@@ -22,5 +22,4 @@ bin
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
