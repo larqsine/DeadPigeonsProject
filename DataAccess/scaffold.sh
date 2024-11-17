@@ -1,4 +1,3 @@
-#!/bin/bash
 dotnet ef dbcontext scaffold \
  "Server=localhost;Database=DBdp;User Id=DBuser;Password=DBpass;" \
  Npgsql.EntityFrameworkCore.PostgreSQL \
