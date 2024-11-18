@@ -1,7 +1,7 @@
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
--- Create Players Table
+
 CREATE TABLE players (
                          id SERIAL PRIMARY KEY,
                          name VARCHAR(255) NOT NULL,
@@ -9,23 +9,33 @@ CREATE TABLE players (
                          phone VARCHAR(50),
                          balance DECIMAL(10, 2) DEFAULT 0.0, -- In-game currency balance
                          annual_fee_paid BOOLEAN DEFAULT FALSE, -- 0 = Not Paid, 1 = Paid
-                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+);
+CREATE TABLE admins (
+                        id SERIAL PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL,
+                        email VARCHAR(255) UNIQUE NOT NULL,
+                        phone VARCHAR(50),
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create Games Table
+
 CREATE TABLE games (
                        id SERIAL PRIMARY KEY,
+                       admin_id INT NOT NULL,
                        start_date DATE NOT NULL DEFAULT CURRENT_DATE, -- Start of the week
                        end_date DATE, -- When the admin submits the winning sequence
                        is_closed BOOLEAN DEFAULT FALSE, -- Indicates if the game is over
-                       winning_numbers VARCHAR(50), -- Stores the winning numbers (e.g., '1,5,7')
-                       prize_pool DECIMAL(10, 2) DEFAULT 0.0, -- 70% of weekly revenue
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                       winning_numbers INTEGER[] CHECK (array_length(winning_numbers, 1) = 3), -- Stores the winning numbers as an array (3 numbers)
+                       total_revenue DECIMAL(10, 2) NOT NULL DEFAULT 0.0, -- Total weekly revenue from board sales
+                       prize_pool DECIMAL(10, 2) NOT NULL DEFAULT 0.0, -- 70% of the revenue goes to the prize pool
+                       rollover_amount DECIMAL(10, 2) DEFAULT 0.0, -- Prize amount carried over if no winners
+                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    
 );
 
--- Create Boards Table
+
 CREATE TABLE boards (
                         id SERIAL PRIMARY KEY,
                         player_id INT NOT NULL,
@@ -35,12 +45,11 @@ CREATE TABLE boards (
                         fields_count INT NOT NULL, -- Number of fields selected (5-8)
                         cost DECIMAL(10, 2) NOT NULL, -- Based on fields count (20/40/80/160 DKK)
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         CONSTRAINT boards_player_id_fkey FOREIGN KEY (player_id) REFERENCES players (id),
                         CONSTRAINT boards_game_id_fkey FOREIGN KEY (game_id) REFERENCES games (id)
 );
 
--- Create Transactions Table
+
 CREATE TABLE transactions (
                               id SERIAL PRIMARY KEY,
                               player_id INT NOT NULL,
@@ -51,19 +60,7 @@ CREATE TABLE transactions (
                               CONSTRAINT transactions_player_id_fkey FOREIGN KEY (player_id) REFERENCES players (id)
 );
 
--- Create Game Revenue Table
-CREATE TABLE game_revenue (
-                              game_id INT NOT NULL,
-                              total_revenue DECIMAL(10, 2) NOT NULL DEFAULT 0.0, -- Total weekly revenue from board sales
-                              prize_pool DECIMAL(10, 2) NOT NULL DEFAULT 0.0, -- 70% of the revenue goes to the prize pool
-                              rollover_amount DECIMAL(10, 2) DEFAULT 0.0, -- Prize amount carried over if no winners
-                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                              PRIMARY KEY (game_id),
-                              CONSTRAINT game_revenue_game_id_fkey FOREIGN KEY (game_id) REFERENCES games (id)
-);
 
--- Create Winners Table
 CREATE TABLE winners (
                          id SERIAL PRIMARY KEY,
                          game_id INT NOT NULL,
@@ -76,8 +73,8 @@ CREATE TABLE winners (
                          CONSTRAINT winners_board_id_fkey FOREIGN KEY (board_id) REFERENCES boards (id)
 );
 
--- Create Indexes
-CREATE UNIQUE INDEX players_email_key ON players (email);
+
+
 CREATE INDEX "IX_boards_player_id" ON boards (player_id);
 CREATE INDEX "IX_boards_game_id" ON boards (game_id);
 CREATE INDEX "IX_transactions_player_id" ON transactions (player_id);
