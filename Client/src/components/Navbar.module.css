@@ -1,0 +1,57 @@
+﻿.nav {
+    display: flex;
+    justify-content: space-between; /* Logo on the left, Profile on the right */
+    align-items: center;
+    padding: 10px 20px;
+    background-color: rgb(210, 137, 24);
+    height: 90px;
+}
+
+/* Logo Styles */
+.logo img {
+    width: 180px;
+}
+
+/* Navigation Buttons (Center) */
+.navButtons {
+    list-style: none;
+    display: flex;
+    gap: 20px; /* Space between buttons */
+    margin: 0;
+    padding: 0;
+    flex-grow: 1; /* Ensures buttons take up remaining space */
+    justify-content: center; /* Centers the buttons */
+}
+
+.navItem {
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 5px;
+}
+
+.navItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: rgb(200, 200, 200);
+}
+
+/* Profile Button (Right) */
+.profileButton {
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.profileButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: rgb(200, 200, 200);
+}
