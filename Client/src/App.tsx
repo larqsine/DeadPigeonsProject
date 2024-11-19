@@ -1,11 +1,13 @@
 import React from 'react';
 import Navbar from './components/Navbar';
-import styles from  './App.module.css';
+import BoxGrid from './components/BoxGrid';
+import styles from './App.module.css';
 
 const App: React.FC = () => {
     return (
         <div className={styles.app}>
-                <Navbar />
+            <Navbar />
+            <BoxGrid />
         </div>
     );
 };
