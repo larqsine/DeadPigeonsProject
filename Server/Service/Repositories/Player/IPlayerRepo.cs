@@ -1,6 +1,15 @@
-namespace Domain.Repositories;
+using Service.DTOs.playerDto;
+using Service.DTOs.PlayerDTO;
 
-public class IPlayerRepo
+namespace Service.Repositories;
+
+public interface IPlayerRepo
 {
-    
+
+    PlayerResponseDto CreatePlayer(PlayerCreateDto createDto);
+    PlayerToClient GetPlayerById(int id);
+    PlayerResponseDto AddBalance(int playerId, decimal amount, string mobilePayNumber);
+
+    //List<BoardDto> GetBoardsByPlayerId(int playerId);
 }
+    

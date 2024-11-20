@@ -22,7 +22,7 @@ public partial class DBContext : DbContext
 
     public virtual DbSet<Game> Games { get; set; }
 
-    public virtual DbSet<Player> Players { get; set; }
+    public virtual DbSet<Player> Player { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
 
