@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using ConsoleApp1.Models;
+using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ConsoleApp1;
+namespace DataAccess;
 
 public partial class DBContext : DbContext
 {

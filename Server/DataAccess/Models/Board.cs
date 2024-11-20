@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ConsoleApp1.Models;
+namespace DataAccess.Models;
 
 public partial class Board
 {
