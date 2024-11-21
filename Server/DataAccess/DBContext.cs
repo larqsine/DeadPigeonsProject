@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using DataAccess.Models;
+﻿using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess;
 
 public partial class DBContext : DbContext
-{
-    public DBContext()
-    {
-    }
-
+{ 
     public DBContext(DbContextOptions<DBContext> options)
         : base(options)
     {
