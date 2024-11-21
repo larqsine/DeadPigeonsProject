@@ -1,17 +1,16 @@
 using DataAccess;
 using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
-using Service.DTOs.playerDto;
-using Service.Repositories;
-using Service.DTOs.PlayerDTO;
+using Service.DTOs.PlayerDto;
+using Service.Interfaces;
 
-namespace Service.Repositories.Player;
+namespace Service.Services;
 
-public class PlayerRepo : IPlayerRepo
+public class PlayerService : IPlayerService
 {
     private readonly DBContext _context;
 
-    public PlayerRepo(DBContext context)
+    public PlayerService(DBContext context)
     {
         _context = context;
     }
@@ -19,7 +18,7 @@ public class PlayerRepo : IPlayerRepo
 
     public PlayerResponseDto CreatePlayer(PlayerCreateDto createDto)
     {
-        DataAccess.Models.Player player = createDto.ToPlayer();
+        Player player = createDto.ToPlayer();
 
         try
         {

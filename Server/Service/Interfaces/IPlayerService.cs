@@ -1,9 +1,9 @@
-using Service.DTOs.playerDto;
-using Service.DTOs.PlayerDTO;
+using Service.DTOs.PlayerDto;
 
-namespace Service.Repositories;
 
-public interface IPlayerRepo
+namespace Service.Interfaces;
+
+public interface IPlayerService
 {
 
     PlayerResponseDto CreatePlayer(PlayerCreateDto createDto);

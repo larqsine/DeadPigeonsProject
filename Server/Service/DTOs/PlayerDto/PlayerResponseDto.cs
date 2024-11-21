@@ -1,6 +1,6 @@
 using DataAccess.Models;
 
-namespace Service.DTOs.PlayerDTO
+namespace Service.DTOs.PlayerDto
 {
     public class PlayerResponseDto
     {

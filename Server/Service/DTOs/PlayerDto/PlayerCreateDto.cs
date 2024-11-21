@@ -1,6 +1,6 @@
 using DataAccess.Models;
 
-namespace Service.DTOs.PlayerDTO
+namespace Service.DTOs.PlayerDto
 {
     public class PlayerCreateDto
     {
@@ -18,7 +18,7 @@ namespace Service.DTOs.PlayerDTO
                 Phone = Phone,
                 AnnualFeePaid = AnnualFeePaid,
                 Balance = 0, 
-                CreatedAt = DateTime.UtcNow 
+                CreatedAt = DateTime.Now 
             };
         }
     }

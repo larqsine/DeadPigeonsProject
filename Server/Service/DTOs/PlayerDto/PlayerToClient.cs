@@ -1,7 +1,7 @@
 ﻿using DataAccess;
 using DataAccess.Models;
 
-namespace Service.DTOs.playerDto;
+namespace Service.DTOs.PlayerDto;
 
 public class PlayerToClient
 {
