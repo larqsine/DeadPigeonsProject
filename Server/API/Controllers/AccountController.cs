@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using DataAccess.Models;
+using Microsoft.AspNetCore.Authorization;
+using Service.DTOs.PlayerDto;
 
 namespace API.Controllers
 {
@@ -10,41 +12,66 @@ namespace API.Controllers
     {
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
         public AccountController(UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager,
+            RoleManager<IdentityRole<Guid>> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(string email, string password)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user != null)
-            {
-                var result = await _signInManager.PasswordSignInAsync(user, password, true, false);
-                if (result.Succeeded)
-                    return Ok(new { message = "Login successful!" });
-            }
-
-            return Unauthorized(new { message = "Invalid login attempt." });
+            _roleManager = roleManager;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(string email, string password)
+        [AllowAnonymous]
+        public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
-            var user = new Player { UserName = email, Email = email };
-            var result = await _userManager.CreateAsync(user, password);
+            var user = model.ToUser();
 
-            if (result.Succeeded)
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return Ok(new { message = "Registration successful!" });
+                // Collect validation errors and return them
+                return BadRequest(new
+                {
+                    message = "Registration failed.",
+                    errors = result.Errors.Select(e => e.Description)
+                });
             }
 
-            return BadRequest(new { errors = result.Errors });
+            // Assign role to user
+            if (!string.IsNullOrEmpty(model.Role))
+            {
+                if (!await _roleManager.RoleExistsAsync(model.Role))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole<Guid>(model.Role));
+                }
+
+                await _userManager.AddToRoleAsync(user, model.Role);
+            }
+
+            return Ok(new { message = "Registration successful!" });
+        }
+
+
+        // POST api/account/login
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginUserDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return Unauthorized(new { message = "Invalid email or password." });
+
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
+            if (!result.Succeeded)
+                return Unauthorized(new { message = "Invalid email or password." });
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return Ok(new { message = "Login successful!", user = user.UserName, roles });
         }
 
         [HttpPost("logout")]
@@ -54,5 +81,4 @@ namespace API.Controllers
             return Ok(new { message = "Logout successful!" });
         }
     }
-
 }

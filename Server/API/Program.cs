@@ -3,6 +3,8 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Service;
+using Service.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +13,15 @@ builder.Services.AddDbContext<DBContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure Identity to use Guid as the key type
-builder.Services.AddIdentity<User, IdentityRole<Guid>>()
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+    {
+        options.User.RequireUniqueEmail = true; // Ensures unique emails
+    })
     .AddEntityFrameworkStores<DBContext>()
-    .AddDefaultTokenProviders(); // Ensures token-based features like email confirmation, password reset, etc.
+    .AddDefaultTokenProviders()
+    .AddUserValidator<CustomEmailValidator<User>>(); // Use a custom validator
+    ; // Ensures token-based features like email confirmation, password reset, etc.
+builder.Services.AddScoped<IPasswordHasher<User>, Argon2idPasswordHasher<User>>();
 
 builder.Services.AddScoped<UserRepository>();
 
