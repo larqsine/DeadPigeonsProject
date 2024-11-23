@@ -6,7 +6,7 @@ const NavBar: React.FC = () => {
         <div className={styles.nav}>
             {/* Logo */}
             <div className={styles.logo}>
-                <img src="/images/logo.png" alt="logo" />
+                <img src="/logo.png" alt="App Logo" className={styles.logo}/>
             </div>
 
             {/* Center Buttons */}
