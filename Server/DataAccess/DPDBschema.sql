@@ -55,7 +55,7 @@ CREATE TABLE transactions (
                               player_id INT NOT NULL,
                               amount DECIMAL(10, 2) NOT NULL, -- Positive for deposits, negative for purchases
                               transaction_type VARCHAR(50) NOT NULL, -- 'Deposit' or 'Purchase'
-                              mobilepay_number VARCHAR(100), -- Only for deposits, nullable
+                              mobilepay_number VARCHAR(100) NOT NULL, -- Only for deposits
                               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               CONSTRAINT transactions_player_id_fkey FOREIGN KEY (player_id) REFERENCES players (id)
 );

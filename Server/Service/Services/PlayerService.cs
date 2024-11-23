@@ -2,6 +2,7 @@ using DataAccess;
 using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Service.DTOs.PlayerDto;
+using Service.DTOs.TransactionDto;
 using Service.Interfaces;
 
 namespace Service.Services;
@@ -22,7 +23,7 @@ public class PlayerService : IPlayerService
 
         try
         {
-            _context.Player.Add(player);
+            _context.Players.Add(player);
             _context.SaveChanges();
         }
         catch (DbUpdateException e)
@@ -38,45 +39,46 @@ public class PlayerService : IPlayerService
         throw new NotImplementedException();
     }
 
-    public PlayerResponseDto AddBalance(int playerId, decimal amount, string mobilePayNumber)
+    public PlayerTransactionResponseDto AddBalance(int playerId, TransactionCreateDto transactioncreateDto, decimal amount, string mobilePayNumber)
     {
-       /* if (amount <= 0)
-            throw new ArgumentException("The amount to add must be greater than zero.");
-    
-        var player = _context.Player.FirstOrDefault(p => p.Id == playerId);
-        if (player == null)
-            throw new KeyNotFoundException("Player not found.");
-    
-        var transaction = new Transaction
+        if (amount <= 0)
         {
-            PlayerId = playerId,
-            Amount = amount,
-            TransactionType = "Deposit",
-            MobilePayNumber = mobilePayNumber,
-            CreatedAt = DateTime.UtcNow
-        };
-    
-        player.Balance += amount;
+            throw new ArgumentException("The amount to add must be greater than zero.");
+        }
 
+        var player = _context.Players.FirstOrDefault(p => p.Id == playerId);
+
+        if (player == null)
+        {
+            throw new KeyNotFoundException("Player not found.");
+        }
+        
+        var transaction = transactioncreateDto.ToTransaction();
+        
         try
         {
-            _context.Transaction.Add(transaction);
+            _context.Transactions.Add(transaction);
             _context.SaveChanges();
         }
         catch (Exception ex)
         {
             throw new Exception("Error occurred while adding balance: " + ex.Message);
         }
+        player.Balance += amount;
 
-        return PlayerResponseDto.FromEntity(player);*/
-       return null;
+        return new PlayerTransactionResponseDto
+        {
+            Player = PlayerResponseDto.FromEntity(player),
+            Transaction = TransactionResponseDto.FromEntity(transaction)
+        };
     }
-
-   /* public List<BoardDto> GetBoardsByPlayerId(int playerId)
-    {
-        throw new NotImplementedException();
-    }*/
+    
+    // method to get boards by player id
 }
+
+
+
+
 
 
     

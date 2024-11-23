@@ -1,4 +1,5 @@
 using Service.DTOs.PlayerDto;
+using Service.DTOs.TransactionDto;
 
 
 namespace Service.Interfaces;
@@ -8,8 +9,9 @@ public interface IPlayerService
 
     PlayerResponseDto CreatePlayer(PlayerCreateDto createDto);
     PlayerToClient GetPlayerById(int id);
-    PlayerResponseDto AddBalance(int playerId, decimal amount, string mobilePayNumber);
-
-    //List<BoardDto> GetBoardsByPlayerId(int playerId);
+    PlayerTransactionResponseDto AddBalance(int playerId, TransactionCreateDto transactioncreateDto, decimal amount, string mobilePayNumber);
+    
+    // get boards by player id
+    
 }
     

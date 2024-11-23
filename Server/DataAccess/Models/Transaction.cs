@@ -13,7 +13,7 @@ public partial class Transaction
 
     public string TransactionType { get; set; } = null!;
 
-    public string? MobilepayNumber { get; set; }
+    public string MobilepayNumber { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
