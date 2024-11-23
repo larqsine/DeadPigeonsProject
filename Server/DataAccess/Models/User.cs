@@ -4,13 +4,6 @@ namespace DataAccess.Models;
 
 public class User : IdentityUser<Guid>
 {
-    public Guid Id { get; set; }
-
-    public string Name { get; set; } = null!;
-
-    public string Email { get; set; } = null!;
-
-    public string? Phone { get; set; }
-
+    public string FullName { get; set; } = string.Empty;
     public DateTime? CreatedAt { get; set; }
 }

@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateModels : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,7 @@ namespace DataAccess.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
@@ -31,16 +31,15 @@ namespace DataAccess.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Phone = table.Column<string>(type: "text", nullable: true),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FullName = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Discriminator = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
                     Balance = table.Column<decimal>(type: "numeric", nullable: true),
                     AnnualFeePaid = table.Column<bool>(type: "boolean", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: true),
@@ -64,7 +63,7 @@ namespace DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RoleId = table.Column<string>(type: "text", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
@@ -85,7 +84,7 @@ namespace DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
@@ -107,7 +106,7 @@ namespace DataAccess.Migrations
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     ProviderKey = table.Column<string>(type: "text", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "text", nullable: true),
-                    UserId = table.Column<string>(type: "text", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -124,8 +123,8 @@ namespace DataAccess.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    RoleId = table.Column<string>(type: "text", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -148,7 +147,7 @@ namespace DataAccess.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Value = table.Column<string>(type: "text", nullable: true)
@@ -177,15 +176,14 @@ namespace DataAccess.Migrations
                     TotalRevenue = table.Column<decimal>(type: "numeric", nullable: false),
                     PrizePool = table.Column<decimal>(type: "numeric", nullable: false),
                     RolloverAmount = table.Column<decimal>(type: "numeric", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    AdminId1 = table.Column<string>(type: "text", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Games", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Games_AspNetUsers_AdminId1",
-                        column: x => x.AdminId1,
+                        name: "FK_Games_AspNetUsers_AdminId",
+                        column: x => x.AdminId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -200,15 +198,14 @@ namespace DataAccess.Migrations
                     Amount = table.Column<decimal>(type: "numeric", nullable: false),
                     TransactionType = table.Column<string>(type: "text", nullable: false),
                     MobilepayNumber = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    PlayerId1 = table.Column<string>(type: "text", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transactions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Transactions_AspNetUsers_PlayerId1",
-                        column: x => x.PlayerId1,
+                        name: "FK_Transactions_AspNetUsers_PlayerId",
+                        column: x => x.PlayerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -225,15 +222,14 @@ namespace DataAccess.Migrations
                     Autoplay = table.Column<bool>(type: "boolean", nullable: true),
                     FieldsCount = table.Column<int>(type: "integer", nullable: false),
                     Cost = table.Column<decimal>(type: "numeric", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    PlayerId1 = table.Column<string>(type: "text", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Boards", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Boards_AspNetUsers_PlayerId1",
-                        column: x => x.PlayerId1,
+                        name: "FK_Boards_AspNetUsers_PlayerId",
+                        column: x => x.PlayerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -254,15 +250,14 @@ namespace DataAccess.Migrations
                     PlayerId = table.Column<Guid>(type: "uuid", nullable: false),
                     BoardId = table.Column<Guid>(type: "uuid", nullable: false),
                     WinningAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    PlayerId1 = table.Column<string>(type: "text", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Winners", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Winners_AspNetUsers_PlayerId1",
-                        column: x => x.PlayerId1,
+                        name: "FK_Winners_AspNetUsers_PlayerId",
+                        column: x => x.PlayerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -323,19 +318,19 @@ namespace DataAccess.Migrations
                 column: "GameId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Boards_PlayerId1",
+                name: "IX_Boards_PlayerId",
                 table: "Boards",
-                column: "PlayerId1");
+                column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Games_AdminId1",
+                name: "IX_Games_AdminId",
                 table: "Games",
-                column: "AdminId1");
+                column: "AdminId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transactions_PlayerId1",
+                name: "IX_Transactions_PlayerId",
                 table: "Transactions",
-                column: "PlayerId1");
+                column: "PlayerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Winners_BoardId",
@@ -348,9 +343,9 @@ namespace DataAccess.Migrations
                 column: "GameId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Winners_PlayerId1",
+                name: "IX_Winners_PlayerId",
                 table: "Winners",
-                column: "PlayerId1");
+                column: "PlayerId");
         }
 
         /// <inheritdoc />

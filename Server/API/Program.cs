@@ -1,53 +1,88 @@
 using DataAccess;
 using DataAccess.Models;
+using DataAccess.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure DbContext with PostgreSQL
+builder.Services.AddDbContext<DBContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Configure Identity to use Guid as the key type
+builder.Services.AddIdentity<User, IdentityRole<Guid>>()
+    .AddEntityFrameworkStores<DBContext>()
+    .AddDefaultTokenProviders(); // Ensures token-based features like email confirmation, password reset, etc.
+
+builder.Services.AddScoped<UserRepository>();
+
+
+// Add Swagger for API documentation
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Add Controllers
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+// Create roles if they don't exist
+CreateRoles(app);
+
+// Configure Swagger for Development
+if (app.Environment.IsDevelopment())
 {
-    public static void Main(string[] args)
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
     {
-        var builder = WebApplication.CreateBuilder(args);
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        options.RoutePrefix = string.Empty; // Serve Swagger UI at the root
+    });
+}
 
-        // Configure DbContext with PostgreSQL
-        builder.Services.AddDbContext<DBContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+app.UseHttpsRedirection();
 
-        // Configure Identity to use Guid as the key type
-        builder.Services.AddIdentity<User, IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<DBContext>()
-            .AddDefaultTokenProviders(); // Ensures token-based features like email confirmation, password reset, etc.
+// Enable Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
-        // Add Swagger for API documentation
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+// Map Controllers
+app.MapControllers();
 
-        // Add Controllers
-        builder.Services.AddControllers();
+// Run the application
+app.Run();
 
-        var app = builder.Build();
+// Method to create roles if they don't exist
+void CreateRoles(IApplicationBuilder app)
+{
+    var scope = app.ApplicationServices.CreateScope();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-        // Configure Swagger for Development
-        if (app.Environment.IsDevelopment())
+    // List of roles to create
+    var roles = new[] { "Admin", "Player" };
+
+    foreach (var role in roles)
+    {
+        // Check if the role exists, if not, create it
+        var roleExists = roleManager.RoleExistsAsync(role).Result;
+        if (!roleExists)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                options.RoutePrefix = string.Empty; // Serve Swagger UI at the root
-            });
+            var identityRole = new IdentityRole<Guid>(role);
+            roleManager.CreateAsync(identityRole).Wait();
         }
+    }
 
-        app.UseHttpsRedirection();
-
-        // Enable Authentication and Authorization
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        // Map Controllers
-        app.MapControllers();
-
-        // Run the application
-        app.Run();
+    // Optionally create an Admin user
+    var admin = userManager.FindByEmailAsync("admin@example.com").Result;
+    if (admin == null)
+    {
+        var user = new User { UserName = "admin", Email = "admin@example.com" };
+        var result = userManager.CreateAsync(user, "AdminPassword123").Result;
+        if (result.Succeeded)
+        {
+            userManager.AddToRoleAsync(user, "Admin").Wait();
+        }
     }
 }

@@ -18,11 +18,11 @@ public class PlayerService : IPlayerService
 
     public PlayerResponseDto CreatePlayer(PlayerCreateDto createDto)
     {
-        /*Player player = createDto.ToPlayer();
+        Player player = createDto.ToPlayer();
 
         try
         {
-            _context.Player.Add(player);
+            _context.Players.Add(player);
             _context.SaveChanges();
         }
         catch (DbUpdateException e)
@@ -30,8 +30,7 @@ public class PlayerService : IPlayerService
             throw new DbUpdateException(e.Message);
         }
         
-        return PlayerResponseDto.FromEntity(player);*/
-        return null;
+        return PlayerResponseDto.FromEntity(player);
     }
 
     public PlayerToClient GetPlayerById(int id)

@@ -16,7 +16,7 @@ public class PlayerController: ControllerBase
         _playerService = playerService;
     }
     
-    /*[HttpPost]
+    [HttpPost]
     [Route("create")]
     public ActionResult<PlayerResponseDto> Create([FromBody] PlayerCreateDto createDto)
     {
@@ -28,5 +28,5 @@ public class PlayerController: ControllerBase
         {
             return BadRequest(e.Message);
         }
-    }*/
+    }
 }

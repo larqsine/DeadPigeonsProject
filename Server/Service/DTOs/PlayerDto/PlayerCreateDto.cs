@@ -5,6 +5,8 @@ namespace Service.DTOs.PlayerDto
     public class PlayerCreateDto
     {
         public string FullName { get; set; } = null!;
+        
+        public string UserName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string? Phone { get; set; }
         public bool? AnnualFeePaid { get; set; }
@@ -13,9 +15,10 @@ namespace Service.DTOs.PlayerDto
         {
             return new Player()
             {
-                Name = FullName,
+                UserName = UserName,
+                FullName = FullName,
                 Email = Email,
-                Phone = Phone,
+                PhoneNumber = Phone,
                 AnnualFeePaid = AnnualFeePaid,
                 Balance = 0, 
                 CreatedAt = DateTime.Now 

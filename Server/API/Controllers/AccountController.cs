@@ -1,26 +1,24 @@
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using DataAccess.Models;
 
 namespace API.Controllers
 {
-    public class AccountController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AccountController : ControllerBase
     {
-        private readonly SignInManager<IdentityUser<Guid>> _signInManager;
-        private readonly UserManager<IdentityUser<Guid>> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
 
-        public AccountController(UserManager<IdentityUser<Guid>> userManager,
-                                 SignInManager<IdentityUser<Guid>> signInManager)
+        public AccountController(UserManager<User> userManager,
+            SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
         }
 
-        [HttpGet]
-        public IActionResult Login() => View();
-
-        [HttpPost]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -28,17 +26,13 @@ namespace API.Controllers
             {
                 var result = await _signInManager.PasswordSignInAsync(user, password, true, false);
                 if (result.Succeeded)
-                    return RedirectToAction("Index", "Home");
+                    return Ok(new { message = "Login successful!" });
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            return View();
+            return Unauthorized(new { message = "Invalid login attempt." });
         }
 
-        [HttpGet]
-        public IActionResult Register() => View();
-
-        [HttpPost]
+        [HttpPost("register")]
         public async Task<IActionResult> Register(string email, string password)
         {
             var user = new Player { UserName = email, Email = email };
@@ -47,22 +41,18 @@ namespace API.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Index", "Home");
+                return Ok(new { message = "Registration successful!" });
             }
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            return View();
+            return BadRequest(new { errors = result.Errors });
         }
 
-        [HttpPost]
+        [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
+            return Ok(new { message = "Logout successful!" });
         }
     }
+
 }

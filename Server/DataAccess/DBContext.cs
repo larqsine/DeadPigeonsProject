@@ -27,4 +27,5 @@ public class DBContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 
     public virtual DbSet<Winner> Winners { get; set; }
     
+    
 }
