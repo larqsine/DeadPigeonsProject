@@ -16,7 +16,7 @@ public class GameService
     public void ProcessGameResults(int gameId)
     {
         // Fetch the game based on its ID and check if it's closed
-        var game = _dbContext.Games.FirstOrDefault(g => g.Id == gameId && g.IsClosed != true);
+        /*var game = _dbContext.Games.FirstOrDefault(g => g.Id == gameId && g.IsClosed != true);
     
         // If game is not found or winning numbers are not set, throw an error
         if (game == null || game.WinningNumbers == null)
@@ -59,7 +59,7 @@ public class GameService
         // Close the game and reset the rollover amount
         game.IsClosed = true;
         game.RolloverAmount = 0;
-        _dbContext.SaveChanges();
+        _dbContext.SaveChanges();*/
     }
 
     public bool IsWinningBoard(string boardNumbers, List<int> winningNumbers)

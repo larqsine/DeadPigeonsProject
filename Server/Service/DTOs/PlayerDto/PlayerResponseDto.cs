@@ -4,7 +4,7 @@ namespace Service.DTOs.PlayerDto
 {
     public class PlayerResponseDto
     {
-        public int Id { get; set; }
+        /*public int Id { get; set; }
         public string Name { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string? Phone { get; set; }
@@ -24,6 +24,6 @@ namespace Service.DTOs.PlayerDto
                 AnnualFeePaid = player.AnnualFeePaid,
                 CreatedAt = player.CreatedAt
             };
-        }
+        }*/
     }
 }

@@ -5,9 +5,9 @@ namespace DataAccess.Models;
 
 public partial class Transaction
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public int PlayerId { get; set; }
+    public Guid PlayerId { get; set; }
 
     public decimal Amount { get; set; }
 

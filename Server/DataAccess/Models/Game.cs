@@ -5,9 +5,9 @@ namespace DataAccess.Models;
 
 public partial class Game
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public int AdminId { get; set; }
+    public Guid AdminId { get; set; }
 
     public DateOnly StartDate { get; set; }
 
@@ -24,6 +24,8 @@ public partial class Game
     public decimal? RolloverAmount { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public virtual Admin Admin { get; set; } = null!;
 
     public virtual ICollection<Board> Boards { get; set; } = new List<Board>();
 

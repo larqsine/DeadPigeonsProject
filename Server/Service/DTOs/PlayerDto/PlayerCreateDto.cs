@@ -4,7 +4,7 @@ namespace Service.DTOs.PlayerDto
 {
     public class PlayerCreateDto
     {
-        public string Name { get; set; } = null!;
+        public string FullName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string? Phone { get; set; }
         public bool? AnnualFeePaid { get; set; }
@@ -13,7 +13,7 @@ namespace Service.DTOs.PlayerDto
         {
             return new Player()
             {
-                Name = Name,
+                Name = FullName,
                 Email = Email,
                 Phone = Phone,
                 AnnualFeePaid = AnnualFeePaid,

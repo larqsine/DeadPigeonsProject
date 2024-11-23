@@ -5,7 +5,7 @@ namespace Service.DTOs.PlayerDto;
 
 public class PlayerToClient
 {
-    public int Id { get; set; }
+    /*public int Id { get; set; }
     public string Name { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string? Phone { get; set; }
@@ -36,5 +36,5 @@ public class PlayerToClient
             Balance = Balance,
             AnnualFeePaid = AnnualFeePaid
         };
-    }
+    }*/
 }

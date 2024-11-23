@@ -5,11 +5,11 @@ namespace DataAccess.Models;
 
 public partial class Board
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public int PlayerId { get; set; }
+    public Guid PlayerId { get; set; }
 
-    public int GameId { get; set; }
+    public Guid GameId { get; set; }
 
     public string Numbers { get; set; } = null!;
 

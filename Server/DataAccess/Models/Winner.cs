@@ -5,13 +5,13 @@ namespace DataAccess.Models;
 
 public partial class Winner
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public int GameId { get; set; }
+    public Guid GameId { get; set; }
 
-    public int PlayerId { get; set; }
+    public Guid PlayerId { get; set; }
 
-    public int BoardId { get; set; }
+    public Guid BoardId { get; set; }
 
     public decimal WinningAmount { get; set; }
 
