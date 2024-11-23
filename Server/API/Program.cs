@@ -21,7 +21,7 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
     .AddDefaultTokenProviders()
     .AddUserValidator<CustomEmailValidator<User>>(); // Use a custom validator
     ; // Ensures token-based features like email confirmation, password reset, etc.
-builder.Services.AddScoped<IPasswordHasher<User>, Argon2idPasswordHasher<User>>();
+builder.Services.AddScoped<IPasswordHasher<User>, Argon2IdPasswordHasher<User>>();
 
 builder.Services.AddScoped<UserRepository>();
 
@@ -32,6 +32,17 @@ builder.Services.AddSwaggerGen();
 
 // Add Controllers
 builder.Services.AddControllers();
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin() // Allow requests from any origin
+            .AllowAnyMethod() // Allow all HTTP methods
+            .AllowAnyHeader(); // Allow all headers
+    });
+});
 
 var app = builder.Build();
 
@@ -79,18 +90,6 @@ void CreateRoles(IApplicationBuilder app)
         {
             var identityRole = new IdentityRole<Guid>(role);
             roleManager.CreateAsync(identityRole).Wait();
-        }
-    }
-
-    // Optionally create an Admin user
-    var admin = userManager.FindByEmailAsync("admin@example.com").Result;
-    if (admin == null)
-    {
-        var user = new User { UserName = "admin", Email = "admin@example.com" };
-        var result = userManager.CreateAsync(user, "AdminPassword123").Result;
-        if (result.Succeeded)
-        {
-            userManager.AddToRoleAsync(user, "Admin").Wait();
         }
     }
 }

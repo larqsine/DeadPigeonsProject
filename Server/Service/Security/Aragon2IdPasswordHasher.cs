@@ -7,7 +7,7 @@ using Konscious.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 
 
-public class Argon2idPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : class
+public class Argon2IdPasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : class
 {
     const string Name = "argon2id";
     public string HashPassword(TUser user, string password)
