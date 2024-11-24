@@ -2,7 +2,7 @@
 import styles from './LoginPage.module.css';
 
 interface LoginPageProps {
-    onLogin: () => void;
+    onLogin: (username: string) => void; // Updated to accept username
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
@@ -27,7 +27,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
     const handleLoginSubmit = () => {
         if (loginForm.username && loginForm.password) {
-            onLogin();
+            onLogin(loginForm.username); // Pass username to App
         } else {
             alert('Please enter username and password.');
         }
