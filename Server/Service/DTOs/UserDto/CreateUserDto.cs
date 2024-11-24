@@ -22,6 +22,7 @@ public class CreateUserDto
             FullName = FullName,
             Email = Email,
             PhoneNumber = Phone,
+            CreatedAt = DateTime.Now 
             
         };
     }
