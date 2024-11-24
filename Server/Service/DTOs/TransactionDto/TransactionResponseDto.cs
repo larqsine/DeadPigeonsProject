@@ -4,11 +4,11 @@ namespace Service.DTOs.TransactionDto;
 
 public class TransactionResponseDto
 {
-    public int Id { get; set; }
-    public int PlayerId { get; set; }
+    public Guid Id { get; set; }
+    public Guid PlayerId { get; set; }
     public decimal Amount { get; set; }
     public string TransactionType { get; set; } = null!;
-    public string MobilepayNumber { get; set; }
+    public string? MobilepayNumber { get; set; }
     public DateTime? CreatedAt { get; set; }
     
     

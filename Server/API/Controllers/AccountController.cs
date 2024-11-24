@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using DataAccess.Models;
 using Microsoft.AspNetCore.Authorization;
 using Service.DTOs.PlayerDto;
+using Service.DTOs.UserDto;
 
 namespace API.Controllers
 {

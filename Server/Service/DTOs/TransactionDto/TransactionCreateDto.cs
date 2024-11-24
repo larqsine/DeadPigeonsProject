@@ -4,7 +4,7 @@ namespace Service.DTOs.TransactionDto;
 
 public class TransactionCreateDto
 {
-    public int PlayerId { get; set; } 
+    public Guid PlayerId { get; set; } 
     public decimal Amount { get; set; } 
     public string TransactionType { get; set; } = null!;
     public string MobilepayNumber { get; set; } 

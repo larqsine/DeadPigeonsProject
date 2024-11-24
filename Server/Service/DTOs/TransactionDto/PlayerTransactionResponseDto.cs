@@ -1,4 +1,5 @@
 using Service.DTOs.PlayerDto;
+using Service.DTOs.UserDto;
 
 namespace Service.DTOs.TransactionDto;
 

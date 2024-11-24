@@ -1,6 +1,6 @@
 using DataAccess.Models;
 
-namespace Service.DTOs.PlayerDto;
+namespace Service.DTOs.UserDto;
 
 public class CreateUserDto
 {

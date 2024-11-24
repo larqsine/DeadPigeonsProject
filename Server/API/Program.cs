@@ -4,7 +4,9 @@ using DataAccess.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Service;
+using Service.Interfaces;
 using Service.Security;
+using Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,9 @@ builder.Services.AddSwaggerGen();
 
 // Add Controllers
 builder.Services.AddControllers();
+
+// Add Services
+builder.Services.AddScoped<IPlayerService, PlayerService>();
 
 var app = builder.Build();
 
