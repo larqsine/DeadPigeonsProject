@@ -36,6 +36,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 // Add Services
+builder.Services.AddScoped<PlayerRepository>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 
 var app = builder.Build();
