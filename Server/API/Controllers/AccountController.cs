@@ -27,13 +27,46 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
-            var user = model.ToUser();
+            if (string.IsNullOrEmpty(model.Role))
+            {
+                return BadRequest(new { message = "Role is required." });
+            }
 
+            User user;
+
+            // Determine whether to create an Admin or Player
+            if (model.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                user = new Admin
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    FullName = model.FullName,
+                    CreatedAt = DateTime.UtcNow
+                };
+            }
+            else if (model.Role.Equals("Player", StringComparison.OrdinalIgnoreCase))
+            {
+                user = new Player
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    FullName = model.FullName,
+                    CreatedAt = DateTime.UtcNow,
+                    Balance = 0, // Initialize player-specific fields
+                    AnnualFeePaid = false
+                };
+            }
+            else
+            {
+                return BadRequest(new { message = "Invalid role. Must be 'Admin' or 'Player'." });
+            }
+
+            // Create the user
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
             {
-                // Collect validation errors and return them
                 return BadRequest(new
                 {
                     message = "Registration failed.",
@@ -42,17 +75,13 @@ namespace API.Controllers
             }
 
             // Assign role to user
-            if (!string.IsNullOrEmpty(model.Role))
+            if (!await _roleManager.RoleExistsAsync(model.Role))
             {
-                if (!await _roleManager.RoleExistsAsync(model.Role))
-                {
-                    await _roleManager.CreateAsync(new IdentityRole<Guid>(model.Role));
-                }
-
-                await _userManager.AddToRoleAsync(user, model.Role);
+                await _roleManager.CreateAsync(new IdentityRole<Guid>(model.Role));
             }
+            await _userManager.AddToRoleAsync(user, model.Role);
 
-            return Ok(new { message = "Registration successful!" });
+            return Ok(new { message = "Registration successful!", userId = user.Id });
         }
 
 
