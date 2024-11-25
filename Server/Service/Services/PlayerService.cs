@@ -35,15 +35,18 @@ namespace Service.Services
 
             try
             {
-                // Ensure that the player exists and is of type "Player"
+                // Ensure the player exists
                 var player = await _repository.GetPlayerByIdAsync(playerId);
                 if (player == null)
                 {
                     throw new KeyNotFoundException("Player not found.");
                 }
 
+                // Generate Transaction ID
+                var transactionId = Guid.NewGuid();
+
                 // Create and save the transaction
-                var transaction = transactionCreateDto.ToTransaction(playerId);
+                var transaction = transactionCreateDto.ToTransaction(playerId, transactionId);
                 await _repository.AddTransactionAsync(transaction);
 
                 // Update player balance
@@ -58,7 +61,6 @@ namespace Service.Services
             }
             catch (Exception ex)
             {
-                // Log the error details
                 Console.WriteLine($"Error in AddBalanceAsync: {ex.Message}");
                 if (ex.InnerException != null)
                 {
@@ -67,7 +69,6 @@ namespace Service.Services
                 throw;
             }
         }
-
 
     }
 }

@@ -42,6 +42,7 @@ namespace API.Controllers
                 {
                     UserName = model.UserName,
                     Email = model.Email,
+                    PhoneNumber = model.Phone,
                     FullName = model.FullName,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -52,6 +53,7 @@ namespace API.Controllers
                 {
                     UserName = model.UserName,
                     Email = model.Email,
+                    PhoneNumber = model.Phone,
                     FullName = model.FullName,
                     CreatedAt = DateTime.UtcNow,
                     Balance = 0, // Initialize player-specific fields
