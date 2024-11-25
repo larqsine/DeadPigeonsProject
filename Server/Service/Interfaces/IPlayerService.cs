@@ -8,11 +8,9 @@ namespace Service.Interfaces;
 public interface IPlayerService
 {
 
-    PlayerResponseDto CreatePlayer(PlayerCreateDto createDto);
-    PlayerToClient GetPlayerById(Guid id);
-    PlayerTransactionResponseDto AddBalance(Guid playerId, TransactionCreateDto transactioncreateDto, decimal amount, string mobilePayNumber);
+    Task<PlayerResponseDto> CreatePlayerAsync(PlayerCreateDto createDto);
+    Task<PlayerTransactionResponseDto> AddBalanceAsync(Guid playerId, TransactionCreateDto transactionCreateDto);
     
-    // get boards by player id
     
 }
     

@@ -27,5 +27,17 @@ public class DBContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 
     public virtual DbSet<Winner> Winners { get; set; }
     
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<User>()
+            .HasDiscriminator<string>("Discriminator")
+            .HasValue<Admin>("Admin")
+            .HasValue<Player>("Player");
+
+    }
+
+    
     
 }

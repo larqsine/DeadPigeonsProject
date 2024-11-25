@@ -1,84 +1,73 @@
-    using DataAccess;
-    using DataAccess.Models;
-    using Microsoft.EntityFrameworkCore;
-    using Service.DTOs.TransactionDto;
-    using Service.DTOs.UserDto;
-    using Service.Interfaces;
+using DataAccess.Models;
+using DataAccess.Repositories;
+using Service.DTOs.PlayerDto;
+using Service.DTOs.TransactionDto;
+using Service.DTOs.UserDto;
+using Service.Interfaces;
 
-    namespace Service.Services;
-
+namespace Service.Services
+{
     public class PlayerService : IPlayerService
     {
-        private readonly DBContext _context;
+        private readonly PlayerRepository _repository;
 
-        public PlayerService(DBContext context)
+        public PlayerService(PlayerRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
-
-        public PlayerResponseDto CreatePlayer(PlayerCreateDto createDto)
+        public async Task<PlayerResponseDto> CreatePlayerAsync(PlayerCreateDto createDto)
         {
-            Player player = createDto.ToPlayer();
+            var player = createDto.ToPlayer();
 
-            try
-            {
-                _context.Players.Add(player);
-                _context.SaveChanges();
-            }
-            catch (DbUpdateException e)
-            {
-                throw new DbUpdateException(e.Message);
-            }
-            
+            await _repository.AddPlayerAsync(player);
             return PlayerResponseDto.FromEntity(player);
         }
-
-        public PlayerToClient GetPlayerById(Guid id)
+        
+        public async Task<PlayerTransactionResponseDto> AddBalanceAsync(
+            Guid playerId,
+            TransactionCreateDto transactionCreateDto)
         {
-            throw new NotImplementedException();
-        }
-
-        public PlayerTransactionResponseDto AddBalance(Guid playerId, TransactionCreateDto transactioncreateDto, decimal amount, string mobilePayNumber)
-        {
-            if (amount <= 0)
+            if (transactionCreateDto.Amount <= 0)
             {
                 throw new ArgumentException("The amount to add must be greater than zero.");
             }
 
-            var player = _context.Players.FirstOrDefault(p => p.Id == playerId);
-
-            if (player == null)
-            {
-                throw new KeyNotFoundException("Player not found.");
-            }
-            
-            var transaction = transactioncreateDto.ToTransaction();
-            
             try
             {
-                _context.Transactions.Add(transaction);
-                _context.SaveChanges();
+                // Ensure that the player exists and is of type "Player"
+                var player = await _repository.GetPlayerByIdAsync(playerId);
+                if (player == null)
+                {
+                    throw new KeyNotFoundException("Player not found.");
+                }
+
+                // Create and save the transaction
+                var transaction = transactionCreateDto.ToTransaction(playerId);
+                await _repository.AddTransactionAsync(transaction);
+
+                // Update player balance
+                player.Balance += transactionCreateDto.Amount;
+                await _repository.UpdatePlayerAsync(player);
+
+                return new PlayerTransactionResponseDto
+                {
+                    Player = PlayerResponseDto.FromEntity(player),
+                    Transaction = TransactionResponseDto.FromEntity(transaction)
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception("Error occurred while adding balance: " + ex.Message);
+                // Log the error details
+                Console.WriteLine($"Error in AddBalanceAsync: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                throw;
             }
-            player.Balance += amount;
-
-            return new PlayerTransactionResponseDto
-            {
-                Player = PlayerResponseDto.FromEntity(player),
-                Transaction = TransactionResponseDto.FromEntity(transaction)
-            };
         }
-        
-        // method to get boards by player id
+
+
     }
-
-
-
-
-
-
-        
+}
