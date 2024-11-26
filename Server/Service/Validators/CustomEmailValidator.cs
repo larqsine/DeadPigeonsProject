@@ -28,7 +28,7 @@ public class CustomEmailValidator<TUser> : UserValidator<TUser> where TUser : cl
     private bool IsValidEmail(string email)
     {
         // Simple regex for validating email format
-        var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        var emailRegex = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
         return Regex.IsMatch(email, emailRegex);
     }
 }
