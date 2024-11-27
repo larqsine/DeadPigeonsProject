@@ -38,6 +38,8 @@ builder.Services.AddControllers();
 // Add Services
 builder.Services.AddScoped<PlayerRepository>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<TransactionRepository>();
+builder.Services.AddScoped<TransactionService>();
 
 var app = builder.Build();
 

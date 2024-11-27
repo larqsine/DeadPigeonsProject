@@ -1,25 +1,27 @@
+using DataAccess.Enums;
 using DataAccess.Models;
 
-namespace Service.DTOs.TransactionDto;
-
-public class TransactionCreateDto
+namespace Service.DTOs.TransactionDto
 {
-    public Guid PlayerId { get; set; } 
-    public decimal Amount { get; set; } 
-    public string TransactionType { get; set; } = null!;
-    public string MobilepayNumber { get; set; } 
-    
-    public Transaction ToTransaction(Guid id, Guid TransactionId)
+    public class TransactionCreateDto
     {
-        return new Transaction
+        public Guid PlayerId { get; set; }
+        public decimal Amount { get; set; }
+        public string TransactionType { get; set; } = null!;
+        public string MobilepayNumber { get; set; }
+        
+        public Transaction ToTransaction(Guid id, Guid transactionId)
         {
-            Id = TransactionId,
-            PlayerId = PlayerId,
-            Amount = Amount,
-            TransactionType = TransactionType,
-            MobilepayNumber = MobilepayNumber,
-            CreatedAt = DateTime.UtcNow
-        };
+            return new Transaction
+            {
+                Id = transactionId,
+                PlayerId = PlayerId,
+                Amount = Amount,
+                TransactionType = TransactionType,
+                MobilepayNumber = MobilepayNumber,
+                CreatedAt = DateTime.UtcNow,
+                Status = TransactionStatus.Pending // Default status is Pending
+            };
+        }
     }
-
 }
