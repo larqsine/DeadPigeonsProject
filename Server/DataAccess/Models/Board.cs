@@ -19,41 +19,7 @@ namespace DataAccess.Models
         public virtual Player Player { get; set; } = null!;
         public virtual ICollection<Winner> Winners { get; set; } = new List<Winner>();
 
-        // Constructor to calculate cost based on FieldsCount
-        public Board(int fieldsCount)
-        {
-            if (fieldsCount < 5 || fieldsCount > 8)
-                throw new ArgumentException("FieldsCount must be between 5 and 8");
-
-            FieldsCount = fieldsCount;
-            SetCost();
-            CreatedAt = DateTime.UtcNow;
-        }
-
-
-        // Set cost based on number of fields
-        public void SetCost()
-        {
-            switch (FieldsCount)
-            {
-                case 5:
-                    Cost = 20m;
-                    break;
-                case 6:
-                    Cost = 40m;
-                    break;
-                case 7:
-                    Cost = 80m;
-                    break;
-                case 8:
-                    Cost = 160m;
-                    break;
-                default:
-                    throw new ArgumentException("FieldsCount must be between 5 and 8");
-            }
-        }
-
-        // Determines if the board matches the winning sequence
+        
         public bool IsWinningBoard(IEnumerable<int> winningNumbers)
         {
             var boardNumbers = Numbers.Split(',').Select(int.Parse).ToList();

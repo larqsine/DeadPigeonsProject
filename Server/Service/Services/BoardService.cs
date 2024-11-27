@@ -1,57 +1,65 @@
 using DataAccess.Models;
 using DataAccess.Repositories;
-using Service.DTOs.BoardDto;
 using Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Service.Services
+namespace Service
 {
     public class BoardService : IBoardService
     {
         private readonly BoardRepository _boardRepository;
-        private readonly IPlayerService _playerService;
+        private readonly PlayerRepository _playerRepository;
 
-        public BoardService(BoardRepository boardRepository, IPlayerService playerService)
+        public BoardService(BoardRepository boardRepository, PlayerRepository playerRepository)
         {
             _boardRepository = boardRepository;
-            _playerService = playerService;
+            _playerRepository = playerRepository;
         }
 
-        public async Task<Board> CreateBoardAsync(BoardCreateDto boardDto)
+        public async Task<Board> BuyBoardAsync(Guid playerId, int fieldsCount, List<int> numbers, Guid gameId)
         {
-            // Validate fields count before creating a board
-            if (boardDto.FieldsCount < 5 || boardDto.FieldsCount > 8)
-                throw new ArgumentException("FieldsCount must be between 5 and 8");
+            var player = await _playerRepository.GetPlayerByIdAsync(playerId);
+            if (player == null)
+                throw new Exception("Player not found or inactive.");
 
-            // Create the board object using the new constructor
-            var board = new Board(boardDto.FieldsCount)
+            // Validate the GameId
+            var game = await _boardRepository.GetGameByIdAsync(gameId);
+            if (game == null)
+                throw new Exception("Invalid GameId.");
+
+            // Calculate the board cost based on selected fields
+            decimal cost = fieldsCount switch
             {
-                Id = Guid.NewGuid(),
-                PlayerId = boardDto.PlayerId,
-                GameId = boardDto.GameId,
-                Numbers = boardDto.Numbers,
-                Autoplay = boardDto.Autoplay,
-                CreatedAt = DateTime.UtcNow
+                5 => 20m,
+                6 => 40m,
+                7 => 80m,
+                8 => 160m,
+                _ => throw new Exception("Invalid number of fields.")
             };
 
-            // Add to repository
-            await _boardRepository.AddBoardAsync(board);
+            // Check if the player has enough balance
+            if (player.Balance < cost)
+                throw new Exception("Insufficient balance.");
 
-            // Return the created board
-            return board;
+            // Deduct the cost from the player's balance
+            player.Balance -= cost;
+            await _playerRepository.UpdatePlayerAsync(player);
+
+            // Create a new board
+            var board = new Board
+            {
+                Id = Guid.NewGuid(),
+                PlayerId = playerId,
+                GameId = gameId, // Set the GameId provided by the client
+                Numbers = string.Join(",", numbers),
+                FieldsCount = fieldsCount,
+                Cost = cost,
+                CreatedAt = DateTime.UtcNow,
+                IsWinning = false // Initially, it's not a winning board
+            };
+
+            // Save the board
+            return await _boardRepository.CreateBoardAsync(board);
         }
 
-        public async Task<IEnumerable<Board>> GetBoardsByPlayerAsync(Guid playerId)
-        {
-            return await _boardRepository.GetBoardsByPlayerAsync(playerId);
-        }
-
-        public async Task<IEnumerable<Board>> GetBoardsByGameAsync(Guid gameId)
-        {
-            return await _boardRepository.GetBoardsByGameAsync(gameId);
-        }
     }
 }

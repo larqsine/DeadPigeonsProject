@@ -1,83 +1,47 @@
 using Microsoft.AspNetCore.Mvc;
-using Service.DTOs.BoardDto;
+using Service.DTOs;
 using Service.Interfaces;
-using System;
-using System.Threading.Tasks;
-using Service.DTOs.UserDto;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class BoardController : ControllerBase
     {
         private readonly IBoardService _boardService;
-        private readonly IPlayerService _playerService;
+        private readonly ILogger<BoardController> _logger;
 
-        public BoardController(IBoardService boardService, IPlayerService playerService)
+        public BoardController(IBoardService boardService, ILogger<BoardController> logger)
         {
             _boardService = boardService;
-            _playerService = playerService;
+            _logger = logger;
         }
 
-        // POST: api/board/purchase
-        [HttpPost("purchase")]
-        public async Task<IActionResult> PurchaseBoard([FromBody] BoardPurchaseDto boardPurchaseDto)
+        [HttpPost("{playerId:guid}/buy")]
+        public async Task<IActionResult> BuyBoard(
+            [FromRoute] Guid playerId,
+            [FromBody] BuyBoardRequestDto buyBoardRequestDto)
         {
-            if (boardPurchaseDto == null)
-                return BadRequest("Board purchase data is required.");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var player = await _playerService.GetPlayerByIdAsync(boardPurchaseDto.PlayerId);
-            if (player == null)
-                return NotFound("Player not found.");
-
-            if (!player.AnnualFeePaid.HasValue || player.AnnualFeePaid == false)
-                return BadRequest("Player is not eligible to purchase boards. Annual fee is not paid.");
-
-            decimal totalCost = 0m;
-            foreach (var boardDto in boardPurchaseDto.Boards)
+            try
             {
-                if (boardDto.FieldsCount < 5 || boardDto.FieldsCount > 8)
-                    return BadRequest("FieldsCount must be between 5 and 8.");
+                var board = await _boardService.BuyBoardAsync(
+                    playerId,
+                    buyBoardRequestDto.FieldsCount,
+                    buyBoardRequestDto.Numbers,
+                    buyBoardRequestDto.GameId // Pass GameId from the request body
+                );
 
-                totalCost += CalculateBoardCost(boardDto.FieldsCount);
+                return Ok(new { message = "Board purchased successfully.", data = board });
             }
-
-            if (player.Balance < totalCost)
-                return BadRequest("Insufficient balance to purchase boards.");
-
-            foreach (var boardDto in boardPurchaseDto.Boards)
+            catch (Exception ex)
             {
-                var board = await _boardService.CreateBoardAsync(boardDto);
-                player.Balance -= board.Cost;
-            }
-
-            var playerUpdateDto = new PlayerUpdateDto
-            {
-                Balance = player.Balance
-            };
-
-            await _playerService.UpdatePlayerAsync(player.Id, playerUpdateDto);
-
-            return Ok(new { message = "Board(s) purchased successfully." });
-        }
-
-        // Calculate board cost based on FieldsCount
-        private decimal CalculateBoardCost(int fieldsCount)
-        {
-            switch (fieldsCount)
-            {
-                case 5:
-                    return 20m;
-                case 6:
-                    return 40m;
-                case 7:
-                    return 80m;
-                case 8:
-                    return 160m;
-                default:
-                    throw new ArgumentException("FieldsCount must be between 5 and 8.");
+                _logger.LogError(ex, "Error occurred while buying the board.");
+                return StatusCode(500, "An error occurred while buying the board.");
             }
         }
+
     }
 }

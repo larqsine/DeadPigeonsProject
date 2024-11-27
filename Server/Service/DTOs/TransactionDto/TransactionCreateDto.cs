@@ -1,24 +1,23 @@
+using System.Text.Json.Serialization;
 using DataAccess.Models;
 
 namespace Service.DTOs.TransactionDto;
 
 public class TransactionCreateDto
 {
-    public Guid PlayerId { get; set; } 
     public decimal Amount { get; set; } 
-    public string TransactionType { get; set; } = null!;
     public string MobilepayNumber { get; set; } 
     
-    public Transaction ToTransaction(Guid id, Guid TransactionId)
+    public Transaction ToDepositTransaction(Guid playerId, Guid transactionId)
     {
         return new Transaction
         {
-            Id = TransactionId,
-            PlayerId = PlayerId,
+            Id = transactionId,
             Amount = Amount,
-            TransactionType = TransactionType,
+            TransactionType = "deposit",
             MobilepayNumber = MobilepayNumber,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            PlayerId = playerId
         };
     }
 
