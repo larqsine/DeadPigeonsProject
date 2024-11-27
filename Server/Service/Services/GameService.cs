@@ -1,17 +1,20 @@
 using DataAccess;
 using DataAccess.Models;
+using DataAccess.Repositories;
+using Service.Interfaces;
 
 namespace Service;
 
 using System.Linq;
 
-public class GameService
-{
-    private readonly DBContext _dbContext;
 
-    public GameService(DBContext dbContext)
+public class GameService : IGameService
+{
+    private readonly GameRepository _gameRepository;
+
+    public GameService(GameRepository gameRepository)
     {
-        _dbContext = dbContext;
+        _gameRepository = gameRepository;
     }
     public void ProcessGameResults(int gameId)
     {
@@ -60,6 +63,41 @@ public class GameService
         game.IsClosed = true;
         game.RolloverAmount = 0;
         _dbContext.SaveChanges();*/
+        Console.WriteLine("Game results for game #" + gameId);
+    }
+    
+    public async Task<Game> StartNewGameAsync(Guid adminId)
+    {
+        var activeGame = await _gameRepository.GetActiveGameAsync();
+        if (activeGame != null)
+            throw new Exception("A game is already active.");
+
+        var game = new Game
+        {
+            Id = Guid.NewGuid(),
+            AdminId = adminId,  // Set the foreign key
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            TotalRevenue = 0m,
+            PrizePool = 0m,
+            IsClosed = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        return await _gameRepository.CreateGameAsync(game);
+    }
+
+    public async Task CloseGameAsync(Guid gameId, List<int> winningNumbers)
+    {
+        // Business logic to calculate rollover
+        var activeGame = await _gameRepository.GetActiveGameAsync();
+        if (activeGame == null || activeGame.Id != gameId)
+            throw new Exception("No active game found or game mismatch.");
+
+        decimal rolloverAmount = activeGame.PrizePool > 5000
+            ? activeGame.PrizePool - 5000
+            : 0;
+
+        await _gameRepository.CloseGameAsync(gameId, winningNumbers, rolloverAmount);
     }
 
     public bool IsWinningBoard(string boardNumbers, List<int> winningNumbers)

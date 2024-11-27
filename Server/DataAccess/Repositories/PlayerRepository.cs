@@ -13,7 +13,6 @@ public class PlayerRepository
     }
     public async Task<Player?> GetPlayerByIdAsync(Guid playerId)
     {
-        Console.WriteLine($"Looking for playerId: {playerId}");
 
         // Querying the AspNetUsers table for entities of type Player
         var player = await _context.Users
@@ -21,20 +20,31 @@ public class PlayerRepository
             .Where(u => u.Id == playerId) // Just filter by playerId
             .FirstOrDefaultAsync();
 
-        Console.WriteLine(player == null ? "Player not found." : $"Found player: {player.Id}");
         return player;
     }
 
-    public async Task AddPlayerAsync(Player player)
+    public async Task<List<Player>> GetAllPlayersAsync()
     {
-        await _context.Players.AddAsync(player);
-        await _context.SaveChangesAsync();
+        var players = await _context.Users.OfType<Player>().ToListAsync();
+
+        return players;
     }
+    
 
     public async Task UpdatePlayerAsync(Player player)
     {
         _context.Players.Update(player);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task DeletePlayerAsync(Guid playerId)
+    {
+        var player = await GetPlayerByIdAsync(playerId);
+        if (player != null)
+        {
+            _context.Players.Remove(player);
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task AddTransactionAsync(Transaction transaction)

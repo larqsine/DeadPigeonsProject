@@ -4,73 +4,134 @@ using Service.DTOs.TransactionDto;
 using Service.DTOs.UserDto;
 using Service.Interfaces;
 
-namespace API.Controllers;
-
-[ApiController]
-[Route("/api/player")]
-public class PlayerController : ControllerBase
+namespace API.Controllers
 {
-    private readonly IPlayerService _playerService;
-
-    public PlayerController(IPlayerService playerService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PlayerController : ControllerBase
     {
-        _playerService = playerService;
-    }
+        private readonly IPlayerService _playerService;
+        private readonly ILogger<PlayerController> _logger;
 
-    [HttpPost("create")]
-    public async Task<ActionResult<PlayerResponseDto>> Create([FromBody] PlayerCreateDto createDto)
-    {
-        try
+        public PlayerController(IPlayerService playerService, ILogger<PlayerController> logger)
         {
-            var player = await _playerService.CreatePlayerAsync(createDto);
-            return Ok(player);
+            _playerService = playerService;
+            _logger = logger;
         }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
+        
 
-    [HttpPost("{playerId}/deposit")]
-    public async Task<IActionResult> AddBalance(
-        [FromRoute] Guid playerId, 
-        [FromBody] TransactionCreateDto transactionCreateDto)
-    {
-        Console.WriteLine($"Received playerId: {playerId}");
-
-        if (transactionCreateDto == null)
+        [HttpGet("{playerId:guid}")]
+        public async Task<ActionResult<PlayerResponseDto>> GetPlayer([FromRoute] Guid playerId)
         {
-            return BadRequest("Transaction details are required.");
-        }
-
-        if (transactionCreateDto.Amount <= 0)
-        {
-            return BadRequest("The amount to add must be greater than zero.");
-        }
-
-        try
-        {
-            var response = await _playerService.AddBalanceAsync(playerId, transactionCreateDto);
-            return Ok(response);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound("Player not found.");
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            // Log the exception details for debugging
-            Console.WriteLine($"An error occurred: {ex.Message}");
-            if (ex.InnerException != null)
+            try
             {
-                Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                var player = await _playerService.GetPlayerByIdAsync(playerId);
+                return Ok(player);
             }
-            return StatusCode(500, "An error occurred while adding balance: " + ex.Message);
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Player not found for ID: {PlayerId}", playerId);
+                return NotFound("Player not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching player.");
+                return StatusCode(500, "An error occurred while retrieving the player.");
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<PlayerResponseDto>>> GetAllPlayers()
+        {
+            try
+            {
+                var players = await _playerService.GetAllPlayersAsync();
+                return Ok(players);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching all players.");
+                return StatusCode(500, "An error occurred while retrieving players.");
+            }
+        }
+
+        [HttpPut("{playerId:guid}")]
+        public async Task<ActionResult<PlayerResponseDto>> UpdatePlayer(
+            [FromRoute] Guid playerId,
+            [FromBody] PlayerUpdateDto updateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var updatedPlayer = await _playerService.UpdatePlayerAsync(playerId, updateDto);
+                return Ok(updatedPlayer);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Player not found for ID: {PlayerId}", playerId);
+                return NotFound("Player not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating player.");
+                return StatusCode(500, "An error occurred while updating the player.");
+            }
+        }
+
+        [HttpDelete("{playerId:guid}")]
+        public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
+        {
+            try
+            {
+                await _playerService.DeletePlayerAsync(playerId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Player not found for ID: {PlayerId}", playerId);
+                return NotFound("Player not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting player.");
+                return StatusCode(500, "An error occurred while deleting the player.");
+            }
+        }
+
+        [HttpPost("{playerId:guid}/deposit")]
+        public async Task<IActionResult> AddBalance(
+            [FromRoute] Guid playerId,
+            [FromBody] TransactionCreateDto transactionCreateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var response = await _playerService.AddBalanceAsync(playerId, transactionCreateDto);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Player not found for ID: {PlayerId}", playerId);
+                return NotFound("Player not found.");
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid transaction for Player ID: {PlayerId}", playerId);
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while adding balance.");
+                return StatusCode(500, "An error occurred while adding balance.");
+            }
         }
     }
-
 }

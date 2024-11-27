@@ -6,7 +6,6 @@ namespace DataAccess.Models;
 public  class Player : User
 {
     public decimal? Balance { get; set; }
-
     public bool? AnnualFeePaid { get; set; }
     
     public virtual ICollection<Board> Boards { get; set; } = new List<Board>();
