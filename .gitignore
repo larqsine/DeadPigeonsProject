@@ -12,6 +12,7 @@ dist
 dist-ssr
 obj
 bin
+Migrations
 *.local
 
 # Editor directories and files

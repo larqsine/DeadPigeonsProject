@@ -33,6 +33,8 @@ builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<GameRepository>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddTransient<WeeklyGameJob>();
+builder.Services.AddScoped<TransactionRepository>();
+builder.Services.AddScoped<TransactionService>();
 
 // Add Controllers
 builder.Services.AddControllers();
