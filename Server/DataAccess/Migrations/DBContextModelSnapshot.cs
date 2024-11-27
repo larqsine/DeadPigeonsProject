@@ -35,7 +35,7 @@ namespace DataAccess.Migrations
                     b.Property<decimal>("Cost")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("FieldsCount")
@@ -43,6 +43,9 @@ namespace DataAccess.Migrations
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsWinning")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Numbers")
                         .IsRequired()
