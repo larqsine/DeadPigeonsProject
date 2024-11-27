@@ -22,20 +22,10 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
     .AddEntityFrameworkStores<DBContext>()
     .AddDefaultTokenProviders()
     .AddUserValidator<CustomEmailValidator<User>>(); // Use a custom validator
-    ; // Ensures token-based features like email confirmation, password reset, etc.
 builder.Services.AddScoped<IPasswordHasher<User>, Argon2idPasswordHasher<User>>();
 
+// Register Repositories and Services
 builder.Services.AddScoped<UserRepository>();
-
-
-// Add Swagger for API documentation
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Add Controllers
-builder.Services.AddControllers();
-
-// Add Services
 builder.Services.AddScoped<PlayerRepository>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<BoardRepository>();
@@ -44,12 +34,26 @@ builder.Services.AddScoped<GameRepository>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddTransient<WeeklyGameJob>();
 
+// Add Controllers
+builder.Services.AddControllers();
 
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin() // Allow any origin
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+// Add Swagger for API documentation
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Create roles if they don't exist
-CreateRoles(app);
 
 // Configure Swagger for Development
 if (app.Environment.IsDevelopment())
@@ -62,9 +66,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 
 // Enable Authentication and Authorization
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -74,36 +79,4 @@ app.MapControllers();
 // Run the application
 app.Run();
 
-// Method to create roles if they don't exist
-void CreateRoles(IApplicationBuilder app)
-{
-    var scope = app.ApplicationServices.CreateScope();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-    // List of roles to create
-    var roles = new[] { "Admin", "Player" };
-
-    foreach (var role in roles)
-    {
-        // Check if the role exists, if not, create it
-        var roleExists = roleManager.RoleExistsAsync(role).Result;
-        if (!roleExists)
-        {
-            var identityRole = new IdentityRole<Guid>(role);
-            roleManager.CreateAsync(identityRole).Wait();
-        }
-    }
-
-    // Optionally create an Admin user
-    var admin = userManager.FindByEmailAsync("admin@example.com").Result;
-    if (admin == null)
-    {
-        var user = new User { UserName = "admin", Email = "admin@example.com" };
-        var result = userManager.CreateAsync(user, "AdminPassword123").Result;
-        if (result.Succeeded)
-        {
-            userManager.AddToRoleAsync(user, "Admin").Wait();
-        }
-    }
-}

@@ -3,7 +3,7 @@ import axios from 'axios';
 import styles from './LoginPage.module.css';
 
 interface LoginPageProps {
-    onLogin: (username: string, roles: string[]) => void;
+    onLogin: (email: string, roles: string[]) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
@@ -29,10 +29,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const handleLoginSubmit = async () => {
         if (loginForm.email && loginForm.password) {
             try {
-                const response = await axios.post('/api/account/login', {
+                const response = await axios.post('http://localhost:5229/api/account/login', {
                     email: loginForm.email,
                     password: loginForm.password,
                 });
+
 
                 const { user, roles } = response.data;
                 alert(`Login successful! Welcome ${user}`);
@@ -43,7 +44,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 alert('Login failed. Please check your credentials.');
             }
         } else {
-            alert('Please enter username and password.');
+            alert('Please enter email and password.');
         }
     };
 
@@ -115,7 +116,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     <div className={styles.form}>
                         <input
                             type="text"
-                            name="username"
+                            name="email"
                             placeholder="Email"
                             value={loginForm.email}
                             onChange={handleLoginChange}
