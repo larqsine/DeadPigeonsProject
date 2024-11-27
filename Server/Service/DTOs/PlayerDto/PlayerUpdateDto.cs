@@ -9,6 +9,8 @@ public class PlayerUpdateDto
     public string? Email { get; set; }
     public string? Phone { get; set; }
     public bool? AnnualFeePaid { get; set; }
+    
+    public decimal? Balance { get; set; }
 
     // Mapping method to update the Player entity
     public void UpdatePlayer(Player player)

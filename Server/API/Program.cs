@@ -38,6 +38,13 @@ builder.Services.AddControllers();
 // Add Services
 builder.Services.AddScoped<PlayerRepository>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<BoardRepository>();
+builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<GameRepository>();
+builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddTransient<WeeklyGameJob>();
+
+
 
 var app = builder.Build();
 
