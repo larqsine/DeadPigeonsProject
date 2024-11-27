@@ -1,104 +1,65 @@
 ﻿import React, { useState, useEffect } from 'react';
 import styles from './AdminPage.module.css';
 
-// Type for player data
-type Player = {
+type User = {
     id: string;
-    name: string;
+    userName: string;
+    fullName: string;
     email: string;
-    role: string;
+    phoneNumber: string;
     balance: number;
+    annualFeePaid: boolean;
     createdAt: string;
 };
 
 const AdminPage: React.FC = () => {
     // State for selected winning numbers
     const [selectedWinningNumbers, setSelectedWinningNumbers] = useState<number[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // State for managing players
-    const [players, setPlayers] = useState<Player[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // Fetch all players when component mounts
+    // Fetch all users
     useEffect(() => {
-        fetchPlayers();
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch('http://localhost:5229/api/player'); // API endpoint for fetching users
+                const data = await response.json();
+                setUsers(data);
+            } catch (error) {
+                console.error('Failed to fetch users:', error);
+            }
+        };
+
+        fetchUsers();
     }, []);
 
-    const fetchPlayers = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch('/api/player'); // Fetch players from backend
-            const data = await response.json();
-            setPlayers(data);
-        } catch (error) {
-            setError('Failed to fetch players.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDeletePlayer = async (playerId: string) => {
-        if (window.confirm('Are you sure you want to delete this player?')) {
-            try {
-                await fetch(`/api/player/${playerId}`, { method: 'DELETE' }); // Call DELETE endpoint
-                setPlayers(players.filter(player => player.id !== playerId)); // Optimistic UI update
-            } catch (error) {
-                alert('Failed to delete player.');
-            }
-        }
-    };
-
-    const handleEditPlayer = async (playerId: string) => {
-        // You can either show an inline form or a modal for editing player details
-        const player = players.find(p => p.id === playerId);
-        if (player) {
-            const newName = prompt('Edit player name:', player.name);
-            if (newName) {
-                try {
-                    const updatedPlayerResponse = await fetch(`/api/player/${player.id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ...player, name: newName })
-                    });
-                    const updatedPlayer = await updatedPlayerResponse.json();
-                    setPlayers(players.map(p => (p.id === player.id ? updatedPlayer : p)));
-                } catch (error) {
-                    alert('Failed to update player.');
-                }
-            }
-        }
-    };
-
-    const handleAddPlayer = async (newPlayer: Player) => {
-        try {
-            const response = await fetch('/api/player', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newPlayer)
-            });
-            const addedPlayer = await response.json();
-            setPlayers([...players, addedPlayer]);
-        } catch (error) {
-            alert('Failed to add player.');
-        }
-    };
-
+    // Handle box click for winning numbers
     const handleBoxClick = (num: number) => {
         if (selectedWinningNumbers.includes(num)) {
-            // Remove box if already selected
-            setSelectedWinningNumbers(selectedWinningNumbers.filter(box => box !== num));
+            setSelectedWinningNumbers(selectedWinningNumbers.filter((box) => box !== num));
         } else if (selectedWinningNumbers.length < 3) {
-            // Add box if under the 3-box limit
             setSelectedWinningNumbers([...selectedWinningNumbers, num]);
         } else {
             alert('You can select a maximum of 3 winning numbers.');
         }
     };
 
+    // Handle submit for winning numbers
     const handleSubmit = () => {
         alert(`Winning numbers are: ${selectedWinningNumbers.join(', ')}`);
+    };
+
+    // Open modal with user details
+    const handleUserClick = (user: User) => {
+        setSelectedUser(user);
+        setIsModalOpen(true);
+    };
+
+    // Close modal
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedUser(null);
     };
 
     return (
@@ -106,65 +67,64 @@ const AdminPage: React.FC = () => {
             <h1 className={styles.header}>Admin Page</h1>
 
             {/* Winning Numbers Section */}
-            <p className={styles.subheader}>Select up to 3 winning numbers:</p>
-            <div className={styles.gridContainer}>
-                {Array.from({ length: 16 }, (_, i) => (
-                    <div
-                        key={i + 1}
-                        className={`${styles.box} ${selectedWinningNumbers.includes(i + 1) ? styles.selected : ''}`}
-                        onClick={() => handleBoxClick(i + 1)}
-                    >
-                        {i + 1}
+            <section>
+                <p className={styles.subheader}>Select up to 3 winning numbers:</p>
+                <div className={styles.gridContainer}>
+                    {Array.from({ length: 16 }, (_, i) => (
+                        <div
+                            key={i + 1}
+                            className={`${styles.box} ${
+                                selectedWinningNumbers.includes(i + 1) ? styles.selected : ''
+                            }`}
+                            onClick={() => handleBoxClick(i + 1)}
+                        >
+                            {i + 1}
+                        </div>
+                    ))}
+                </div>
+                <button
+                    className={styles.actionButton}
+                    onClick={handleSubmit}
+                    disabled={selectedWinningNumbers.length !== 3}
+                >
+                    Confirm Winning Numbers
+                </button>
+            </section>
+
+            {/* Users Section */}
+            <section>
+                <h2 className={styles.subheader}>Users</h2>
+                <ul className={styles.userList}>
+                    {users.map((user) => (
+                        <li
+                            key={user.id}
+                            className={styles.userItem}
+                            onClick={() => handleUserClick(user)}
+                        >
+                            {user.userName}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+
+            {/* Modal */}
+            {isModalOpen && selectedUser && (
+                <div className={styles.modal}>
+                    <div className={styles.modalContent}>
+                        <button className={styles.closeButton} onClick={handleCloseModal}>
+                            &times;
+                        </button>
+                        <h3>User Details:</h3>
+                        <p><strong>Username:</strong> {selectedUser.userName}</p>
+                        <p><strong>Full Name:</strong> {selectedUser.fullName}</p>
+                        <p><strong>Email:</strong> {selectedUser.email}</p>
+                        <p><strong>Phone:</strong> {selectedUser.phoneNumber}</p>
+                        <p><strong>Balance:</strong> ${selectedUser.balance.toFixed(2)}</p>
+                        <p><strong>Annual Fee Paid:</strong> {selectedUser.annualFeePaid ? 'Yes' : 'No'}</p>
+                        <p><strong>Created At:</strong> {new Date(selectedUser.createdAt).toLocaleDateString()}</p>
                     </div>
-                ))}
-            </div>
-            <button
-                className={styles.actionButton}
-                onClick={handleSubmit}
-                disabled={selectedWinningNumbers.length !== 3}
-            >
-                Confirm Winning Numbers
-            </button>
-
-            {/* Player Management Section */}
-            <h2 className={styles.subheader}>Manage Players</h2>
-
-            <button className={styles.actionButton} onClick={() => handleAddPlayer({ /* player details */ })}>
-                Add New Player
-            </button>
-
-            {loading && <p>Loading players...</p>}
-            {error && <p className={styles.error}>{error}</p>}
-
-            <table className={styles.table}>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Balance</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {players.map(player => (
-                    <tr key={player.id}>
-                        <td>{player.id}</td>
-                        <td>{player.name}</td>
-                        <td>{player.email}</td>
-                        <td>{player.role}</td>
-                        <td>{player.balance}</td>
-                        <td>{player.createdAt}</td>
-                        <td>
-                            <button onClick={() => handleEditPlayer(player.id)}>Edit</button>
-                            <button onClick={() => handleDeletePlayer(player.id)}>Delete</button>
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+                </div>
+            )}
         </div>
     );
 };
