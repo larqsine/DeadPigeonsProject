@@ -3,6 +3,7 @@ using Service.DTOs.BoardDto;
 using Service.Interfaces;
 using System;
 using System.Threading.Tasks;
+using Service.DTOs.PlayerDto;
 using Service.DTOs.UserDto;
 
 namespace API.Controllers
