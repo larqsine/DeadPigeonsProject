@@ -30,6 +30,15 @@ const AdminPage: React.FC = () => {
         role: ''
     });
 
+    // Lock body scroll when any modal is open
+    useEffect(() => {
+        if (isModalOpen || isEditUserModalOpen || isCreateUserModalOpen) {
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        } else {
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }, [isModalOpen, isEditUserModalOpen, isCreateUserModalOpen]);
+    
     // Fetch all users
     useEffect(() => {
         const fetchUsers = async () => {
@@ -43,6 +52,8 @@ const AdminPage: React.FC = () => {
         };
         fetchUsers();
     }, []);
+    
+    
 
     // Handle box click for winning numbers
     const handleBoxClick = (num: number) => {
@@ -185,7 +196,7 @@ const AdminPage: React.FC = () => {
             <h1 className={styles.header}>Admin Page</h1>
 
             {/* Winning Numbers Section */}
-            <section>
+            <section className={styles.WiningSection}>
                 <p className={styles.subheader}>Select up to 3 winning numbers:</p>
                 <div className={styles.gridContainer}>
                     {Array.from({ length: 16 }, (_, i) => (
@@ -208,7 +219,7 @@ const AdminPage: React.FC = () => {
             </section>
 
             {/* Users Section */}
-            <section>
+            <section className={styles.UserSection}>
                 <h2 className={styles.subheader}>Users</h2>
                 <button
                     className={styles.actionButton}
