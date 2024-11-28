@@ -3,7 +3,7 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using Service.Interfaces;
 
-namespace Service;
+namespace Service.Services;
 
 using System.Linq;
 

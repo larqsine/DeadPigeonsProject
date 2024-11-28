@@ -1,3 +1,4 @@
+using DataAccess.Enums;
 using DataAccess.Models;
 using DataAccess.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -153,17 +154,21 @@ namespace Service.Services
                 // Generate Transaction ID
                 var transactionId = Guid.NewGuid();
 
-                // Create the transaction object using the provided DTO
+                // Create and save the transaction with default status as Pending
                 var transaction = transactionCreateDto.ToDepositTransaction(playerId, transactionId);
-
-                // Save the transaction to the database
+                transaction.Status = TransactionStatus.Pending; // Default status
                 await _repository.AddTransactionAsync(transaction);
+                
 
                 // Update player balance
                 player.Balance += transactionCreateDto.Amount;
                 await _repository.UpdatePlayerAsync(player);
 
                 // Return response with updated player and transaction info
+               
+
+                // Return the transaction details without modifying the balance
+
                 return new PlayerTransactionResponseDto
                 {
                     Player = PlayerResponseDto.FromEntity(player),
