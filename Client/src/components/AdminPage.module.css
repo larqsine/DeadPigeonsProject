@@ -1,30 +1,55 @@
-﻿.container {
-    text-align: center;
-    padding: 20px;
+﻿/* Ensure body and HTML can fully expand with content */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%; /* Stretches to fit content height */
+    overflow-y: auto; /* Always allows vertical scrolling */
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+    box-sizing: border-box;
 }
 
+/* Main container styling */
+.container {
+    text-align: center;
+    padding: 20px;
+    min-height: 100vh; /* Ensure it fills the viewport at least */
+    height: auto; /* Let the height adjust to content */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    justify-content: flex-start;
+    overflow-y: auto; /* Allow scrolling if content exceeds viewport */
+}
+
+/* Header styling */
 .header {
     font-size: 2rem;
     color: #333;
 }
 
+/* Subheader styling */
 .subheader {
     margin-bottom: 20px;
     font-size: 1.2rem;
     color: #555;
 }
 
-.gridContainer {
+/* Responsive grid container for items */
+.gridContainer, .userList {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     justify-content: center;
     align-items: center;
+    width: 300px; /* Ensure responsive width */
+    max-width: 1200px;
     margin: 20px auto;
-    width: 300px;
+    overflow: visible; /* Ensure content inside isn't clipped */
 }
 
-.box {
+/* Styling for each grid box */
+.box, .userItem {
     width: 160px;
     height: 80px;
     display: flex;
@@ -39,10 +64,12 @@
     transition: background-color 0.3s, transform 0.2s;
 }
 
-.box:hover {
+/* Hover effects for grid items */
+.box:hover, .userItem:hover {
     background-color: #ddd;
 }
 
+/* Selected box styling */
 .box.selected {
     background-color: #f15c5c;
     color: white;
@@ -50,6 +77,7 @@
     transform: scale(1.1);
 }
 
+/* Button styling */
 .actionButton {
     margin-top: 20px;
     padding: 10px 20px;
@@ -62,44 +90,18 @@
     transition: background-color 0.2s ease;
 }
 
+/* Disabled button styling */
 .actionButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
 
+/* Hover effects for active buttons */
 .actionButton:hover:not(:disabled) {
     background-color: #045b12;
 }
 
-.userList {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    justify-content: center;
-    align-items: center;
-    margin: 20px auto;
-    width: 300px;
-}
-
-.userItem {
-    width: 160px;
-    height: 80px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f0f0f0;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.userItem:hover {
-    background-color: #ddd;
-}
-
+/* Modal styling */
 .modal {
     position: fixed;
     top: 0;
@@ -110,17 +112,23 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow-y: auto; /* Ensure modal content can scroll if long */
 }
 
+/* Modal content box */
 .modalContent {
     background: white;
     padding: 20px;
     border-radius: 5px;
-    width: 400px;
+    width: 90%; /* Responsive modal width */
+    max-width: 400px; /* Maximum width for modal */
+    max-height: 90%; /* Prevent modal from exceeding viewport height */
+    overflow-y: auto; /* Allow modal content to scroll */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
 
+/* Close button inside modal */
 .closeButton {
     position: absolute;
     top: 10px;
@@ -129,4 +137,62 @@
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
+}
+
+/* Modal Input fields */
+.modalContent input, .modalContent select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* Modal form submit button */
+.modalContent .actionButton {
+    margin-top: 20px;
+    background-color: #045b12;
+    font-size: 1.2rem;
+}
+
+/* User details styling */
+.userItem {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fafafa;
+}
+
+.userItem:hover {
+    background-color: #f0f0f0;
+}
+
+/* User Edit form styles */
+.userDetailsForm {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Additional input field styles */
+.userDetailsForm input, .userDetailsForm select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.userDetailsForm .checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox input {
+    margin-right: 10px;
 }

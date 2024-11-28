@@ -13,11 +13,22 @@ type User = {
 };
 
 const AdminPage: React.FC = () => {
-    // State for selected winning numbers
     const [selectedWinningNumbers, setSelectedWinningNumbers] = useState<number[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+    const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+    const [editUser, setEditUser] = useState<User | null>(null);
+
+    const [newUser, setNewUser] = useState({
+        userName: '',
+        fullName: '',
+        email: '',
+        phoneNumber: '',
+        password: '',
+        role: ''
+    });
 
     // Fetch all users
     useEffect(() => {
@@ -30,7 +41,6 @@ const AdminPage: React.FC = () => {
                 console.error('Failed to fetch users:', error);
             }
         };
-
         fetchUsers();
     }, []);
 
@@ -56,10 +66,118 @@ const AdminPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
+    // Handle edit user click
+    const handleEditUserClick = (user: User) => {
+        setEditUser(user);
+        setIsEditUserModalOpen(true);
+        setIsModalOpen(false); // Close the view user modal
+    };
+
     // Close modal
     const handleCloseModal = () => {
         setIsModalOpen(false);
+        setIsEditUserModalOpen(false);
+        setIsCreateUserModalOpen(false);
         setSelectedUser(null);
+        setEditUser(null);
+    };
+
+    // Handle edit user input change
+    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (editUser) {
+            setEditUser({
+                ...editUser,
+                [e.target.name]: e.target.value,
+            });
+        }
+    };
+
+    // Handle new user input change
+    const handleCreateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setNewUser(prev => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    // Submit edited user form
+    const handleEditUserSubmit = async () => {
+        if (editUser) {
+            try {
+                const response = await fetch(`http://localhost:5229/api/player/${editUser.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(editUser),
+                });
+
+                if (response.ok) {
+                    alert('User updated successfully');
+                    handleCloseModal();
+                    // Refresh the user list
+                    const usersResponse = await fetch('http://localhost:5229/api/player');
+                    const data = await usersResponse.json();
+                    setUsers(data);
+                } else {
+                    alert('Failed to update user');
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+                alert('Error updating user');
+            }
+        }
+    };
+
+    // Submit new user form
+    const handleCreateUserSubmit = async () => {
+        if (!newUser.userName || !newUser.fullName || !newUser.email || !newUser.role || !newUser.password) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:5229/api/Account/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userName: newUser.userName,
+                    fullName: newUser.fullName,
+                    email: newUser.email,
+                    phone: newUser.phoneNumber,
+                    password: newUser.password,
+                    role: newUser.role,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('User created successfully');
+                setIsCreateUserModalOpen(false); // Close the modal
+                // Clear form fields after user creation
+                setNewUser({
+                    userName: '',
+                    fullName: '',
+                    email: '',
+                    phoneNumber: '',
+                    password: '',
+                    role: ''
+                });
+                // Refresh the user list
+                const usersResponse = await fetch('http://localhost:5229/api/player');
+                const data = await usersResponse.json();
+                setUsers(data);
+            } else {
+                alert(result.message || 'Failed to create user');
+            }
+        } catch (error) {
+            console.error('Error creating user:', error);
+            alert('An error occurred while creating the user.');
+        }
     };
 
     return (
@@ -73,9 +191,7 @@ const AdminPage: React.FC = () => {
                     {Array.from({ length: 16 }, (_, i) => (
                         <div
                             key={i + 1}
-                            className={`${styles.box} ${
-                                selectedWinningNumbers.includes(i + 1) ? styles.selected : ''
-                            }`}
+                            className={`${styles.box} ${selectedWinningNumbers.includes(i + 1) ? styles.selected : ''}`}
                             onClick={() => handleBoxClick(i + 1)}
                         >
                             {i + 1}
@@ -94,6 +210,12 @@ const AdminPage: React.FC = () => {
             {/* Users Section */}
             <section>
                 <h2 className={styles.subheader}>Users</h2>
+                <button
+                    className={styles.actionButton}
+                    onClick={() => setIsCreateUserModalOpen(true)}
+                >
+                    New User
+                </button>
                 <ul className={styles.userList}>
                     {users.map((user) => (
                         <li
@@ -107,7 +229,7 @@ const AdminPage: React.FC = () => {
                 </ul>
             </section>
 
-            {/* Modal */}
+            {/* Modal for User Details */}
             {isModalOpen && selectedUser && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
@@ -122,6 +244,125 @@ const AdminPage: React.FC = () => {
                         <p><strong>Balance:</strong> ${selectedUser.balance.toFixed(2)}</p>
                         <p><strong>Annual Fee Paid:</strong> {selectedUser.annualFeePaid ? 'Yes' : 'No'}</p>
                         <p><strong>Created At:</strong> {new Date(selectedUser.createdAt).toLocaleDateString()}</p>
+                        <button className={styles.actionButton} onClick={() => handleEditUserClick(selectedUser)}>
+                            Edit User
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal for Editing User */}
+            {isEditUserModalOpen && editUser && (
+                <div className={styles.modal}>
+                    <div className={styles.modalContent}>
+                        <button className={styles.closeButton} onClick={handleCloseModal}>
+                            &times;
+                        </button>
+                        <h3>Edit User</h3>
+                        <input
+                            type="text"
+                            name="userName"
+                            placeholder="Username"
+                            value={editUser.userName}
+                            onChange={handleEditInputChange}
+                        />
+                        <input
+                            type="text"
+                            name="fullName"
+                            placeholder="Full Name"
+                            value={editUser.fullName}
+                            onChange={handleEditInputChange}
+                        />
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            value={editUser.email}
+                            onChange={handleEditInputChange}
+                        />
+                        <input
+                            type="text"
+                            name="phone"
+                            placeholder="Phone Number"
+                            value={editUser.phoneNumber}
+                            onChange={handleEditInputChange}
+                        />
+                        <input
+                            type="number"
+                            name="balance"
+                            placeholder="Balance"
+                            value={editUser.balance}
+                            onChange={handleEditInputChange}
+                        />
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="annualFeePaid"
+                                checked={editUser.annualFeePaid}
+                                onChange={() => setEditUser({ ...editUser, annualFeePaid: !editUser.annualFeePaid })}
+                            />
+                            Annual Fee Paid
+                        </label>
+                        <button className={styles.actionButton} onClick={handleEditUserSubmit}>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal for Creating New User */}
+            {isCreateUserModalOpen && (
+                <div className={styles.modal}>
+                    <div className={styles.modalContent}>
+                        <button className={styles.closeButton} onClick={handleCloseModal}>
+                            &times;
+                        </button>
+                        <h3>Create New User</h3>
+                        <input
+                            type="text"
+                            name="userName"
+                            placeholder="Username"
+                            value={newUser.userName}
+                            onChange={handleCreateInputChange}
+                        />
+                        <input
+                            type="text"
+                            name="fullName"
+                            placeholder="Full Name"
+                            value={newUser.fullName}
+                            onChange={handleCreateInputChange}
+                        />
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            value={newUser.email}
+                            onChange={handleCreateInputChange}
+                        />
+                        <input
+                            type="text"
+                            name="phoneNumber"
+                            placeholder="Phone Number"
+                            value={newUser.phoneNumber}
+                            onChange={handleCreateInputChange}
+                        />
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            value={newUser.password}
+                            onChange={handleCreateInputChange}
+                        />
+                        <input
+                            type="text"
+                            name="role"
+                            placeholder="Role"
+                            value={newUser.role}
+                            onChange={handleCreateInputChange}
+                        />
+                        <button className={styles.actionButton} onClick={handleCreateUserSubmit}>
+                            Create User
+                        </button>
                     </div>
                 </div>
             )}
