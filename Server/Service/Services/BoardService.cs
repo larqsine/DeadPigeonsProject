@@ -1,12 +1,7 @@
-using Service.DTOs;
 using Service.Interfaces;
-using DataAccess.Models;
 using DataAccess.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Service.DTOs.BoardDto;
+using Service.DTOs.TransactionDto;
 
 namespace Service.Services
 {
@@ -52,9 +47,17 @@ namespace Service.Services
             if (player.Balance < cost)
                 throw new Exception("Insufficient balance.");
 
-            // Deduct the cost from the player's balance
-            player.Balance -= cost;
-            await _playerRepository.UpdatePlayerAsync(player);
+            // Create a purchase transaction
+            var purchaseTransactionDto = new TransactionCreateDto
+            {
+                Amount = cost
+            };
+
+            var transactionId = Guid.NewGuid();
+            var purchaseTransaction = purchaseTransactionDto.ToPurchaseTransaction(playerId, transactionId);
+
+            // Add the purchase transaction (Transaction Repository handles persisting and deducting balance)
+            await _playerRepository.AddTransactionAsync(purchaseTransaction);
 
             // Use the ToBoard method from the DTO to map to the Board entity
             var board = buyBoardRequestDto.ToBoard(playerId, cost);
@@ -75,5 +78,6 @@ namespace Service.Services
                 IsWinning = createdBoard.IsWinning
             };
         }
+
     }
 }

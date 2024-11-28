@@ -23,5 +23,19 @@ public class TransactionCreateDto
 
         };
     }
+    
+    // Creates a purchase transaction for buying a board
+    public Transaction ToPurchaseTransaction(Guid playerId, Guid transactionId)
+    {
+        return new Transaction
+        {
+            Id = transactionId,
+            Amount = -Amount, // Deducted amount for purchase
+            TransactionType = "purchase",
+            CreatedAt = DateTime.UtcNow,
+            PlayerId = playerId,
+            Status = TransactionStatus.Completed // Purchase transactions are marked as completed
+        };
+    }
 
 }

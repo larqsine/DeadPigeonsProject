@@ -14,7 +14,8 @@ namespace DataAccess.Models
         public int FieldsCount { get; set; }  
         public decimal Cost { get; set; } 
         public DateTime CreatedAt { get; set; }  
-        public bool IsWinning { get; set; } 
+        public bool IsWinning { get; set; }
+
         public virtual Game Game { get; set; } = null!;
         public virtual Player Player { get; set; } = null!;
         public virtual ICollection<Winner> Winners { get; set; } = new List<Winner>();
