@@ -19,12 +19,5 @@ namespace DataAccess.Models
         public virtual Game Game { get; set; } = null!;
         public virtual Player Player { get; set; } = null!;
         public virtual ICollection<Winner> Winners { get; set; } = new List<Winner>();
-
-        
-        public bool IsWinningBoard(IEnumerable<int> winningNumbers)
-        {
-            var boardNumbers = Numbers.Split(',').Select(int.Parse).ToList();
-            return !boardNumbers.Except(winningNumbers).Any();  
-        }
     }
 }

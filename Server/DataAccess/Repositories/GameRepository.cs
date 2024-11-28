@@ -44,4 +44,10 @@ public class GameRepository
 
             await _context.SaveChangesAsync();
         }
+    
+        public async Task UpdateGameAsync(Game game)
+        {
+            _context.Games.Update(game);
+            await _context.SaveChangesAsync();
+        }
 }

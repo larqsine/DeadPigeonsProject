@@ -1,71 +1,29 @@
 using DataAccess;
 using DataAccess.Models;
 using DataAccess.Repositories;
+using Service.DTOs;
+using Service.DTOs.BoardDto;
 using Service.Interfaces;
-
-namespace Service.Services;
-
 using System.Linq;
 
+namespace Service.Services;
 
 public class GameService : IGameService
 {
     private readonly GameRepository _gameRepository;
+    private readonly BoardRepository _boardRepository;
+    private readonly PlayerRepository _playerRepository;
+    private readonly WinnerRepository _winnerRepository;
 
-    public GameService(GameRepository gameRepository)
+    public GameService(GameRepository gameRepository, BoardRepository boardRepository,
+        PlayerRepository playerRepository, WinnerRepository winnerRepository)
     {
         _gameRepository = gameRepository;
+        _boardRepository = boardRepository;
+        _playerRepository = playerRepository;
+        _winnerRepository = winnerRepository;
     }
-    public void ProcessGameResults(int gameId)
-    {
-        // Fetch the game based on its ID and check if it's closed
-        /*var game = _dbContext.Games.FirstOrDefault(g => g.Id == gameId && g.IsClosed != true);
-    
-        // If game is not found or winning numbers are not set, throw an error
-        if (game == null || game.WinningNumbers == null)
-            throw new InvalidOperationException("Game not found or winning numbers not set.");
 
-        // Get the list of boards associated with the game
-        var boards = _dbContext.Boards.Where(b => b.GameId == gameId).ToList();
-
-        // Find boards that are winning
-        var winningBoards = boards
-            .Where(b => IsWinningBoard(b.Numbers, game.WinningNumbers))
-            .ToList();
-
-        // If no winning boards, apply rollover logic
-        if (!winningBoards.Any())
-        {
-            game.RolloverAmount += game.PrizePool;
-            game.IsClosed = true;
-            _dbContext.SaveChanges();
-            return;
-        }
-
-        // Calculate the prize per winner and create winners
-        var totalWinners = winningBoards.Count;
-        var prizePerWinner = game.PrizePool / totalWinners;
-
-        foreach (var board in winningBoards)
-        {
-            var winner = new Winner
-            {
-                GameId = game.Id,
-                PlayerId = board.PlayerId,
-                BoardId = board.Id,
-                WinningAmount = prizePerWinner,
-                CreatedAt = DateTime.UtcNow
-            };
-            _dbContext.Winners.Add(winner);
-        }
-
-        // Close the game and reset the rollover amount
-        game.IsClosed = true;
-        game.RolloverAmount = 0;
-        _dbContext.SaveChanges();*/
-        Console.WriteLine("Game results for game #" + gameId);
-    }
-    
     public async Task<Game> StartNewGameAsync(Guid adminId)
     {
         var activeGame = await _gameRepository.GetActiveGameAsync();
@@ -75,8 +33,7 @@ public class GameService : IGameService
         var game = new Game
         {
             Id = Guid.NewGuid(),
-            AdminId = adminId,  // Set the foreign key
-            StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            AdminId = adminId, // Set the foreign key
             TotalRevenue = 0m,
             PrizePool = 0m,
             IsClosed = false,
@@ -88,14 +45,36 @@ public class GameService : IGameService
 
     public async Task CloseGameAsync(Guid gameId, List<int> winningNumbers)
     {
-        // Business logic to calculate rollover
         var activeGame = await _gameRepository.GetActiveGameAsync();
         if (activeGame == null || activeGame.Id != gameId)
             throw new Exception("No active game found or game mismatch.");
 
+        activeGame.WinningNumbers = winningNumbers.ToList();
+        activeGame.IsClosed = true;
+        await _gameRepository.UpdateGameAsync(activeGame);
+
+        var boards = await _boardRepository.GetBoardsByGameIdAsync(gameId);
+        var totalRevenue = boards.Sum(b => b.Cost);
+        var prizePool = totalRevenue * 0.7m;
+        activeGame.PrizePool = prizePool;
+        await _gameRepository.UpdateGameAsync(activeGame);
+
+        foreach (var board in boards)
+        {
+            var boardNumbers = board.Numbers.Split(',').Select(int.Parse).ToList();
+
+            if (boardNumbers.SequenceEqual(winningNumbers))
+            {
+                board.IsWinning = true;
+                await _boardRepository.UpdateBoardAsync(board);
+            }
+        }
+
+        var winners = boards.Where(b => IsWinningBoard(b.Numbers, winningNumbers)).ToList();
         decimal rolloverAmount = activeGame.PrizePool > 5000
             ? activeGame.PrizePool - 5000
             : 0;
+
 
         await _gameRepository.CloseGameAsync(gameId, winningNumbers, rolloverAmount);
     }
@@ -107,9 +86,33 @@ public class GameService : IGameService
 
         // Check if all the winning numbers are present in the board's numbers
         return winningNumbers.All(boardArray.Contains);
-    
+
     }
 
-
-
+    public async Task DeductForAutoplayAsync()
+    {
+        var activeGame = await _gameRepository.GetActiveGameAsync();
+        if (activeGame == null)
+        {
+            throw new InvalidOperationException("No active game found.");
+        }
+        
+        var autoplayBoards = await _boardRepository.GetBoardsByGameIdAsync(activeGame.Id, groupByPlayer: true);
+    
+        foreach (var autoplayBoard in autoplayBoards)
+        {
+            if (autoplayBoard.Autoplay == true)
+            {
+                var player = await _playerRepository.GetPlayerByIdAsync(autoplayBoard.PlayerId);
+                
+                if (player.Balance < autoplayBoard.Cost)
+                {
+                    throw new Exception("Insufficient balance, please refill.");
+                }
+                
+                player.Balance -= autoplayBoard.Cost;
+                await _playerRepository.UpdatePlayerAsync(player);
+            }
+        }
+    }
 }

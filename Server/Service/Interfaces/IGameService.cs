@@ -9,8 +9,6 @@ namespace Service.Interfaces
 
         Task CloseGameAsync(Guid gameId, List<int> winningNumbers);
 
-        void ProcessGameResults(int gameId);
-
         bool IsWinningBoard(string boardNumbers, List<int> winningNumbers);
     }
 }
