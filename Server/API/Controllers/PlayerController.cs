@@ -114,7 +114,6 @@ namespace API.Controllers
 
             try
             {
-                // Call the service method to add the balance
                 var response = await _playerService.AddBalanceAsync(playerId, transactionCreateDto);
                 return Ok(response);
             }

@@ -35,13 +35,15 @@ builder.Services.AddSwaggerGen();
 // Add Controllers
 builder.Services.AddControllers();
 
-// Add Services
+// Register repositories
 builder.Services.AddScoped<PlayerRepository>();
-builder.Services.AddScoped<IPlayerService, PlayerService>();
-builder.Services.AddScoped<BoardRepository>();
-builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<GameRepository>();
+builder.Services.AddScoped<BoardRepository>();
+
+// Register services
+builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddTransient<WeeklyGameJob>();
 
 

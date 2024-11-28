@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Service.DTOs;
 using Service.Interfaces;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Service.DTOs.BoardDto;
 
 namespace API.Controllers
 {
@@ -27,14 +31,10 @@ namespace API.Controllers
 
             try
             {
-                var board = await _boardService.BuyBoardAsync(
-                    playerId,
-                    buyBoardRequestDto.FieldsCount,
-                    buyBoardRequestDto.Numbers,
-                    buyBoardRequestDto.GameId // Pass GameId from the request body
-                );
+                // Call the service method passing the DTO directly
+                var boardResponse = await _boardService.BuyBoardAsync(playerId, buyBoardRequestDto);
 
-                return Ok(new { message = "Board purchased successfully.", data = board });
+                return Ok(new { message = "Board purchased successfully.", data = boardResponse });
             }
             catch (Exception ex)
             {
@@ -42,6 +42,5 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while buying the board.");
             }
         }
-
     }
 }

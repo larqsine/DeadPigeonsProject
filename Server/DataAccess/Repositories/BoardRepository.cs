@@ -12,10 +12,7 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        public async Task<Game> GetGameByIdAsync(Guid gameId)
-        {
-            return await _context.Games.FindAsync(gameId);
-        }
+        
 
         public async Task<Board> CreateBoardAsync(Board board)
         {

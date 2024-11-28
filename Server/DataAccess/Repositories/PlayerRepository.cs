@@ -14,10 +14,9 @@ public class PlayerRepository
     public async Task<Player?> GetPlayerByIdAsync(Guid playerId)
     {
 
-        // Querying the AspNetUsers table for entities of type Player
         var player = await _context.Users
             .OfType<Player>() // EF Core automatically filters for the Player type using Discriminator internally
-            .Where(u => u.Id == playerId) // Just filter by playerId
+            .Where(u => u.Id == playerId) 
             .FirstOrDefaultAsync();
 
         return player;

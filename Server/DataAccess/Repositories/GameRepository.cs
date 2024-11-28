@@ -18,6 +18,11 @@ public class GameRepository
             await _context.SaveChangesAsync();
             return game;
         }
+        
+        public async Task<Game> GetGameByIdAsync(Guid gameId)
+        {
+            return await _context.Games.FindAsync(gameId);
+        }
 
         public async Task<Game?> GetActiveGameAsync()
         {
