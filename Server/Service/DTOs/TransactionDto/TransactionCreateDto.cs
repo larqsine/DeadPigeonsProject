@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using DataAccess.Enums;
 using DataAccess.Models;
 
 namespace Service.DTOs.TransactionDto;
@@ -17,7 +18,9 @@ public class TransactionCreateDto
             TransactionType = "deposit",
             MobilepayNumber = MobilepayNumber,
             CreatedAt = DateTime.UtcNow,
-            PlayerId = playerId
+            PlayerId = playerId,
+            Status = TransactionStatus.Pending // Default status is Pending
+
         };
     }
 

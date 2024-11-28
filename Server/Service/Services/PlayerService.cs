@@ -131,14 +131,12 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while deleting the player.");
             }
         }
-
         public async Task<PlayerTransactionResponseDto> AddBalanceAsync(
             Guid playerId,
             TransactionCreateDto transactionCreateDto)
         {
             try
             {
-                // Validate the transaction amount
                 if (transactionCreateDto.Amount <= 0)
                 {
                     throw new ArgumentException("The amount to add must be greater than zero.");
@@ -158,17 +156,8 @@ namespace Service.Services
                 var transaction = transactionCreateDto.ToDepositTransaction(playerId, transactionId);
                 transaction.Status = TransactionStatus.Pending; // Default status
                 await _repository.AddTransactionAsync(transaction);
-                
-
-                // Update player balance
-                player.Balance += transactionCreateDto.Amount;
-                await _repository.UpdatePlayerAsync(player);
-
-                // Return response with updated player and transaction info
-               
 
                 // Return the transaction details without modifying the balance
-
                 return new PlayerTransactionResponseDto
                 {
                     Player = PlayerResponseDto.FromEntity(player),
@@ -191,7 +180,6 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while adding balance to the player.");
             }
         }
-
 
         private void LogError(string message, Exception ex)
         {
