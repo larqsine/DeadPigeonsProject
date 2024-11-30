@@ -1,3 +1,4 @@
+using API.Scheduler;
 using DataAccess;
 using DataAccess.Models;
 using DataAccess.Repositories;
@@ -34,9 +35,11 @@ builder.Services.AddScoped<BoardRepository>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IBoardService, BoardService>();
-builder.Services.AddTransient<WeeklyGameJob>();
 builder.Services.AddScoped<TransactionRepository>();
 builder.Services.AddScoped<TransactionService>();
+
+builder.Services.AddQuartzJobs(); // Add Quartz jobs
+
 
 // Add Controllers
 builder.Services.AddControllers();
