@@ -16,11 +16,11 @@ namespace API.Controllers
         }
 
         [HttpPost("start")]
-        public async Task<IActionResult> StartGame([FromBody] Guid adminId)
+        public async Task<IActionResult> StartGame()
         {
             try
             {
-                var game = await _gameService.StartNewGameAsync(adminId);
+                var game = await _gameService.StartNewGameAsync();
                 return Ok(new
                 {
                     message = "Game started successfully.",

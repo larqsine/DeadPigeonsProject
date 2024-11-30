@@ -5,7 +5,7 @@ namespace Service.Interfaces
 {
     public interface IGameService
     {
-        Task<Game> StartNewGameAsync(Guid adminId);
+        Task<Game> StartNewGameAsync();
 
         Task CloseGameAsync(Guid gameId, List<int> winningNumbers);
 

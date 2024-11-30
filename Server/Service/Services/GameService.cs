@@ -66,7 +66,7 @@ public class GameService : IGameService
         Console.WriteLine("Game results for game #" + gameId);
     }
     
-    public async Task<Game> StartNewGameAsync(Guid adminId)
+    public async Task<Game> StartNewGameAsync()
     {
         var activeGame = await _gameRepository.GetActiveGameAsync();
         if (activeGame != null)
@@ -75,7 +75,7 @@ public class GameService : IGameService
         var game = new Game
         {
             Id = Guid.NewGuid(),
-            AdminId = adminId,  // Set the foreign key
+            AdminId = null,
             StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
             TotalRevenue = 0m,
             PrizePool = 0m,

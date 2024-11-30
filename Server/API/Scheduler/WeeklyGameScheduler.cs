@@ -25,6 +25,6 @@ public class WeeklyGameJob : IJob
             throw new Exception($"Admin user with username {adminUsername} not found.");
         }
 
-        await _gameService.StartNewGameAsync(admin.Id); // Pass the admin's GUID
+        await _gameService.StartNewGameAsync(); // Pass the admin's GUID
     }
 }

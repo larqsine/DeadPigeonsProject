@@ -7,7 +7,7 @@ public partial class Game
 {
     public Guid Id { get; set; }
 
-    public Guid AdminId { get; set; }
+    public Guid? AdminId { get; set; }
 
     public DateOnly StartDate { get; set; }
 
