@@ -31,7 +31,10 @@ namespace Service.Services
             // Get the game by GameId
             var game = await _gameRepository.GetGameByIdAsync(buyBoardRequestDto.GameId);
             if (game == null)
-                throw new Exception("Invalid GameId.");
+                throw new Exception("Game not found.");
+
+            if (game.IsClosed == true)
+                throw new Exception("Cannot purchase a board for a closed game.");
 
             // Calculate the cost based on FieldsCount from the DTO
             decimal cost = buyBoardRequestDto.FieldsCount switch

@@ -1,6 +1,7 @@
 using DataAccess;
 using DataAccess.Models;
 using DataAccess.Repositories;
+using Service.DTOs.GameDto;
 using Service.Interfaces;
 
 namespace Service.Services;
@@ -16,57 +17,14 @@ public class GameService : IGameService
     {
         _gameRepository = gameRepository;
     }
-    public void ProcessGameResults(int gameId)
+    
+    public async Task<Game?> GetActiveGameAsync()
     {
-        // Fetch the game based on its ID and check if it's closed
-        /*var game = _dbContext.Games.FirstOrDefault(g => g.Id == gameId && g.IsClosed != true);
-    
-        // If game is not found or winning numbers are not set, throw an error
-        if (game == null || game.WinningNumbers == null)
-            throw new InvalidOperationException("Game not found or winning numbers not set.");
-
-        // Get the list of boards associated with the game
-        var boards = _dbContext.Boards.Where(b => b.GameId == gameId).ToList();
-
-        // Find boards that are winning
-        var winningBoards = boards
-            .Where(b => IsWinningBoard(b.Numbers, game.WinningNumbers))
-            .ToList();
-
-        // If no winning boards, apply rollover logic
-        if (!winningBoards.Any())
-        {
-            game.RolloverAmount += game.PrizePool;
-            game.IsClosed = true;
-            _dbContext.SaveChanges();
-            return;
-        }
-
-        // Calculate the prize per winner and create winners
-        var totalWinners = winningBoards.Count;
-        var prizePerWinner = game.PrizePool / totalWinners;
-
-        foreach (var board in winningBoards)
-        {
-            var winner = new Winner
-            {
-                GameId = game.Id,
-                PlayerId = board.PlayerId,
-                BoardId = board.Id,
-                WinningAmount = prizePerWinner,
-                CreatedAt = DateTime.UtcNow
-            };
-            _dbContext.Winners.Add(winner);
-        }
-
-        // Close the game and reset the rollover amount
-        game.IsClosed = true;
-        game.RolloverAmount = 0;
-        _dbContext.SaveChanges();*/
-        Console.WriteLine("Game results for game #" + gameId);
+        return await _gameRepository.GetActiveGameAsync();
     }
+
     
-    public async Task<Game> StartNewGameAsync()
+    public async Task<GameDetailsDto> StartNewGameAsync()
     {
         var activeGame = await _gameRepository.GetActiveGameAsync();
         if (activeGame != null)
@@ -75,30 +33,54 @@ public class GameService : IGameService
         var game = new Game
         {
             Id = Guid.NewGuid(),
-            AdminId = null,
             StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            EndDate = null,
             TotalRevenue = 0m,
             PrizePool = 0m,
             IsClosed = false,
             CreatedAt = DateTime.UtcNow
         };
 
-        return await _gameRepository.CreateGameAsync(game);
-    }
+        var createdGame = await _gameRepository.CreateGameAsync(game);
 
+        return new GameDetailsDto
+        {
+            Id = createdGame.Id,
+            StartDate = createdGame.StartDate,
+            EndDate = createdGame.EndDate,
+            TotalRevenue = createdGame.TotalRevenue,
+            PrizePool = createdGame.PrizePool,
+            IsClosed = createdGame.IsClosed.Value,
+            WinningNumbers = createdGame.WinningNumbers
+        };
+    }
     public async Task CloseGameAsync(Guid gameId, List<int> winningNumbers)
     {
-        // Business logic to calculate rollover
+
+        // Validate active game
         var activeGame = await _gameRepository.GetActiveGameAsync();
         if (activeGame == null || activeGame.Id != gameId)
+        {
             throw new Exception("No active game found or game mismatch.");
+        }
 
+        // Validate winning numbers
+        if (winningNumbers == null || winningNumbers.Count == 0)
+        {
+            throw new Exception("Winning numbers cannot be null or empty.");
+        }
+        
+        // Calculate rollover if prize pool exceeds 5000
         decimal rolloverAmount = activeGame.PrizePool > 5000
             ? activeGame.PrizePool - 5000
             : 0;
 
+        // Update game status in the repository
         await _gameRepository.CloseGameAsync(gameId, winningNumbers, rolloverAmount);
+
     }
+
+
 
     public bool IsWinningBoard(string boardNumbers, List<int> winningNumbers)
     {

@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTOs.GameDto;
 using Service.Interfaces;
@@ -21,6 +22,7 @@ namespace API.Controllers
         {
             try
             {
+
                 var game = await _gameService.StartNewGameAsync();
                 return Ok(new
                 {
