@@ -1,6 +1,6 @@
 namespace Service.DTOs.GameDto;
 
-public class UpdateWinningNumbersDto
+public class GameDetailsDto
 {
     
 }

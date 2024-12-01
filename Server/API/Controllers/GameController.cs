@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Mvc;
+using Service.DTOs.GameDto;
 using Service.Interfaces;
 
 namespace API.Controllers
@@ -16,7 +17,7 @@ namespace API.Controllers
         }
 
         [HttpPost("start")]
-        public async Task<IActionResult> StartGame()
+        public async Task<IActionResult> StartGame([FromBody] GameCreateDto gameCreateDto)
         {
             try
             {
@@ -33,13 +34,12 @@ namespace API.Controllers
             }
         }
 
-
         [HttpPost("{gameId}/close")]
-        public async Task<IActionResult> CloseGame(Guid gameId, [FromBody] List<int> winningNumbers)
+        public async Task<IActionResult> CloseGame(Guid gameId, [FromBody] GameCloseDto gameCloseDto)
         {
             try
             {
-                await _gameService.CloseGameAsync(gameId, winningNumbers);
+                await _gameService.CloseGameAsync(gameId, gameCloseDto.WinningNumbers);
                 return Ok(new { message = "Game closed successfully." });
             }
             catch (Exception ex)
@@ -48,4 +48,5 @@ namespace API.Controllers
             }
         }
     }
+
 }

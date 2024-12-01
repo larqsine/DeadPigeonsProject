@@ -1,6 +1,6 @@
 namespace Service.DTOs.GameDto;
 
-public class GameDto
+public class GameCloseDto
 {
     
 }
