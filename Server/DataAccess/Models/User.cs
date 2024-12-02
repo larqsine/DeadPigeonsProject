@@ -7,6 +7,6 @@ public class User : IdentityUser<Guid>
     public string FullName { get; set; } = string.Empty;
     public DateTime? CreatedAt { get; set; }
     
-    public bool PasswordChangeRequired { get; set; } = false; 
+    public bool PasswordChangeRequired { get; set; } 
 
 }
