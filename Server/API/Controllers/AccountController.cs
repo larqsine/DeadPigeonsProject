@@ -4,6 +4,7 @@ using DataAccess.Models;
 using Microsoft.AspNetCore.Authorization;
 using Service.DTOs.PlayerDto;
 using Service.DTOs.UserDto;
+using Service.Security;
 
 namespace API.Controllers
 {
@@ -14,18 +15,21 @@ namespace API.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly IJwtService _jwtService;
 
         public AccountController(UserManager<User> userManager,
             SignInManager<User> signInManager,
-            RoleManager<IdentityRole<Guid>> roleManager)
+            RoleManager<IdentityRole<Guid>> roleManager,
+            IJwtService jwtService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _jwtService = jwtService;
         }
 
         [HttpPost("register")]
-        [AllowAnonymous]
+        [Authorize(Policy = "AdminPolicy")] 
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
             if (string.IsNullOrEmpty(model.Role))
@@ -102,8 +106,12 @@ namespace API.Controllers
                 return Unauthorized(new { message = "Invalid email or password." });
 
             var roles = await _userManager.GetRolesAsync(user);
+            
+            // Generate JWT token using the JwtService
+            var token = _jwtService.GenerateJwtToken(user.Id.ToString(), user.UserName, roles.ToList());
 
-            return Ok(new { message = "Login successful!", user = user.UserName, roles });
+
+            return Ok(new { message = "Login successful!", user = user.UserName, roles, token });
         }
 
         [HttpPost("logout")]
