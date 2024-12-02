@@ -1,17 +1,14 @@
-using DataAccess;
 using DataAccess.Models;
 using DataAccess.Repositories;
-using Service.DTOs;
-using Service.DTOs.BoardDto;
+using Service.DTOs.WinnerDto;
 using Service.Interfaces;
-using System.Linq;
 
 namespace Service.Services;
 
 public class GameService : IGameService
 {
-    private readonly GameRepository _gameRepository;
     private readonly BoardRepository _boardRepository;
+    private readonly GameRepository _gameRepository;
     private readonly PlayerRepository _playerRepository;
     private readonly WinnerRepository _winnerRepository;
 
@@ -33,7 +30,7 @@ public class GameService : IGameService
         var game = new Game
         {
             Id = Guid.NewGuid(),
-            AdminId = adminId, // Set the foreign key
+            AdminId = adminId,
             TotalRevenue = 0m,
             PrizePool = 0m,
             IsClosed = false,
@@ -43,76 +40,89 @@ public class GameService : IGameService
         return await _gameRepository.CreateGameAsync(game);
     }
 
-    public async Task CloseGameAsync(Guid gameId, List<int> winningNumbers)
+    public async Task<List<WinnerDto>> CloseGameAsync(Guid gameId, List<int> winningNumbers)
     {
-        var activeGame = await _gameRepository.GetActiveGameAsync();
-        if (activeGame == null || activeGame.Id != gameId)
-            throw new Exception("No active game found or game mismatch.");
+        if (winningNumbers == null || !winningNumbers.Any())
+            throw new ArgumentException("Winning numbers cannot be null or empty.");
 
-        activeGame.WinningNumbers = winningNumbers.ToList();
-        activeGame.IsClosed = true;
-        await _gameRepository.UpdateGameAsync(activeGame);
+        var activeGame = await _gameRepository.GetActiveGameAsync();
+        if (activeGame == null) throw new InvalidOperationException("No active game found.");
+        if (activeGame.Id != gameId) throw new InvalidOperationException("Game ID mismatch.");
 
         var boards = await _boardRepository.GetBoardsByGameIdAsync(gameId);
         var totalRevenue = boards.Sum(b => b.Cost);
+        if (totalRevenue == 0) throw new InvalidOperationException("Total revenue cannot be zero. Check board costs.");
+
         var prizePool = totalRevenue * 0.7m;
+
+        activeGame.TotalRevenue = totalRevenue;
         activeGame.PrizePool = prizePool;
-        await _gameRepository.UpdateGameAsync(activeGame);
+        activeGame.WinningNumbers = winningNumbers.ToList();
+        activeGame.IsClosed = true;
 
-        foreach (var board in boards)
+        var winners = new List<Winner>();
+        var winnerDtos = new List<WinnerDto>();
+
+        var winningBoards = boards.Where(b => IsWinningBoard(b.Numbers, winningNumbers)).ToList();
+        if (winningBoards.Any())
         {
-            var boardNumbers = board.Numbers.Split(',').Select(int.Parse).ToList();
-
-            if (boardNumbers.SequenceEqual(winningNumbers))
+            var winningAmount = prizePool / winningBoards.Count;
+            foreach (var board in winningBoards)
             {
                 board.IsWinning = true;
-                await _boardRepository.UpdateBoardAsync(board);
+
+                var winner = new Winner
+                {
+                    Id = Guid.NewGuid(),
+                    GameId = gameId,
+                    PlayerId = board.PlayerId,
+                    BoardId = board.Id,
+                    WinningAmount = winningAmount,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                winners.Add(winner);
+                winnerDtos.Add(WinnerDto.FromEntity(winner));
             }
         }
 
-        var winners = boards.Where(b => IsWinningBoard(b.Numbers, winningNumbers)).ToList();
-        decimal rolloverAmount = activeGame.PrizePool > 5000
+        await _boardRepository.UpdateBoardsAsync(boards);
+        await _winnerRepository.AddWinnersAsync(winners);
+        await _gameRepository.UpdateGameAsync(activeGame);
+
+        var rolloverAmount = activeGame.PrizePool > 5000
             ? activeGame.PrizePool - 5000
             : 0;
 
-
         await _gameRepository.CloseGameAsync(gameId, winningNumbers, rolloverAmount);
+
+        return winnerDtos;
     }
+
 
     public bool IsWinningBoard(string boardNumbers, List<int> winningNumbers)
     {
-        // Convert the board's string of numbers into a list of integers
         var boardArray = boardNumbers.Split(',').Select(int.Parse).ToList();
-
-        // Check if all the winning numbers are present in the board's numbers
-        return winningNumbers.All(boardArray.Contains);
-
+        return boardArray.SequenceEqual(winningNumbers);
     }
 
-    public async Task DeductForAutoplayAsync()
+
+    /*public async Task DeductForAutoplayAsync()
     {
         var activeGame = await _gameRepository.GetActiveGameAsync();
-        if (activeGame == null)
-        {
-            throw new InvalidOperationException("No active game found.");
-        }
-        
-        var autoplayBoards = await _boardRepository.GetBoardsByGameIdAsync(activeGame.Id, groupByPlayer: true);
-    
+        if (activeGame == null) throw new InvalidOperationException("No active game found.");
+
+        var autoplayBoards = await _boardRepository.GetBoardsByGameIdAsync(activeGame.Id, true);
+
         foreach (var autoplayBoard in autoplayBoards)
-        {
             if (autoplayBoard.Autoplay == true)
             {
                 var player = await _playerRepository.GetPlayerByIdAsync(autoplayBoard.PlayerId);
-                
-                if (player.Balance < autoplayBoard.Cost)
-                {
-                    throw new Exception("Insufficient balance, please refill.");
-                }
-                
+
+                if (player.Balance < autoplayBoard.Cost) throw new Exception("Insufficient balance, please refill.");
+
                 player.Balance -= autoplayBoard.Cost;
                 await _playerRepository.UpdatePlayerAsync(player);
             }
-        }
-    }
+    }*/
 }

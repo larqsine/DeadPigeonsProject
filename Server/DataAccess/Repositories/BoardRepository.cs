@@ -43,10 +43,11 @@ namespace DataAccess.Repositories
             return await query.ToListAsync();
         }
         
-        public async Task UpdateBoardAsync(Board board)
+        public async Task UpdateBoardsAsync(IEnumerable<Board> boards)
         {
-            _context.Boards.Update(board);
+            _context.Boards.UpdateRange(boards);
             await _context.SaveChangesAsync();
         }
+
     }
 }

@@ -13,7 +13,7 @@ namespace DataAccess.Models
         public bool? Autoplay { get; set; }  
         public int FieldsCount { get; set; }  
         public decimal Cost { get; set; } 
-        public DateTime CreatedAt { get; set; }  
+        public DateTime? CreatedAt { get; set; }  
         public bool IsWinning { get; set; }
 
         public virtual Game Game { get; set; } = null!;

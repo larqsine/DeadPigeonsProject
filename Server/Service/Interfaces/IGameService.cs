@@ -1,14 +1,13 @@
 using DataAccess.Models;
+using Service.DTOs.WinnerDto;
 
+namespace Service.Interfaces;
 
-namespace Service.Interfaces
+public interface IGameService
 {
-    public interface IGameService
-    {
-        Task<Game> StartNewGameAsync(Guid adminId);
+    Task<Game> StartNewGameAsync(Guid adminId);
 
-        Task CloseGameAsync(Guid gameId, List<int> winningNumbers);
+    Task<List<WinnerDto>> CloseGameAsync(Guid gameId, List<int> winningNumbers);
 
-        bool IsWinningBoard(string boardNumbers, List<int> winningNumbers);
-    }
+    bool IsWinningBoard(string boardNumbers, List<int> winningNumbers);
 }

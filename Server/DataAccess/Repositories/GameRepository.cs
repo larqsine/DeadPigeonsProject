@@ -26,9 +26,9 @@ public class GameRepository
 
         public async Task<Game?> GetActiveGameAsync()
         {
-            return await _context.Games
-                .FirstOrDefaultAsync(g => !g.IsClosed.HasValue);
+            return await _context.Games.FirstOrDefaultAsync(g => g.IsClosed == false);
         }
+
 
         public async Task CloseGameAsync(Guid gameId, List<int> winningNumbers, decimal rolloverAmount)
         {
