@@ -9,5 +9,5 @@ public interface IGameService
 
     Task<List<WinnerDto>> CloseGameAsync(Guid gameId, List<int> winningNumbers);
 
-    bool IsWinningBoard(string boardNumbers, List<int> winningNumbers);
+    bool IsWinningBoard(List<int> boardNumbers, List<int> winningNumbers);
 }

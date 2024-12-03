@@ -45,9 +45,13 @@ namespace DataAccess.Repositories
         
         public async Task UpdateBoardsAsync(IEnumerable<Board> boards)
         {
-            _context.Boards.UpdateRange(boards);
+            foreach (var board in boards)
+            {
+                _context.Entry(board).State = EntityState.Modified;
+            }
             await _context.SaveChangesAsync();
         }
+
 
     }
 }
