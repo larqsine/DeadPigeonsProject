@@ -137,6 +137,7 @@ namespace Service.Services
         {
             try
             {
+                // Validate the transaction amount
                 if (transactionCreateDto.Amount <= 0)
                 {
                     throw new ArgumentException("The amount to add must be greater than zero.");
@@ -152,14 +153,17 @@ namespace Service.Services
                 // Generate Transaction ID
                 var transactionId = Guid.NewGuid();
 
-                // Create and save the transaction
-                var transaction = transactionCreateDto.ToTransaction(playerId, transactionId);
+                // Create the transaction object using the provided DTO
+                var transaction = transactionCreateDto.ToDepositTransaction(playerId, transactionId);
+
+                // Save the transaction to the database
                 await _repository.AddTransactionAsync(transaction);
 
                 // Update player balance
                 player.Balance += transactionCreateDto.Amount;
                 await _repository.UpdatePlayerAsync(player);
 
+                // Return response with updated player and transaction info
                 return new PlayerTransactionResponseDto
                 {
                     Player = PlayerResponseDto.FromEntity(player),
@@ -182,6 +186,7 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while adding balance to the player.");
             }
         }
+
 
         private void LogError(string message, Exception ex)
         {

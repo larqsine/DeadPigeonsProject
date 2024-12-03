@@ -1,57 +1,79 @@
+using Service.DTOs;
+using Service.Interfaces;
 using DataAccess.Models;
 using DataAccess.Repositories;
-using Service.DTOs.BoardDto;
-using Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Service.DTOs.BoardDto;
 
 namespace Service.Services
 {
     public class BoardService : IBoardService
     {
         private readonly BoardRepository _boardRepository;
-        private readonly IPlayerService _playerService;
+        private readonly PlayerRepository _playerRepository;
+        private readonly GameRepository _gameRepository;
 
-        public BoardService(BoardRepository boardRepository, IPlayerService playerService)
+        public BoardService(
+            BoardRepository boardRepository,
+            PlayerRepository playerRepository,
+            GameRepository gameRepository)
         {
             _boardRepository = boardRepository;
-            _playerService = playerService;
+            _playerRepository = playerRepository;
+            _gameRepository = gameRepository;
         }
 
-        public async Task<Board> CreateBoardAsync(BoardCreateDto boardDto)
+        public async Task<BoardResponseDto> BuyBoardAsync(Guid playerId, BuyBoardRequestDto buyBoardRequestDto)
         {
-            // Validate fields count before creating a board
-            if (boardDto.FieldsCount < 5 || boardDto.FieldsCount > 8)
-                throw new ArgumentException("FieldsCount must be between 5 and 8");
+            // Get the player
+            var player = await _playerRepository.GetPlayerByIdAsync(playerId);
+            if (player == null)
+                throw new Exception("Player not found or inactive.");
 
-            // Create the board object using the new constructor
-            var board = new Board(boardDto.FieldsCount)
+            // Get the game by GameId
+            var game = await _gameRepository.GetGameByIdAsync(buyBoardRequestDto.GameId);
+            if (game == null)
+                throw new Exception("Invalid GameId.");
+
+            // Calculate the cost based on FieldsCount from the DTO
+            decimal cost = buyBoardRequestDto.FieldsCount switch
             {
-                Id = Guid.NewGuid(),
-                PlayerId = boardDto.PlayerId,
-                GameId = boardDto.GameId,
-                Numbers = boardDto.Numbers,
-                Autoplay = boardDto.Autoplay,
-                CreatedAt = DateTime.UtcNow
+                5 => 20m,
+                6 => 40m,
+                7 => 80m,
+                8 => 160m,
+                _ => throw new Exception("Invalid number of fields.")
             };
 
-            // Add to repository
-            await _boardRepository.AddBoardAsync(board);
+            // Check if the player has sufficient balance
+            if (player.Balance < cost)
+                throw new Exception("Insufficient balance.");
 
-            // Return the created board
-            return board;
-        }
+            // Deduct the cost from the player's balance
+            player.Balance -= cost;
+            await _playerRepository.UpdatePlayerAsync(player);
 
-        public async Task<IEnumerable<Board>> GetBoardsByPlayerAsync(Guid playerId)
-        {
-            return await _boardRepository.GetBoardsByPlayerAsync(playerId);
-        }
+            // Use the ToBoard method from the DTO to map to the Board entity
+            var board = buyBoardRequestDto.ToBoard(playerId, cost);
 
-        public async Task<IEnumerable<Board>> GetBoardsByGameAsync(Guid gameId)
-        {
-            return await _boardRepository.GetBoardsByGameAsync(gameId);
+            // Save the board to the database
+            var createdBoard = await _boardRepository.CreateBoardAsync(board);
+
+            // Return the BoardResponseDto with the board details
+            return new BoardResponseDto
+            {
+                Id = createdBoard.Id,
+                PlayerId = createdBoard.PlayerId,
+                GameId = createdBoard.GameId,
+                Numbers = createdBoard.Numbers,
+                FieldsCount = createdBoard.FieldsCount,
+                Cost = createdBoard.Cost,
+                CreatedAt = createdBoard.CreatedAt,
+                IsWinning = createdBoard.IsWinning
+            };
         }
     }
 }

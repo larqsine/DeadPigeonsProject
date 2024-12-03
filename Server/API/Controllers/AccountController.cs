@@ -56,7 +56,7 @@ namespace API.Controllers
                     PhoneNumber = model.Phone,
                     FullName = model.FullName,
                     CreatedAt = DateTime.UtcNow,
-                    Balance = 0, // Initialize player-specific fields
+                    Balance = 0, 
                     AnnualFeePaid = false
                 };
             }

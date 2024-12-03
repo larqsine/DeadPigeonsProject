@@ -1,17 +1,33 @@
+using DataAccess.Models;
+
 namespace Service.DTOs.BoardDto
 {
     public class BoardResponseDto
     {
         public Guid Id { get; set; }
         public Guid PlayerId { get; set; }
-        public string PlayerFullName { get; set; } = string.Empty; // Player's full name for convenience
         public Guid GameId { get; set; }
-        public string GameStartDate { get; set; } = string.Empty; // Game's start date in string format
-        public string Numbers { get; set; } = string.Empty; // The numbers on the board as a comma-separated string
+        public string Numbers { get; set; }
         public bool? Autoplay { get; set; }
         public int FieldsCount { get; set; }
-        public decimal Cost { get; set; } // The cost of the board based on the fields selected
-        public DateTime? CreatedAt { get; set; } // Timestamp when the board was created
-        public bool IsWinning { get; set; } // Whether the board is a winning board
+        public decimal Cost { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public bool IsWinning { get; set; }
+
+        public static BoardResponseDto FromEntity(Board board)
+        {
+            return new BoardResponseDto
+            {
+                Id = board.Id,
+                PlayerId = board.PlayerId,
+                GameId = board.GameId,
+                Numbers = board.Numbers,
+                Autoplay = board.Autoplay, //can decide later how to implement
+                FieldsCount = board.FieldsCount,
+                Cost = board.Cost,
+                CreatedAt = board.CreatedAt,
+                IsWinning = board.IsWinning
+            };
+        }
     }
 }
