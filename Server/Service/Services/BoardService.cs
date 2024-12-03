@@ -1,17 +1,13 @@
-using Service.DTOs;
-using Service.Interfaces;
-using DataAccess.Models;
 using DataAccess.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Service.DTOs.BoardDto;
+using Service.DTOs.TransactionDto;
+using Service.Interfaces;
 
-namespace Service.Services
+namespace Service.Services;
+
+public class BoardService : IBoardService
 {
-    public class BoardService : IBoardService
-    {
+    
         private readonly BoardRepository _boardRepository;
         private readonly PlayerRepository _playerRepository;
         private readonly GameRepository _gameRepository;
@@ -36,7 +32,10 @@ namespace Service.Services
             // Get the game by GameId
             var game = await _gameRepository.GetGameByIdAsync(buyBoardRequestDto.GameId);
             if (game == null)
-                throw new Exception("Invalid GameId.");
+                throw new Exception("Game not found.");
+
+            if (game.IsClosed == true)
+                throw new Exception("Cannot purchase a board for a closed game.");
 
             // Calculate the cost based on FieldsCount from the DTO
             decimal cost = buyBoardRequestDto.FieldsCount switch
@@ -52,9 +51,17 @@ namespace Service.Services
             if (player.Balance < cost)
                 throw new Exception("Insufficient balance.");
 
-            // Deduct the cost from the player's balance
-            player.Balance -= cost;
-            await _playerRepository.UpdatePlayerAsync(player);
+            // Create a purchase transaction
+            var purchaseTransactionDto = new TransactionCreateDto
+            {
+                Amount = cost
+            };
+
+            var transactionId = Guid.NewGuid();
+            var purchaseTransaction = purchaseTransactionDto.ToPurchaseTransaction(playerId, transactionId);
+
+            // Add the purchase transaction (Transaction Repository handles persisting and deducting balance)
+            await _playerRepository.AddTransactionAsync(purchaseTransaction);
 
             // Use the ToBoard method from the DTO to map to the Board entity
             var board = buyBoardRequestDto.ToBoard(playerId, cost);
@@ -74,6 +81,5 @@ namespace Service.Services
                 CreatedAt = createdBoard.CreatedAt,
                 IsWinning = createdBoard.IsWinning
             };
-        }
     }
 }

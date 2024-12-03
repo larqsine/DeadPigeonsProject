@@ -1,7 +1,8 @@
 using DataAccess.Models;
+using Service.DTOs.UserDto;
 
 
-namespace Service.DTOs.UserDto;
+namespace Service.DTOs.PlayerDto;
 
     public class PlayerCreateDto : CreateUserDto
     {
@@ -16,7 +17,7 @@ namespace Service.DTOs.UserDto;
                 FullName = FullName,
                 Email = Email,
                 PhoneNumber = Phone,
-                AnnualFeePaid = AnnualFeePaid,
+                AnnualFeePaid = true,
                 Balance = 0,
                 CreatedAt = DateTime.Now
             };

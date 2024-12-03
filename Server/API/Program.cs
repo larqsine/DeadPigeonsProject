@@ -1,18 +1,26 @@
+using System.Text;
+using System.Xml;
+using API.Scheduler;
 using DataAccess;
 using DataAccess.Models;
 using DataAccess.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Service;
 using Service.Interfaces;
 using Service.Security;
 using Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+Console.WriteLine(Environment.GetEnvironmentVariable("DB"));
 // Configure DbContext with PostgreSQL
 builder.Services.AddDbContext<DBContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+     //   Environment.GetEnvironmentVariable("DB") ?? 
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure Identity to use Guid as the key type
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -22,36 +30,105 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
     .AddEntityFrameworkStores<DBContext>()
     .AddDefaultTokenProviders()
     .AddUserValidator<CustomEmailValidator<User>>(); // Use a custom validator
-    ; // Ensures token-based features like email confirmation, password reset, etc.
 builder.Services.AddScoped<IPasswordHasher<User>, Argon2idPasswordHasher<User>>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
+
+// Register Repositories and Services
 builder.Services.AddScoped<UserRepository>();
-
-
-// Add Swagger for API documentation
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Add Controllers
-builder.Services.AddControllers();
-
-// Register repositories
 builder.Services.AddScoped<PlayerRepository>();
 builder.Services.AddScoped<GameRepository>();
 builder.Services.AddScoped<BoardRepository>();
+builder.Services.AddScoped<WinnerRepository>();
 
 // Register services
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IBoardService, BoardService>();
-builder.Services.AddTransient<WeeklyGameJob>();
+builder.Services.AddScoped<TransactionRepository>();
+builder.Services.AddScoped<TransactionService>();
 
+builder.Services.AddQuartzJobs(); // Add Quartz jobs
+
+
+// Add Controllers
+builder.Services.AddControllers();
+
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin() // Allow any origin
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+// Add Swagger for API documentation
+builder.Services.AddEndpointsApiExplorer();
+
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = "JwtBearer";
+        options.DefaultChallengeScheme = "JwtBearer";
+    })
+    .AddJwtBearer("JwtBearer", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],  
+            ValidAudience = builder.Configuration["Jwt:Audience"],  
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy =>
+        policy.RequireRole("admin"));
+});
+
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+    // Add JWT Authorization
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by your JWT token in the text input below. Example: 'Bearer abc123xyz'"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 
 var app = builder.Build();
 
-// Create roles if they don't exist
-CreateRoles(app);
 
 // Configure Swagger for Development
 if (app.Environment.IsDevelopment())
@@ -64,9 +141,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 
 // Enable Authentication and Authorization
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -76,36 +154,4 @@ app.MapControllers();
 // Run the application
 app.Run();
 
-// Method to create roles if they don't exist
-void CreateRoles(IApplicationBuilder app)
-{
-    var scope = app.ApplicationServices.CreateScope();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-    // List of roles to create
-    var roles = new[] { "Admin", "Player" };
-
-    foreach (var role in roles)
-    {
-        // Check if the role exists, if not, create it
-        var roleExists = roleManager.RoleExistsAsync(role).Result;
-        if (!roleExists)
-        {
-            var identityRole = new IdentityRole<Guid>(role);
-            roleManager.CreateAsync(identityRole).Wait();
-        }
-    }
-
-    // Optionally create an Admin user
-    var admin = userManager.FindByEmailAsync("admin@example.com").Result;
-    if (admin == null)
-    {
-        var user = new User { UserName = "admin", Email = "admin@example.com" };
-        var result = userManager.CreateAsync(user, "AdminPassword123").Result;
-        if (result.Succeeded)
-        {
-            userManager.AddToRoleAsync(user, "Admin").Wait();
-        }
-    }
-}

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTOs.PlayerDto;
 using Service.DTOs.TransactionDto;
@@ -21,6 +22,8 @@ namespace API.Controllers
         
 
         [HttpGet("{playerId:guid}")]
+        [Authorize(Policy = "AdminPolicy")] 
+
         public async Task<ActionResult<PlayerResponseDto>> GetPlayer([FromRoute] Guid playerId)
         {
             try
@@ -41,6 +44,8 @@ namespace API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminPolicy")] 
+
         public async Task<ActionResult<List<PlayerResponseDto>>> GetAllPlayers()
         {
             try
@@ -56,6 +61,8 @@ namespace API.Controllers
         }
 
         [HttpPut("{playerId:guid}")]
+        [Authorize(Policy = "AdminPolicy")] 
+
         public async Task<ActionResult<PlayerResponseDto>> UpdatePlayer(
             [FromRoute] Guid playerId,
             [FromBody] PlayerUpdateDto updateDto)
@@ -83,6 +90,8 @@ namespace API.Controllers
         }
 
         [HttpDelete("{playerId:guid}")]
+        [Authorize(Policy = "AdminPolicy")] 
+
         public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
         {
             try

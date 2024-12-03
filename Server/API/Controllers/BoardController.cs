@@ -1,9 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Service.DTOs;
 using Service.Interfaces;
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Service.DTOs.BoardDto;
 
 namespace API.Controllers

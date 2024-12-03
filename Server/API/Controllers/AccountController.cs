@@ -1,9 +1,12 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using DataAccess.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Service.DTOs.PlayerDto;
 using Service.DTOs.UserDto;
+using Service.Security;
 
 namespace API.Controllers
 {
@@ -14,18 +17,21 @@ namespace API.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly IJwtService _jwtService;
 
         public AccountController(UserManager<User> userManager,
             SignInManager<User> signInManager,
-            RoleManager<IdentityRole<Guid>> roleManager)
+            RoleManager<IdentityRole<Guid>> roleManager,
+            IJwtService jwtService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _jwtService = jwtService;
         }
 
         [HttpPost("register")]
-        [AllowAnonymous]
+        [Authorize(Policy = "AdminPolicy")] 
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
             if (string.IsNullOrEmpty(model.Role))
@@ -44,7 +50,8 @@ namespace API.Controllers
                     Email = model.Email,
                     PhoneNumber = model.Phone,
                     FullName = model.FullName,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    PasswordChangeRequired = false
                 };
             }
             else if (model.Role.Equals("Player", StringComparison.OrdinalIgnoreCase))
@@ -57,7 +64,8 @@ namespace API.Controllers
                     FullName = model.FullName,
                     CreatedAt = DateTime.UtcNow,
                     Balance = 0, 
-                    AnnualFeePaid = false
+                    AnnualFeePaid = false,
+                    PasswordChangeRequired = true
                 };
             }
             else
@@ -88,7 +96,6 @@ namespace API.Controllers
         }
 
 
-        // POST api/account/login
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginUserDto model)
@@ -103,7 +110,17 @@ namespace API.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            return Ok(new { message = "Login successful!", user = user.UserName, roles });
+            // Generate JWT token using the JwtService
+            var token = _jwtService.GenerateJwtToken(user.Id.ToString(), user.UserName, roles.ToList());
+
+            return Ok(new
+            {
+                message = "Login successful!",
+                user = user.UserName,
+                roles,
+                token,
+                passwordChangeRequired = user.PasswordChangeRequired 
+            });
         }
 
         [HttpPost("logout")]
@@ -112,5 +129,36 @@ namespace API.Controllers
             await _signInManager.SignOutAsync();
             return Ok(new { message = "Logout successful!" });
         }
+        
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+                         ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub); // Try both
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { message = "Invalid token. User ID not found." });
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "User not found." });
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new { message = "Password change failed.", errors = result.Errors.Select(e => e.Description) });
+            }
+
+            user.PasswordChangeRequired = false;
+            await _userManager.UpdateAsync(user);
+
+            return Ok(new { message = "Password changed successfully!" });
+        }
+
     }
 }
