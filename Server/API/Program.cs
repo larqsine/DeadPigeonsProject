@@ -39,6 +39,7 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<PlayerRepository>();
 builder.Services.AddScoped<GameRepository>();
 builder.Services.AddScoped<BoardRepository>();
+builder.Services.AddScoped<WinnerRepository>();
 
 // Register services
 builder.Services.AddScoped<IPlayerService, PlayerService>();

@@ -1,12 +1,13 @@
-using Service.Interfaces;
 using DataAccess.Repositories;
 using Service.DTOs.BoardDto;
 using Service.DTOs.TransactionDto;
+using Service.Interfaces;
 
-namespace Service.Services
+namespace Service.Services;
+
+public class BoardService : IBoardService
 {
-    public class BoardService : IBoardService
-    {
+    
         private readonly BoardRepository _boardRepository;
         private readonly PlayerRepository _playerRepository;
         private readonly GameRepository _gameRepository;
@@ -80,7 +81,5 @@ namespace Service.Services
                 CreatedAt = createdBoard.CreatedAt,
                 IsWinning = createdBoard.IsWinning
             };
-        }
-
     }
 }

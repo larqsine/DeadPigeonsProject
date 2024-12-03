@@ -26,9 +26,11 @@ public class GameRepository
 
         public async Task<Game?> GetActiveGameAsync()
         {
+            
             return await _context.Games
-                .FirstOrDefaultAsync(g => g.IsClosed.Value==false);
+                .FirstOrDefaultAsync(g => g.IsClosed == false);
         }
+
 
         public async Task CloseGameAsync(Guid gameId, List<int> winningNumbers, decimal rolloverAmount)
         {
@@ -44,10 +46,11 @@ public class GameRepository
 
             await _context.SaveChangesAsync();
         }
-    
         
-        public async Task SaveChangesAsync()
+
+        public async Task UpdateGameAsync(Game game)
         {
-            await _context.SaveChangesAsync();  
+            _context.Games.Update(game);
+            await _context.SaveChangesAsync();
         }
 }
