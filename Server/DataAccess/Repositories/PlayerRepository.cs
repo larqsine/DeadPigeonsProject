@@ -55,5 +55,11 @@ public class PlayerRepository
     {
         await _context.SaveChangesAsync();
     }
+    
+    public async Task<Player> GetByIdAsync(Guid playerId)
+    {
+        return await _context.Players.FindAsync(playerId); // Fetch player from DbContext
+    }
+
 
 }

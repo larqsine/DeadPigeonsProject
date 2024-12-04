@@ -20,5 +20,7 @@ namespace Service.Interfaces
 
         // Add balance to a player's account
         Task<PlayerTransactionResponseDto> AddBalanceAsync(Guid playerId, TransactionCreateDto transactionCreateDto);
+        
+        Task<decimal> GetPlayerBalanceAsync(Guid playerId);
     }
 }

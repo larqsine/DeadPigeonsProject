@@ -5,6 +5,8 @@ html, body {
     font-family: Arial, sans-serif;
     height: 100%; /* Stretches to fit content height */
     box-sizing: border-box;
+}
+body.modalOpen {
     overflow: hidden;
 }
 
@@ -42,7 +44,7 @@ html, body {
     width: 300px; /* Ensure responsive width */
     max-width: 1200px;
     margin: 20px auto;
-    overflow: visible; /* Ensure content inside isn't clipped */
+    
 }
 
 /* Styling for each grid box */
@@ -100,17 +102,16 @@ html, body {
 
 /* Modal styling */
 .modal {
-    position: absolute;
+    position: fixed;
     height: 100vh;
     width: 100vw;
     top: 0;
     left: 0;
-    /*width: 100%;*/
-    /*height: 100%;*/
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 9999;
 }
 
 /* Modal content box */
@@ -120,19 +121,27 @@ html, body {
     margin-bottom: 10px;
     padding: 20px;
     border-radius: 5px;
-    width: 90%; /* Responsive modal width */
-    max-width: 400px; /* Maximum width for modal */
-    max-height: 90%; /* Prevent modal from exceeding viewport height */
-    overflow-y: auto; /* Allow modal content to scroll */
+    width: 90%; 
+    max-width: 400px; 
+    max-height: 90%;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
 .modalContent label {
     display: flex;
     align-items: center;
-    gap: 10px; /* Adds space between the checkbox and the text */
-    margin-bottom: 10px; /* Adds space below the checkbox text */
-} 
+    gap: 10px; 
+    margin-bottom: 10px; 
+}
+
+.modalButtons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Adds space between Edit and Delete buttons */
+    margin-bottom: 20px; /* Adds space between buttons and other content */
+}
 
 /* Close button inside modal */
 .closeButton {
@@ -143,6 +152,7 @@ html, body {
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
+    background: #a60505;
 }
 
 /* Modal Input fields */
@@ -215,6 +225,3 @@ html, body {
     flex-shrink: 0; /* Prevent sections from shrinking */
 }
 
-.UserSection {
-    overflow-y: auto; /* Allows internal scrolling if needed */
-}

@@ -22,7 +22,7 @@ namespace API.Controllers
         
 
         [HttpGet("{playerId:guid}")]
-        [Authorize(Policy = "AdminPolicy")] 
+       //[Authorize(Policy = "AdminPolicy")] 
 
         public async Task<ActionResult<PlayerResponseDto>> GetPlayer([FromRoute] Guid playerId)
         {
@@ -44,7 +44,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = "AdminPolicy")] 
+        //[Authorize(Policy = "AdminPolicy")] 
 
         public async Task<ActionResult<List<PlayerResponseDto>>> GetAllPlayers()
         {
@@ -61,7 +61,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{playerId:guid}")]
-        [Authorize(Policy = "AdminPolicy")] 
+        //[Authorize(Policy = "AdminPolicy")] 
 
         public async Task<ActionResult<PlayerResponseDto>> UpdatePlayer(
             [FromRoute] Guid playerId,
@@ -90,7 +90,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{playerId:guid}")]
-        [Authorize(Policy = "AdminPolicy")] 
+        //[Authorize(Policy = "AdminPolicy")] 
 
         public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
         {
@@ -142,5 +142,27 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while adding balance.");
             }
         }
+        [HttpGet("{playerId:guid}/balance")]
+        //[Authorize]
+        public async Task<ActionResult<decimal>> GetBalance([FromRoute] Guid playerId)
+        {
+            try
+            {
+                var balance = await _playerService.GetPlayerBalanceAsync(playerId); // Use a service method to retrieve the balance
+                return Ok(balance);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Player not found for ID: {PlayerId}", playerId);
+                return NotFound("Player not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching balance.");
+                return StatusCode(500, "An error occurred while retrieving the balance.");
+            }
+        }
+
+
     }
 }

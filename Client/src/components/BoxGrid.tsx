@@ -15,13 +15,21 @@ const BoxGrid: React.FC = () => {
             try {
                 const response = await axios.get(`/api/Player/${playerId}`);
                 setPlayerId(response.data.playerId);
-                setGameId(response.data.gameId);
             } catch (err) {
                 setError('Failed to fetch player data');
             }
         };
+        const fetchGameData = async () => {
+            try {
+                const response = await axios.get(`/api/Games/active`);
+                setGameId(response.data.gameId);
+            } catch (err) {
+                setError('Failed to fetch game data');
+            }
+        }
 
         fetchUserData();
+        fetchGameData();
     }, []);
 
     const handleBoxClick = (num: number) => {
@@ -56,8 +64,13 @@ const BoxGrid: React.FC = () => {
             ],
         };
 
+        // Add these logs here
+        console.log('PlayerId:', playerId); // Logs the player ID
+        console.log('GameId:', gameId); // Logs the active game ID
+        console.log('Payload:', payload); // Logs the payload sent to the backend
+
         try {
-            const response = await axios.post('/api/Board/purchase', payload);
+            const response = await axios.post(`/api/Board/${playerId}/buy`, payload);
             setMessage(response.data.message || 'Board purchased successfully!');
             setSelectedBoxes([]); // Clear selected numbers after purchase
         } catch (err) {
@@ -71,6 +84,8 @@ const BoxGrid: React.FC = () => {
             }
         }
     };
+
+
 
 
     // Determine board price based on selected boxes

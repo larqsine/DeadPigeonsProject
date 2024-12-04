@@ -33,9 +33,9 @@ const AdminPage: React.FC = () => {
     // Lock body scroll when any modal is open
     useEffect(() => {
         if (isModalOpen || isEditUserModalOpen || isCreateUserModalOpen) {
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            document.body.classList.add('modal-open'); // Disable body scroll
         } else {
-            document.body.style.overflow = ''; // Restore scrolling
+            document.body.classList.remove('modal-open'); // Enable body scroll
         }
     }, [isModalOpen, isEditUserModalOpen, isCreateUserModalOpen]);
 
@@ -44,6 +44,9 @@ const AdminPage: React.FC = () => {
         const fetchUsers = async () => {
             try {
                 const response = await fetch('http://localhost:5229/api/player'); // API endpoint for fetching users
+                if (!response.ok) {
+                    throw new Error('Failed to fetch users');
+                }
                 const data = await response.json();
                 setUsers(data);
             } catch (error) {
@@ -189,6 +192,31 @@ const AdminPage: React.FC = () => {
         }
     };
 
+    // Handle delete user
+    const handleDeleteUser = async (userId: string) => {
+        const confirmed = window.confirm('Are you sure you want to delete this user?');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch(`http://localhost:5229/api/player/${userId}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('User deleted successfully');
+                // Remove the deleted user from the local users list
+                setUsers(users.filter(user => user.id !== userId));
+                handleCloseModal(); // Close the modal
+            } else {
+                alert('Failed to delete user');
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert('Error deleting user');
+        }
+    };
+
+
     return (
         <div className={styles.container}>
             <h1 className={styles.header}>Admin Page</h1>
@@ -238,142 +266,166 @@ const AdminPage: React.FC = () => {
                 </ul>
             </section>
 
-            {/* Modal for User Details */}
             {isModalOpen && selectedUser && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
                         <button className={styles.closeButton} onClick={handleCloseModal}>
                             &times;
                         </button>
-                        <h3>User Details:</h3>
-                        <p><strong>Username:</strong> {selectedUser.userName}</p>
-                        <p><strong>Full Name:</strong> {selectedUser.fullName}</p>
-                        <p><strong>Email:</strong> {selectedUser.email}</p>
-                        <p><strong>Phone:</strong> {selectedUser.phoneNumber}</p>
-                        <p><strong>Balance:</strong> {selectedUser.balance.toFixed(2)} DKK</p>
-                        <p><strong>Annual Fee Paid:</strong> {selectedUser.annualFeePaid ? 'Yes' : 'No'}</p>
-                        <p><strong>Created At:</strong> {new Date(selectedUser.createdAt).toLocaleDateString()}</p>
-                        <button
-                            className={styles.editButton}
-                            onClick={() => handleEditUserClick(selectedUser)}
-                        >
-                            Edit User
-                        </button>
+                        <h3>User Details</h3>
+                        <p>UserName: {selectedUser.userName}</p>
+                        <p>Full Name: {selectedUser.fullName}</p>
+                        <p>Email: {selectedUser.email}</p>
+                        <p>Phone Number: {selectedUser.phoneNumber}</p>
+                        <p>Balance: {selectedUser.balance}</p>
+                        <p>Annual Fee Paid: {selectedUser.annualFeePaid ? 'Yes' : 'No'}</p>
+                        <p>Created At: {selectedUser.createdAt}</p>
+                        <div className={styles.modalButtons}>
+                            <button onClick={() => handleEditUserClick(selectedUser)}>Edit User</button>
+                            <button onClick={() => handleDeleteUser(selectedUser.id)}>Delete User</button>
+                        </div>
                     </div>
                 </div>
             )}
 
-            {/* Modal for Edit User */}
+
+            {/* Modal for Editing User */}
             {isEditUserModalOpen && editUser && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
+                        <h3>Edit User</h3>
                         <button className={styles.closeButton} onClick={handleCloseModal}>
                             &times;
                         </button>
-                        <h3>Edit User:</h3>
-                        <input
-                            type="text"
-                            name="userName"
-                            value={editUser.userName}
-                            onChange={handleEditInputChange}
-                            placeholder="Username"
-                        />
-                        <input
-                            type="text"
-                            name="fullName"
-                            value={editUser.fullName}
-                            onChange={handleEditInputChange}
-                            placeholder="Full Name"
-                        />
-                        <input
-                            type="email"
-                            name="email"
-                            value={editUser.email}
-                            onChange={handleEditInputChange}
-                            placeholder="Email"
-                        />
-                        <input
-                            type="text"
-                            name="phoneNumber"
-                            value={editUser.phoneNumber}
-                            onChange={handleEditInputChange}
-                            placeholder="Phone Number"
-                        />
-                        <input
-                            type="number"
-                            name="balance"
-                            value={editUser.balance}
-                            onChange={handleEditInputChange}
-                            placeholder="Balance"
-                        />
-                        <button
-                            className={styles.submitButton}
-                            onClick={handleEditUserSubmit}
-                        >
-                            Save Changes
-                        </button>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            handleEditUserSubmit();
+                        }}>
+                            <label>
+                                User Name:
+                                <input
+                                    type="text"
+                                    name="userName"
+                                    value={editUser.userName}
+                                    onChange={handleEditInputChange}
+                                />
+                            </label>
+                            <label>
+                                Full Name:
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={editUser.fullName}
+                                    onChange={handleEditInputChange}
+                                />
+                            </label>
+                            <label>
+                                Email:
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={editUser.email}
+                                    onChange={handleEditInputChange}
+                                />
+                            </label>
+                            <label>
+                                Phone Number:
+                                <input
+                                    type="text"
+                                    name="phoneNumber"
+                                    value={editUser.phoneNumber}
+                                    onChange={handleEditInputChange}
+                                />
+                            </label>
+                            <label>
+                                Annual Fee Paid:
+                                <input
+                                    type="checkbox"
+                                    name="annualFeePaid"
+                                    checked={editUser.annualFeePaid}
+                                    onChange={() => setEditUser({
+                                        ...editUser,
+                                        annualFeePaid: !editUser.annualFeePaid
+                                    })}
+                                />
+                            </label>
+                            <button type="submit">Save Changes</button>
+                        </form>
                     </div>
                 </div>
             )}
 
-            {/* Modal for Creating New User */}
+            {/* Modal for Creating User */}
             {isCreateUserModalOpen && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
+                        <h3>Create New User</h3>
                         <button className={styles.closeButton} onClick={handleCloseModal}>
                             &times;
                         </button>
-                        <h3>Create New User:</h3>
-                        <input
-                            type="text"
-                            name="userName"
-                            value={newUser.userName}
-                            onChange={handleCreateInputChange}
-                            placeholder="Username"
-                        />
-                        <input
-                            type="text"
-                            name="fullName"
-                            value={newUser.fullName}
-                            onChange={handleCreateInputChange}
-                            placeholder="Full Name"
-                        />
-                        <input
-                            type="email"
-                            name="email"
-                            value={newUser.email}
-                            onChange={handleCreateInputChange}
-                            placeholder="Email"
-                        />
-                        <input
-                            type="text"
-                            name="phoneNumber"
-                            value={newUser.phoneNumber}
-                            onChange={handleCreateInputChange}
-                            placeholder="Phone Number"
-                        />
-                        <input
-                            type="password"
-                            name="password"
-                            value={newUser.password}
-                            onChange={handleCreateInputChange}
-                            placeholder="Password"
-                        />
-                        <select
-                            name="role"
-                            value={newUser.role}
-                            onChange={handleCreateInputChange}
-                        >
-                            <option value="">Select Role</option>
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                        <button
-                            className={styles.submitButton}
-                            onClick={handleCreateUserSubmit}
-                        >
-                            Create User
-                        </button>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            handleCreateUserSubmit();
+                        }}>
+                            <label>
+                                User Name:
+                                <input
+                                    type="text"
+                                    name="userName"
+                                    value={newUser.userName}
+                                    onChange={handleCreateInputChange}
+                                />
+                            </label>
+                            <label>
+                                Full Name:
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={newUser.fullName}
+                                    onChange={handleCreateInputChange}
+                                />
+                            </label>
+                            <label>
+                                Email:
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={newUser.email}
+                                    onChange={handleCreateInputChange}
+                                />
+                            </label>
+                            <label>
+                                Phone Number:
+                                <input
+                                    type="text"
+                                    name="phoneNumber"
+                                    value={newUser.phoneNumber}
+                                    onChange={handleCreateInputChange}
+                                />
+                            </label>
+                            <label>
+                                Password:
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={newUser.password}
+                                    onChange={handleCreateInputChange}
+                                />
+                            </label>
+                            <label>
+                                Role:
+                                <select
+                                    name="role"
+                                    value={newUser.role}
+                                    onChange={handleCreateInputChange}
+                                >
+                                    <option value="admin">Admin</option>
+                                    <option value="player">Player</option>
+                                    {/* Updated option */}
+                                </select>
+                            </label>
+                            <button type="submit">Create User</button>
+                        </form>
                     </div>
                 </div>
             )}
@@ -382,3 +434,4 @@ const AdminPage: React.FC = () => {
 };
 
 export default AdminPage;
+    

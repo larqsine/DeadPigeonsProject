@@ -15,13 +15,12 @@ namespace Service.Services
         private readonly UserManager<User> _userManager;
 
         
-
         public PlayerService(PlayerRepository repository, UserManager<User> userManager)
         {
             _repository = repository;
             _userManager = userManager;
         }
-
+        
         
         public async Task<PlayerResponseDto> GetPlayerByIdAsync(Guid playerId)
         {
@@ -45,7 +44,6 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while retrieving the player.");
             }
         }
-
         public async Task<List<PlayerResponseDto>> GetAllPlayersAsync()
         {
             try
@@ -59,7 +57,6 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while retrieving players.");
             }
         }
-
         public async Task<PlayerResponseDto> UpdatePlayerAsync(Guid playerId, PlayerUpdateDto updateDto)
         {
             try
@@ -180,6 +177,32 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while adding balance to the player.");
             }
         }
+        public async Task<decimal> GetPlayerBalanceAsync(Guid playerId)
+        {
+            try
+            {
+                var player = await _repository.GetPlayerByIdAsync(playerId);
+                if (player == null)
+                {
+                    throw new KeyNotFoundException("Player not found.");
+                }
+
+                return player.Balance ?? 0; 
+            }
+            catch (KeyNotFoundException ex)
+            {
+                LogError($"Player not found for ID: {playerId}", ex);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LogError("GetPlayerBalanceAsync failed", ex);
+                throw new ApplicationException("An error occurred while retrieving the player's balance.");
+            }
+        }
+
+
+
 
         private void LogError(string message, Exception ex)
         {
