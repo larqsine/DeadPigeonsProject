@@ -28,16 +28,17 @@ public class BoardService : IBoardService
             var player = await _playerRepository.GetPlayerByIdAsync(playerId);
             if (player == null)
                 throw new Exception("Player not found or inactive.");
-            
-            if(player.AnnualFeePaid== false)
+
+            if (player.AnnualFeePaid == false)
                 throw new Exception("Cannot buy a board if annual fee has not been paid.");
-            
+
             // Get current time in Danish time zone
             var denmarkTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
             var currentTimeInDenmark = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, denmarkTimeZone);
 
             // Check if it's past the participation window (Saturday 5 PM Danish time)
-            var isPastDeadline = currentTimeInDenmark.DayOfWeek == DayOfWeek.Saturday && currentTimeInDenmark.Hour >= 17;
+            var isPastDeadline =
+                currentTimeInDenmark.DayOfWeek == DayOfWeek.Saturday && currentTimeInDenmark.Hour >= 17;
 
             if (isPastDeadline)
             {
@@ -96,5 +97,16 @@ public class BoardService : IBoardService
                 CreatedAt = createdBoard.CreatedAt,
                 IsWinning = createdBoard.IsWinning
             };
-    }
+        }
+        public async Task<List<BoardResponseDto>> GetBoardsByPlayerIdAsync(Guid playerId)
+        {
+            var boards = await _boardRepository.GetBoardsByPlayerIdAsync(playerId);
+            return boards.Select(BoardResponseDto.FromEntity).ToList();
+        }
+
+        public async Task<List<BoardResponseDto>> GetAllBoardsAsync()
+        {
+            var boards = await _boardRepository.GetAllBoardsAsync();
+            return boards.Select(BoardResponseDto.FromEntity).ToList();
+        }
 }

@@ -23,6 +23,11 @@ public class GameRepository
         {
             return await _context.Games.FindAsync(gameId);
         }
+        
+        public async Task<List<Game>> GetAllGamesAsync()
+        {
+            return await _context.Games.ToListAsync();
+        }
 
         public async Task<Game?> GetActiveGameAsync()
         {

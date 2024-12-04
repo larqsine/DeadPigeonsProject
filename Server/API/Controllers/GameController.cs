@@ -11,7 +11,6 @@ namespace API.Controllers
     public class GamesController : ControllerBase
     {
         private readonly IGameService _gameService;
-
         public GamesController(IGameService gameService)
         {
             _gameService = gameService;
@@ -47,6 +46,19 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllGames()
+        {
+            try
+            {
+                var games = await _gameService.GetAllGamesAsync();
+                return Ok(new { message = "Games retrieved successfully.", data = games });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while fetching games.");
             }
         }
     }

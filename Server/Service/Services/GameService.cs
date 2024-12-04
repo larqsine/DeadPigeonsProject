@@ -27,7 +27,13 @@ public class GameService : IGameService
         return await _gameRepository.GetActiveGameAsync();
     }
 
-    
+    public async Task<List<GameResponseDto>> GetAllGamesAsync()
+    {
+        var games = await _gameRepository.GetAllGamesAsync();
+        return games.Select(GameResponseDto.FromEntity).ToList();
+    }
+
+
     public async Task<GameDetailsDto> StartNewGameAsync()
     {
         var activeGame = await _gameRepository.GetActiveGameAsync();
@@ -132,23 +138,4 @@ public bool IsWinningBoard(List<int> boardNumbers, List<int> winningNumbers)
     // Ensure that all winning numbers are contained in the board's numbers
     return winningNumberSet.All(winningNumber => boardNumberSet.Contains(winningNumber));
 }
-
-    /*public async Task DeductForAutoplayAsync()
-    {
-        var activeGame = await _gameRepository.GetActiveGameAsync();
-        if (activeGame == null) throw new InvalidOperationException("No active game found.");
-
-        var autoplayBoards = await _boardRepository.GetBoardsByGameIdAsync(activeGame.Id, true);
-
-        foreach (var autoplayBoard in autoplayBoards)
-            if (autoplayBoard.Autoplay == true)
-            {
-                var player = await _playerRepository.GetPlayerByIdAsync(autoplayBoard.PlayerId);
-
-                if (player.Balance < autoplayBoard.Cost) throw new Exception("Insufficient balance, please refill.");
-
-                player.Balance -= autoplayBoard.Cost;
-                await _playerRepository.UpdatePlayerAsync(player);
-            }
-    }*/
 }
