@@ -17,12 +17,6 @@ public static class QuartzConfig
                 .WithSchedule(CronScheduleBuilder
                     .CronSchedule("0 0 12 ? * SUN") // Every Sunday at 12:00 noon CET to start a new game
                     .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"))));
-
-            q.ScheduleJob<CloseGameJob>(trigger => trigger
-                .WithIdentity("CloseGameTrigger")
-                .WithSchedule(CronScheduleBuilder
-                    .CronSchedule("0 0 17 ? * SAT") // Every Saturday at 17:00 CET to close the current game
-                    .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"))));
             
             Console.WriteLine("Jobs scheduled.");
         });

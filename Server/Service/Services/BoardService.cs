@@ -31,6 +31,18 @@ public class BoardService : IBoardService
             
             if(player.AnnualFeePaid== false)
                 throw new Exception("Cannot buy a board if annual fee has not been paid.");
+            
+            // Get current time in Danish time zone
+            var denmarkTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+            var currentTimeInDenmark = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, denmarkTimeZone);
+
+            // Check if it's past the participation window (Saturday 5 PM Danish time)
+            var isPastDeadline = currentTimeInDenmark.DayOfWeek == DayOfWeek.Saturday && currentTimeInDenmark.Hour >= 17;
+
+            if (isPastDeadline)
+            {
+                throw new Exception("You cannot participate after Saturday 5 PM Danish time.");
+            }
 
             // Get the game by GameId
             var game = await _gameRepository.GetGameByIdAsync(buyBoardRequestDto.GameId);
