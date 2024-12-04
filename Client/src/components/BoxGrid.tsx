@@ -1,13 +1,21 @@
-﻿import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Import AxiosError
+﻿import React, { useEffect } from 'react';
+import { useAtom } from 'jotai';
+import axios from 'axios';
 import styles from './BoxGrid.module.css';
+import {
+    selectedBoxesAtom,
+    playerIdAtom,
+    gameIdAtom,
+    messageAtom,
+    errorAtom,
+} from './ComponentsJotaiStore';
 
 const BoxGrid: React.FC = () => {
-    const [selectedBoxes, setSelectedBoxes] = useState<number[]>([]);
-    const [playerId, setPlayerId] = useState<string>('');
-    const [gameId, setGameId] = useState<string>('');
-    const [message, setMessage] = useState<string>(''); // Ensure message is always a string
-    const [error, setError] = useState<string>('');
+    const [selectedBoxes, setSelectedBoxes] = useAtom(selectedBoxesAtom);
+    const [playerId, setPlayerId] = useAtom(playerIdAtom);
+    const [gameId, setGameId] = useAtom(gameIdAtom);
+    const [message, setMessage] = useAtom(messageAtom);
+    const [error, setError] = useAtom(errorAtom);
 
     // Fetch PlayerId and GameId when the component is mounted
     useEffect(() => {
@@ -19,6 +27,7 @@ const BoxGrid: React.FC = () => {
                 setError('Failed to fetch player data');
             }
         };
+
         const fetchGameData = async () => {
             try {
                 const response = await axios.get(`/api/Games/active`);
@@ -26,11 +35,11 @@ const BoxGrid: React.FC = () => {
             } catch (err) {
                 setError('Failed to fetch game data');
             }
-        }
+        };
 
         fetchUserData();
         fetchGameData();
-    }, []);
+    }, [playerId, setPlayerId, setGameId, setError]);
 
     const handleBoxClick = (num: number) => {
         if (selectedBoxes.includes(num)) {
@@ -85,9 +94,6 @@ const BoxGrid: React.FC = () => {
         }
     };
 
-
-
-
     // Determine board price based on selected boxes
     const getBoardPrice = () => {
         const prices: Record<number, string> = {
@@ -135,11 +141,11 @@ const BoxGrid: React.FC = () => {
             {/* Show success or error message */}
             {message && message !== '' ? (
                 <p style={{ color: 'green' }}>{message}</p>
-            ) : null} {/* Ensure message is always a string */}
+            ) : null}
 
             {error && error !== '' ? (
                 <p style={{ color: 'red' }}>{error}</p>
-            ) : null} {/* Ensure error is always a string */}
+            ) : null}
         </div>
     );
 };

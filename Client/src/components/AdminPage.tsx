@@ -1,41 +1,33 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
+import { useAtom } from 'jotai';
 import styles from './AdminPage.module.css';
-
-type User = {
-    id: string;
-    userName: string;
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    balance: number;
-    annualFeePaid: boolean;
-    createdAt: string;
-};
+import {
+    selectedWinningNumbersAtom,
+    usersAtom,
+    selectedUserAtom,
+    isModalOpenAtom,
+    isCreateUserModalOpenAtom,
+    isEditUserModalOpenAtom,
+    editUserAtom,
+    newUserAtom, User,
+} from './ComponentsJotaiStore';
 
 const AdminPage: React.FC = () => {
-    const [selectedWinningNumbers, setSelectedWinningNumbers] = useState<number[]>([]);
-    const [users, setUsers] = useState<User[]>([]);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
-    const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
-    const [editUser, setEditUser] = useState<User | null>(null);
-
-    const [newUser, setNewUser] = useState({
-        userName: '',
-        fullName: '',
-        email: '',
-        phoneNumber: '',
-        password: '',
-        role: ''
-    });
+    const [selectedWinningNumbers, setSelectedWinningNumbers] = useAtom(selectedWinningNumbersAtom);
+    const [users, setUsers] = useAtom(usersAtom);
+    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
+    const [isModalOpen, setIsModalOpen] = useAtom(isModalOpenAtom);
+    const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useAtom(isCreateUserModalOpenAtom);
+    const [isEditUserModalOpen, setIsEditUserModalOpen] = useAtom(isEditUserModalOpenAtom);
+    const [editUser, setEditUser] = useAtom(editUserAtom);
+    const [newUser, setNewUser] = useAtom(newUserAtom);
 
     // Lock body scroll when any modal is open
     useEffect(() => {
         if (isModalOpen || isEditUserModalOpen || isCreateUserModalOpen) {
-            document.body.classList.add('modal-open'); // Disable body scroll
+            document.body.classList.add('modal-open');
         } else {
-            document.body.classList.remove('modal-open'); // Enable body scroll
+            document.body.classList.remove('modal-open');
         }
     }, [isModalOpen, isEditUserModalOpen, isCreateUserModalOpen]);
 
@@ -43,10 +35,8 @@ const AdminPage: React.FC = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:5229/api/player'); // API endpoint for fetching users
-                if (!response.ok) {
-                    throw new Error('Failed to fetch users');
-                }
+                const response = await fetch('http://localhost:5229/api/player');
+                if (!response.ok) throw new Error('Failed to fetch users');
                 const data = await response.json();
                 setUsers(data);
             } catch (error) {
@@ -54,9 +44,8 @@ const AdminPage: React.FC = () => {
             }
         };
         fetchUsers();
-    }, []);
+    }, [setUsers]);
 
-    // Handle box click for winning numbers
     const handleBoxClick = (num: number) => {
         if (selectedWinningNumbers.includes(num)) {
             setSelectedWinningNumbers(selectedWinningNumbers.filter((box) => box !== num));
@@ -67,25 +56,21 @@ const AdminPage: React.FC = () => {
         }
     };
 
-    // Handle submit for winning numbers
     const handleSubmit = () => {
         alert(`Winning numbers are: ${selectedWinningNumbers.join(', ')}`);
     };
 
-    // Open modal with user details
     const handleUserClick = (user: User) => {
         setSelectedUser(user);
         setIsModalOpen(true);
     };
 
-    // Handle edit user click
     const handleEditUserClick = (user: User) => {
         setEditUser(user);
         setIsEditUserModalOpen(true);
-        setIsModalOpen(false); // Close the view user modal
+        setIsModalOpen(false);
     };
 
-    // Close modal
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setIsEditUserModalOpen(false);
@@ -94,26 +79,23 @@ const AdminPage: React.FC = () => {
         setEditUser(null);
     };
 
-    // Handle edit user input change
     const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (editUser) {
             setEditUser({
                 ...editUser,
-                [e.target.name]: e.target.type === "number" ? parseFloat(e.target.value) : e.target.value,
+                [e.target.name]: e.target.type === 'number' ? parseFloat(e.target.value) : e.target.value,
             });
         }
     };
 
-    // Handle new user input change
     const handleCreateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setNewUser(prev => ({
+        setNewUser((prev) => ({
             ...prev,
             [name]: value,
         }));
     };
 
-    // Submit edited user form
     const handleEditUserSubmit = async () => {
         if (editUser) {
             try {
@@ -127,11 +109,10 @@ const AdminPage: React.FC = () => {
 
                 if (response.ok) {
                     alert('User updated successfully');
-                    // Fetch the updated list of users immediately after a successful update
                     const usersResponse = await fetch('http://localhost:5229/api/player');
                     const data = await usersResponse.json();
-                    setUsers(data); // Update the local users state with fresh data from the server
-                    handleCloseModal(); // Close the modal
+                    setUsers(data);
+                    handleCloseModal();
                 } else {
                     alert('Failed to update user');
                 }
@@ -142,7 +123,6 @@ const AdminPage: React.FC = () => {
         }
     };
 
-    // Submit new user form
     const handleCreateUserSubmit = async () => {
         if (!newUser.userName || !newUser.fullName || !newUser.email || !newUser.role || !newUser.password) {
             alert('Please fill in all fields.');
@@ -169,17 +149,15 @@ const AdminPage: React.FC = () => {
 
             if (response.ok) {
                 alert('User created successfully');
-                setIsCreateUserModalOpen(false); // Close the modal
-                // Clear form fields after user creation
+                setIsCreateUserModalOpen(false);
                 setNewUser({
                     userName: '',
                     fullName: '',
                     email: '',
                     phoneNumber: '',
                     password: '',
-                    role: ''
+                    role: '',
                 });
-                // Refresh the user list
                 const usersResponse = await fetch('http://localhost:5229/api/player');
                 const data = await usersResponse.json();
                 setUsers(data);
@@ -192,7 +170,6 @@ const AdminPage: React.FC = () => {
         }
     };
 
-    // Handle delete user
     const handleDeleteUser = async (userId: string) => {
         const confirmed = window.confirm('Are you sure you want to delete this user?');
         if (!confirmed) return;
@@ -204,9 +181,8 @@ const AdminPage: React.FC = () => {
 
             if (response.ok) {
                 alert('User deleted successfully');
-                // Remove the deleted user from the local users list
-                setUsers(users.filter(user => user.id !== userId));
-                handleCloseModal(); // Close the modal
+                setUsers(users.filter((user) => user.id !== userId));
+                handleCloseModal();
             } else {
                 alert('Failed to delete user');
             }
@@ -215,7 +191,6 @@ const AdminPage: React.FC = () => {
             alert('Error deleting user');
         }
     };
-
 
     return (
         <div className={styles.container}>
@@ -247,10 +222,7 @@ const AdminPage: React.FC = () => {
             {/* Users Section */}
             <section className={styles.UserSection}>
                 <h2 className={styles.subheader}>Users</h2>
-                <button
-                    className={styles.actionButton}
-                    onClick={() => setIsCreateUserModalOpen(true)}
-                >
+                <button className={styles.actionButton} onClick={() => setIsCreateUserModalOpen(true)}>
                     New User
                 </button>
                 <ul className={styles.userList}>

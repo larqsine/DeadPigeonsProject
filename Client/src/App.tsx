@@ -1,4 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useAtom } from 'jotai'; // Import Jotai's useAtom hook
+import {
+    isLoggedInAtom,
+    isAdminAtom,
+    showBoxGridAtom,
+    transitioningAtom,
+    usernameAtom,
+    balanceAtom,
+} from './AppJotaiStore.ts'; // Import your atoms
 import Navbar from './components/Navbar';
 import BoxGrid from './components/BoxGrid';
 import AdminPage from './components/AdminPage';
@@ -6,12 +15,12 @@ import LoginPage from './components/LoginPage';
 import styles from './App.module.css';
 
 const App: React.FC = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [showBoxGrid, setShowBoxGrid] = useState(true); // To toggle between BoxGrid and AdminPage
-    const [transitioning, setTransitioning] = useState(false);
-    const [username, setUsername] = useState<string | null>(null);
-    const [balance, setBalance] = useState<number | null>(null); // Add state for balance
+    const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
+    const [isAdmin, setIsAdmin] = useAtom(isAdminAtom);
+    const [showBoxGrid, setShowBoxGrid] = useAtom(showBoxGridAtom);
+    const [transitioning, setTransitioning] = useAtom(transitioningAtom);
+    const [username, setUsername] = useAtom(usernameAtom);
+    const [balance, setBalance] = useAtom(balanceAtom);
 
     const handleLogin = async (username: string) => {
         setTransitioning(true);
@@ -19,16 +28,14 @@ const App: React.FC = () => {
             setIsLoggedIn(true);
             setIsAdmin(username.toLowerCase() === 'admin');
             setUsername(username);
-            setShowBoxGrid(username.toLowerCase() !== 'admin'); // Show BoxGrid if not admin
+            setShowBoxGrid(username.toLowerCase() !== 'admin');
             setTransitioning(false);
 
             try {
-                // Fetch the playerId from the backend using the username
                 const playerIdResponse = await fetch(`http://localhost:5229/api/player/username/${username}`);
                 if (!playerIdResponse.ok) {
                     throw new Error('Failed to fetch player ID');
                 }
-
                 const playerId = await playerIdResponse.json();
 
                 const balanceResponse = await fetch(`http://localhost:5229/api/player/${playerId}/balance`);
@@ -49,20 +56,13 @@ const App: React.FC = () => {
         setIsLoggedIn(false);
         setUsername(null);
         setIsAdmin(false);
-        setBalance(null); // Clear balance on sign-out
+        setBalance(null);
     };
 
-    const handlePlayClick = () => {
-        setShowBoxGrid(true); // When "Play" is clicked, show the BoxGrid
-    };
+    const handlePlayClick = () => setShowBoxGrid(true);
+    const handleGoToAdminPage = () => setShowBoxGrid(false);
 
-    const handleGoToAdminPage = () => {
-        setShowBoxGrid(false); // Hide BoxGrid and show AdminPage
-    };
-
-    const generatePlayerId = (username: string): string => {
-        return username.toLowerCase();
-    };
+    const generatePlayerId = (username: string): string => username.toLowerCase();
 
     return (
         <div className={styles.app}>
@@ -85,14 +85,14 @@ const App: React.FC = () => {
                     <>
                         <Navbar
                             onPlayClick={handlePlayClick}
-                            username={username || 'Guest'} // Use 'Guest' if username is null
-                            balance={balance !== null ? balance : 0} // Use default balance of 0 if balance is null
-                            onSignOut={handleSignOut} // Pass sign-out function
-                            isAdmin={isAdmin} // Pass isAdmin prop
-                            onGoToAdminPage={handleGoToAdminPage} // Pass onGoToAdminPage function
-                            playerId={generatePlayerId(username || 'Guest')} // Pass the playerId for balance fetching, default 'Guest'
+                            username={username || 'Guest'}
+                            balance={balance !== null ? balance : 0}
+                            onSignOut={handleSignOut}
+                            isAdmin={isAdmin}
+                            onGoToAdminPage={handleGoToAdminPage}
+                            playerId={generatePlayerId(username || 'Guest')}
                         />
-                        {showBoxGrid ? <BoxGrid /> : <AdminPage />} {/* Conditional rendering */}
+                        {showBoxGrid ? <BoxGrid /> : <AdminPage />}
                     </>
                 )}
             </div>

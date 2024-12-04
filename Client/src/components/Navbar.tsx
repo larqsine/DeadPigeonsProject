@@ -17,7 +17,6 @@ const NavBar: React.FC<NavbarProps> = ({
                                            onSignOut,
                                            isAdmin,
                                            onGoToAdminPage,
-                                           playerId,
                                            balance,
                                        }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
