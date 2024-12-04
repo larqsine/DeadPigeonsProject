@@ -64,7 +64,7 @@ namespace API.Controllers
                     FullName = model.FullName,
                     CreatedAt = DateTime.UtcNow,
                     Balance = 0, 
-                    AnnualFeePaid = false,
+                    AnnualFeePaid = true,
                     PasswordChangeRequired = true
                 };
             }

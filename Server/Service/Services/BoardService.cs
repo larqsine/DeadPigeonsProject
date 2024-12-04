@@ -28,6 +28,9 @@ public class BoardService : IBoardService
             var player = await _playerRepository.GetPlayerByIdAsync(playerId);
             if (player == null)
                 throw new Exception("Player not found or inactive.");
+            
+            if(player.AnnualFeePaid== false)
+                throw new Exception("Cannot buy a board if annual fee has not been paid.");
 
             // Get the game by GameId
             var game = await _gameRepository.GetGameByIdAsync(buyBoardRequestDto.GameId);

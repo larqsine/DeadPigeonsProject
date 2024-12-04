@@ -55,5 +55,17 @@ public class PlayerRepository
     {
         await _context.SaveChangesAsync();
     }
+    public async Task UpdatePlayerAnnualFeeStatusAsync(Guid playerId, bool isPaid)
+    {
+        var player = await _context.Users
+            .OfType<Player>()
+            .FirstOrDefaultAsync(u => u.Id == playerId);
+
+        if (player != null)
+        {
+            player.AnnualFeePaid = isPaid;
+            await _context.SaveChangesAsync();
+        }
+    }
 
 }

@@ -180,6 +180,31 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while adding balance to the player.");
             }
         }
+        
+        public async Task<PlayerResponseDto> TogglePlayerActiveStatusAsync(Guid playerId, bool isActive)
+        {
+            try
+            {
+                // Update the player's annual fee paid status based on active/inactive toggle
+                await _repository.UpdatePlayerAnnualFeeStatusAsync(playerId, isActive);
+
+                // Retrieve the updated player and return the PlayerResponseDto
+                var player = await _repository.GetPlayerByIdAsync(playerId);
+                return PlayerResponseDto.FromEntity(player);  // Convert player to DTO
+            }
+            catch (KeyNotFoundException ex)
+            {
+                LogError($"Player not found for ID: {playerId}", ex);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LogError("TogglePlayerActiveStatusAsync failed", ex);
+                throw new ApplicationException("An error occurred while toggling the player status.");
+            }
+        }
+
+
 
         private void LogError(string message, Exception ex)
         {

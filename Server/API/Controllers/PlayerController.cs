@@ -142,5 +142,33 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while adding balance.");
             }
         }
+        [HttpPut("{playerId:guid}/toggle-active")]
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<ActionResult<PlayerResponseDto>> TogglePlayerActiveStatus(
+            [FromRoute] Guid playerId,
+            [FromBody] bool isActive) // True for active, False for inactive
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var updatedPlayer = await _playerService.TogglePlayerActiveStatusAsync(playerId, isActive);
+                return Ok(updatedPlayer);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Player not found for ID: {PlayerId}", playerId);
+                return NotFound("Player not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while toggling player active status.");
+                return StatusCode(500, "An error occurred while updating the player status.");
+            }
+        }
+
     }
 }

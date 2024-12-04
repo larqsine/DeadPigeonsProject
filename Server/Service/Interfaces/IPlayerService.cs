@@ -18,7 +18,7 @@ namespace Service.Interfaces
 
         Task DeletePlayerAsync(Guid playerId);
 
-        // Add balance to a player's account
+        Task<PlayerResponseDto> TogglePlayerActiveStatusAsync(Guid playerId, bool isActive);
         Task<PlayerTransactionResponseDto> AddBalanceAsync(Guid playerId, TransactionCreateDto transactionCreateDto);
     }
 }
