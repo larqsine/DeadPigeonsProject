@@ -9,6 +9,8 @@ namespace Service.DTOs.BoardDto
         public Guid GameId { get; set; }
         public string Numbers { get; set; }
         public bool? Autoplay { get; set; }
+        
+        public int? RemainingWeeks { get; set; }
         public int FieldsCount { get; set; }
         public decimal Cost { get; set; }
         public DateTime? CreatedAt { get; set; }
@@ -22,7 +24,8 @@ namespace Service.DTOs.BoardDto
                 PlayerId = board.PlayerId,
                 GameId = board.GameId,
                 Numbers = board.Numbers,
-                Autoplay = board.Autoplay, //can decide later how to implement
+                Autoplay = board.Autoplay, 
+                RemainingWeeks = board.RemainingWeeks,
                 FieldsCount = board.FieldsCount,
                 Cost = board.Cost,
                 CreatedAt = board.CreatedAt,

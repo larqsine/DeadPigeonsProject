@@ -52,6 +52,10 @@ namespace DataAccess.Repositories
             await _context.SaveChangesAsync();
         }
 
-
+        public async Task UpdateBoardAsync(Board board)
+        {
+            _context.Entry(board).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
     }
 }

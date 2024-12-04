@@ -11,6 +11,8 @@ namespace DataAccess.Models
         public Guid GameId { get; set; }
         public string Numbers { get; set; } = null!; 
         public bool? Autoplay { get; set; }  
+        
+        public int RemainingWeeks { get; set; }
         public int FieldsCount { get; set; }  
         public decimal Cost { get; set; } 
         public DateTime? CreatedAt { get; set; }  

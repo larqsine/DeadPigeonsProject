@@ -85,4 +85,33 @@ public class BoardService : IBoardService
                 IsWinning = createdBoard.IsWinning
             };
     }
+        public async Task DeductForAutoplayAsync()
+        {
+            var activeGame = await _gameRepository.GetActiveGameAsync();
+            if (activeGame == null) throw new InvalidOperationException("No active game found.");
+
+            var autoplayBoards = await _boardRepository.GetBoardsByGameIdAsync(activeGame.Id, true);
+
+            foreach (var board in autoplayBoards)
+            {
+                if (board.Autoplay == true && board.RemainingWeeks > 0)
+                {
+                    var player = await _playerRepository.GetPlayerByIdAsync(board.PlayerId);
+
+                    if (player.Balance < board.Cost)
+                        throw new Exception($"Player {player.Id} has insufficient balance, please refill.");
+                    
+                    player.Balance -= board.Cost;
+                    await _playerRepository.UpdatePlayerAsync(player);
+                    
+                    board.RemainingWeeks--;
+                    
+                    if (board.RemainingWeeks == 0)
+                        board.Autoplay = false;
+
+                    await _boardRepository.UpdateBoardAsync(board);
+                }
+            }
+        }
+
 }
