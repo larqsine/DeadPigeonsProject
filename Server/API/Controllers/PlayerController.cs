@@ -163,6 +163,25 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet("username/{username}")]
+        public async Task<ActionResult<Guid>> GetPlayerIdByUsername([FromRoute] string username)
+        {
+            try
+            {
+                var playerId = await _playerService.GetPlayerIdByUsernameAsync(username); // Implement this method in your service
+                return Ok(playerId);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Player not found for Username: {Username}", username);
+                return NotFound("Player not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching player ID by username.");
+                return StatusCode(500, "An error occurred while retrieving the player ID.");
+            }
+        }
 
     }
 }

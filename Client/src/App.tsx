@@ -13,32 +13,35 @@ const App: React.FC = () => {
     const [username, setUsername] = useState<string | null>(null);
     const [balance, setBalance] = useState<number | null>(null); // Add state for balance
 
-    const fetchPlayerBalance = async (playerId: string) => {
-        try {
-            const response = await fetch(`/api/player/${playerId}/balance`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch balance');
-            }
-            const data = await response.json();
-            setBalance(data.balance);
-        } catch (error) {
-            console.error('Error fetching balance:', error);
-            setBalance(null); // Handle error by setting balance to null
-            alert("Error fetching balance, please try again.");
-        }
-    };
-
-
-    const handleLogin = (username: string) => {
+    const handleLogin = async (username: string) => {
         setTransitioning(true);
-        setTimeout(() => {
+        setTimeout(async () => {
             setIsLoggedIn(true);
             setIsAdmin(username.toLowerCase() === 'admin');
             setUsername(username);
             setShowBoxGrid(username.toLowerCase() !== 'admin'); // Show BoxGrid if not admin
-            const playerId = generatePlayerId(username); // Replace with actual player ID logic
-            fetchPlayerBalance(playerId); // Fetch balance after login
             setTransitioning(false);
+
+            try {
+                // Fetch the playerId from the backend using the username
+                const playerIdResponse = await fetch(`http://localhost:5229/api/player/username/${username}`);
+                if (!playerIdResponse.ok) {
+                    throw new Error('Failed to fetch player ID');
+                }
+
+                const playerId = await playerIdResponse.json();
+
+                const balanceResponse = await fetch(`http://localhost:5229/api/player/${playerId}/balance`);
+                if (!balanceResponse.ok) {
+                    throw new Error('Failed to fetch player balance');
+                }
+
+                const balanceData = await balanceResponse.json();
+                setBalance(balanceData);
+            } catch (error) {
+                console.error('Error fetching player data:', error);
+                setBalance(null);
+            }
         }, 500);
     };
 
@@ -57,11 +60,9 @@ const App: React.FC = () => {
         setShowBoxGrid(false); // Hide BoxGrid and show AdminPage
     };
 
-   
     const generatePlayerId = (username: string): string => {
-        return username.toLowerCase(); 
+        return username.toLowerCase();
     };
-
 
     return (
         <div className={styles.app}>

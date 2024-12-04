@@ -60,6 +60,19 @@ public class PlayerRepository
     {
         return await _context.Players.FindAsync(playerId); // Fetch player from DbContext
     }
+    
+    public async Task<Guid> GetPlayerIdByUsernameAsync(string username)
+    {
+        // Find the player by username using case-insensitive comparison
+        var player = await _context.Players
+            .FirstOrDefaultAsync(p => p.UserName.ToLower() == username.ToLower()); // Case-insensitive comparison
 
+        if (player == null)
+        {
+            throw new KeyNotFoundException($"Player with username {username} not found.");
+        }
+
+        return player.Id; // Return the player's Id
+    }
 
 }

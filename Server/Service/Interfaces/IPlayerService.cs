@@ -18,7 +18,7 @@ namespace Service.Interfaces
 
         Task DeletePlayerAsync(Guid playerId);
 
-        // Add balance to a player's account
+        Task<Guid> GetPlayerIdByUsernameAsync(string username); 
         Task<PlayerTransactionResponseDto> AddBalanceAsync(Guid playerId, TransactionCreateDto transactionCreateDto);
         
         Task<decimal> GetPlayerBalanceAsync(Guid playerId);
