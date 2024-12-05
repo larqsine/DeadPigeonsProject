@@ -51,6 +51,14 @@ namespace DataAccess.Repositories
             }
             await _context.SaveChangesAsync();
         }
+        
+        public async Task<List<Board>> GetBoardsForAutoplayAsync()
+        {
+            return await _context.Boards
+                .Where(b => b.Autoplay && b.RemainingAutoplayWeeks > 0)
+                .ToListAsync();
+        }
+
 
 
     }

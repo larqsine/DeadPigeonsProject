@@ -15,10 +15,9 @@ public static class QuartzConfig
             q.ScheduleJob<StartNewGameJob>(trigger => trigger
                 .WithIdentity("StartNewGameTrigger")
                 .WithSchedule(CronScheduleBuilder
-                    .CronSchedule("0 0 12 ? * SUN") // Every Sunday at 12:00 noon CET to start a new game
+                    .CronSchedule("0 0 12 ? * SUN")
                     .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"))));
-            
-            Console.WriteLine("Jobs scheduled.");
+
         });
 
         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
