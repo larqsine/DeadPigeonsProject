@@ -27,11 +27,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     password: loginForm.password,
                 });
 
-                const { user, roles } = response.data;
+                const { user, roles, token } = response.data;
                 alert(`Login successful! Welcome ${user}`);
 
                 // Store user data in Jotai atoms
-                setUser({ userName: user, roles });
+                setUser({ userName: user, roles, token });
                 setIsLoggedIn(true); // Set the logged-in status to true
 
                 onLogin(user, roles); // Pass user details to parent component or state

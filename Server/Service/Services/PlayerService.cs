@@ -214,6 +214,21 @@ namespace Service.Services
             }
         }
 
+        
+        public async Task<PlayerResponseDto> GetPlayerByUsernameAsync(string username)
+        {
+            try
+            {
+                // Call the repository to get the player ID by username
+                var player = await _repository.GetPlayerByUsernameAsync(username);
+                return PlayerResponseDto.FromEntity(player);
+
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new KeyNotFoundException($"Player with username {username} not found.", ex);
+            }
+        }
 
         private void LogError(string message, Exception ex)
         {

@@ -11,7 +11,9 @@ namespace Service.Interfaces
     {
 
         Task<PlayerResponseDto> GetPlayerByIdAsync(Guid playerId);
+        Task<PlayerResponseDto> GetPlayerByUsernameAsync(string username);
 
+        
         Task<List<PlayerResponseDto>> GetAllPlayersAsync();
 
         Task<PlayerResponseDto> UpdatePlayerAsync(Guid playerId, PlayerUpdateDto updateDto);

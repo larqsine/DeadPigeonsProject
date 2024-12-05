@@ -38,7 +38,7 @@ export const errorAtom = atom<string>('');
 
 // Atoms for LoginPage component
 export const loginFormAtom = atom({ email: '', password: '' }); // To store the email and password input
-export const userAtom = atom<{ userName: string; roles: string[] } | null>(null); // To store logged-in user details
+export const userAtom = atom<{ userName: string; roles: string[]; token: string[]; } | null>(null); // To store logged-in user details
 export const isLoggedInAtom = atom<boolean>(false);
 
 // Atoms for NavBar component

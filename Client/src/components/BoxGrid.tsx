@@ -7,11 +7,12 @@ import {
     playerIdAtom,
     gameIdAtom,
     messageAtom,
-    errorAtom,
+    errorAtom, userAtom,
 } from './ComponentsJotaiStore';
 
 const BoxGrid: React.FC = () => {
     const [selectedBoxes, setSelectedBoxes] = useAtom(selectedBoxesAtom);
+    const [user] = useAtom(userAtom);
     const [playerId, setPlayerId] = useAtom(playerIdAtom);
     const [gameId, setGameId] = useAtom(gameIdAtom);
     const [message, setMessage] = useAtom(messageAtom);
@@ -21,8 +22,12 @@ const BoxGrid: React.FC = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(`/api/Player/${playerId}`);
-                setPlayerId(response.data.playerId);
+                const response = await axios.get(`http://localhost:5229/api/Player/current`, {
+                    headers: {
+                        Authorization: "Bearer " + user?.token
+                    }
+                });
+                setPlayerId(response.data.id);
             } catch (err) {
                 setError('Failed to fetch player data');
             }
@@ -30,7 +35,7 @@ const BoxGrid: React.FC = () => {
 
         const fetchGameData = async () => {
             try {
-                const response = await axios.get(`/api/Games/active`);
+                const response = await axios.get(`http://localhost:5229/api/Games/active`);
                 setGameId(response.data.gameId);
             } catch (err) {
                 setError('Failed to fetch game data');
@@ -61,25 +66,18 @@ const BoxGrid: React.FC = () => {
         }
 
         const payload = {
-            PlayerId: playerId,
-            Boards: [
-                {
-                    GameId: gameId,
-                    PlayerId: playerId,
-                    Numbers: selectedBoxes.join(','), // Convert selected numbers to a comma-separated string
-                    FieldsCount: selectedBoxes.length,
-                    Autoplay: false, // You can make this configurable if needed
-                },
-            ],
+                    playerId: playerId,
+                    fieldsCount: selectedBoxes.length,
+                    numbers: selectedBoxes, // Convert selected numbers to a comma-separated string
+                    gameId: gameId,
         };
-
-        // Add these logs here
+        
         console.log('PlayerId:', playerId); // Logs the player ID
         console.log('GameId:', gameId); // Logs the active game ID
         console.log('Payload:', payload); // Logs the payload sent to the backend
 
         try {
-            const response = await axios.post(`/api/Board/${playerId}/buy`, payload);
+            const response = await axios.post(`http://localhost:5229/api/Board/${playerId}/buy`, payload);
             setMessage(response.data.message || 'Board purchased successfully!');
             setSelectedBoxes([]); // Clear selected numbers after purchase
         } catch (err) {

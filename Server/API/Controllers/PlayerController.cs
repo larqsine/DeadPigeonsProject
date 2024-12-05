@@ -19,7 +19,14 @@ namespace API.Controllers
             _playerService = playerService;
             _logger = logger;
         }
-        
+
+        [HttpGet("current")]
+        public async Task<ActionResult<PlayerResponseDto>> GetCurrentPlayer()
+        {
+            var username = HttpContext.User.Identities.First().Name;
+            var player = await _playerService.GetPlayerByUsernameAsync(username);
+            return Ok(player);
+        }
 
         [HttpGet("{playerId:guid}")]
        //[Authorize(Policy = "AdminPolicy")] 
