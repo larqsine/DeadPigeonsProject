@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Service.DTOs.PlayerDto;
 using Service.DTOs.TransactionDto;
 using Service.DTOs.UserDto;
+using Service.DTOs.WinnerDto;
 using Service.Interfaces;
 
 namespace Service.Services
@@ -14,7 +15,6 @@ namespace Service.Services
         private readonly PlayerRepository _repository;
         private readonly UserManager<User> _userManager;
 
-        
 
         public PlayerService(PlayerRepository repository, UserManager<User> userManager)
         {

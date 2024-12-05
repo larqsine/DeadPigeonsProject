@@ -169,6 +169,5 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while updating the player status.");
             }
         }
-
     }
 }

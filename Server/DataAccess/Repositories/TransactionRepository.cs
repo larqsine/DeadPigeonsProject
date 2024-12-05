@@ -22,5 +22,11 @@ namespace DataAccess.Repositories
         {
             await _context.SaveChangesAsync();
         }
+        public async Task<List<Transaction>> GetTransactionsByPlayerIdAsync(Guid playerId)
+        {
+            return await _context.Transactions
+                .Where(t => t.PlayerId == playerId)
+                .ToListAsync();
+        }
     }
 }
