@@ -1,4 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useAtom } from 'jotai'; // Import Jotai's useAtom hook
+import {
+    isLoggedInAtom,
+    isAdminAtom,
+    showBoxGridAtom,
+    transitioningAtom,
+    usernameAtom,
+    balanceAtom,
+} from './AppJotaiStore.ts'; // Import your atoms
 import Navbar from './components/Navbar';
 import BoxGrid from './components/BoxGrid';
 import AdminPage from './components/AdminPage';
@@ -6,24 +15,54 @@ import LoginPage from './components/LoginPage';
 import styles from './App.module.css';
 
 const App: React.FC = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [showBoxGrid, setShowBoxGrid] = useState(true); // To toggle between BoxGrid and AdminPage
-    const [transitioning, setTransitioning] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
+    const [isAdmin, setIsAdmin] = useAtom(isAdminAtom);
+    const [showBoxGrid, setShowBoxGrid] = useAtom(showBoxGridAtom);
+    const [transitioning, setTransitioning] = useAtom(transitioningAtom);
+    const [username, setUsername] = useAtom(usernameAtom);
+    const [balance, setBalance] = useAtom(balanceAtom);
 
-    const handleLogin = (username: string) => {
+    const handleLogin = async (username: string) => {
         setTransitioning(true);
-        setTimeout(() => {
+        setTimeout(async () => {
             setIsLoggedIn(true);
             setIsAdmin(username.toLowerCase() === 'admin');
-            setShowBoxGrid(username.toLowerCase() !== 'admin'); // Show BoxGrid if not admin
+            setUsername(username);
+            setShowBoxGrid(username.toLowerCase() !== 'admin');
             setTransitioning(false);
+
+            try {
+                const playerIdResponse = await fetch(`http://localhost:5229/api/player/username/${username}`);
+                if (!playerIdResponse.ok) {
+                    throw new Error('Failed to fetch player ID');
+                }
+                const playerId = await playerIdResponse.json();
+
+                const balanceResponse = await fetch(`http://localhost:5229/api/player/${playerId}/balance`);
+                if (!balanceResponse.ok) {
+                    throw new Error('Failed to fetch player balance');
+                }
+
+                const balanceData = await balanceResponse.json();
+                setBalance(balanceData);
+            } catch (error) {
+                console.error('Error fetching player data:', error);
+                setBalance(null);
+            }
         }, 500);
     };
 
-    const handlePlayClick = () => {
-        setShowBoxGrid(true); // When "Play" is clicked, show the BoxGrid
+    const handleSignOut = () => {
+        setIsLoggedIn(false);
+        setUsername(null);
+        setIsAdmin(false);
+        setBalance(null);
     };
+
+    const handlePlayClick = () => setShowBoxGrid(true);
+    const handleGoToAdminPage = () => setShowBoxGrid(false);
+
+    const generatePlayerId = (username: string): string => username.toLowerCase();
 
     return (
         <div className={styles.app}>
@@ -44,8 +83,16 @@ const App: React.FC = () => {
             >
                 {isLoggedIn && (
                     <>
-                        <Navbar onPlayClick={handlePlayClick} />
-                        {showBoxGrid ? <BoxGrid /> : <AdminPage />} {/* Conditional rendering */}
+                        <Navbar
+                            onPlayClick={handlePlayClick}
+                            username={username || 'Guest'}
+                            balance={balance !== null ? balance : 0}
+                            onSignOut={handleSignOut}
+                            isAdmin={isAdmin}
+                            onGoToAdminPage={handleGoToAdminPage}
+                            playerId={generatePlayerId(username || 'Guest')}
+                        />
+                        {showBoxGrid ? <BoxGrid /> : <AdminPage />}
                     </>
                 )}
             </div>

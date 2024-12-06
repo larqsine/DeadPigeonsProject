@@ -15,13 +15,12 @@ namespace Service.Services
         private readonly UserManager<User> _userManager;
 
         
-
         public PlayerService(PlayerRepository repository, UserManager<User> userManager)
         {
             _repository = repository;
             _userManager = userManager;
         }
-
+        
         
         public async Task<PlayerResponseDto> GetPlayerByIdAsync(Guid playerId)
         {
@@ -45,7 +44,6 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while retrieving the player.");
             }
         }
-
         public async Task<List<PlayerResponseDto>> GetAllPlayersAsync()
         {
             try
@@ -59,7 +57,6 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while retrieving players.");
             }
         }
-
         public async Task<PlayerResponseDto> UpdatePlayerAsync(Guid playerId, PlayerUpdateDto updateDto)
         {
             try
@@ -180,7 +177,6 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while adding balance to the player.");
             }
         }
-        
         public async Task<PlayerResponseDto> TogglePlayerActiveStatusAsync(Guid playerId, bool isActive)
         {
             try
@@ -204,6 +200,58 @@ namespace Service.Services
             }
         }
 
+        public async Task<Guid> GetPlayerIdByUsernameAsync(string username)
+        {
+            try
+            {
+                // Call the repository to get the player ID by username
+                return await _repository.GetPlayerIdByUsernameAsync(username);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new KeyNotFoundException($"Player with username {username} not found.", ex);
+            }
+        }
+
+        
+        public async Task<PlayerResponseDto> GetPlayerByUsernameAsync(string username)
+        {
+            try
+            {
+                // Call the repository to get the player ID by username
+                var player = await _repository.GetPlayerByUsernameAsync(username);
+                return PlayerResponseDto.FromEntity(player);
+
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new KeyNotFoundException($"Player with username {username} not found.", ex);
+            }
+        }
+        
+        public async Task<decimal> GetPlayerBalanceAsync(Guid playerId)
+        {
+            try
+            {
+                var player = await _repository.GetPlayerByIdAsync(playerId);
+                if (player == null)
+                {
+                    throw new KeyNotFoundException("Player not found.");
+                }
+
+                return player.Balance ?? 0; 
+            }
+            catch (KeyNotFoundException ex)
+            {
+                LogError($"Player not found for ID: {playerId}", ex);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LogError("GetPlayerBalanceAsync failed", ex);
+                throw new ApplicationException("An error occurred while retrieving the player's balance.");
+            }
+        }
 
 
         private void LogError(string message, Exception ex)

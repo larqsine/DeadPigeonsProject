@@ -55,6 +55,7 @@ public class PlayerRepository
     {
         await _context.SaveChangesAsync();
     }
+
     public async Task UpdatePlayerAnnualFeeStatusAsync(Guid playerId, bool isPaid)
     {
         var player = await _context.Users
@@ -66,6 +67,38 @@ public class PlayerRepository
             player.AnnualFeePaid = isPaid;
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<Player> GetByIdAsync(Guid playerId)
+    {
+        return await _context.Players.FindAsync(playerId); // Fetch player from DbContext
+    }
+    
+    public async Task<Guid> GetPlayerIdByUsernameAsync(string username)
+    {
+        // Find the player by username using case-insensitive comparison
+        var player = await _context.Players
+            .FirstOrDefaultAsync(p => p.UserName.ToLower() == username.ToLower()); // Case-insensitive comparison
+
+        if (player == null)
+        {
+            throw new KeyNotFoundException($"Player with username {username} not found.");
+        }
+
+        return player.Id; // Return the player's Id
+    }
+    public async Task<Player> GetPlayerByUsernameAsync(string username)
+    {
+        // Find the player by username using case-insensitive comparison
+        var player = await _context.Players
+            .FirstOrDefaultAsync(p => p.UserName.ToLower() == username.ToLower()); // Case-insensitive comparison
+
+        if (player == null)
+        {
+            throw new KeyNotFoundException($"Player with username {username} not found.");
+        }
+
+        return player; // Return the player's Id
     }
 
 }

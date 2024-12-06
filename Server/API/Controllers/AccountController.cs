@@ -31,7 +31,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        [Authorize(Policy = "AdminPolicy")] 
+        //[Authorize(Policy = "AdminPolicy")] 
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
             if (string.IsNullOrEmpty(model.Role))
@@ -131,7 +131,7 @@ namespace API.Controllers
         }
         
         [HttpPost("change-password")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 

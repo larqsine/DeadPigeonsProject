@@ -5,11 +5,13 @@
     padding: 10px 20px;
     background-color: rgb(164, 1, 1);
     height: 90px;
+    border-bottom: 1px solid #ddd;
 }
 
 /* Logo Styles */
 .logo img {
     width: 80px;
+    cursor: pointer;
 }
 
 /* Navigation Buttons (Center) */
@@ -41,6 +43,7 @@
 
 /* Profile Button (Right) */
 .profileButton {
+    position: relative;
     font-size: 18px;
     color: white;
     cursor: pointer;
@@ -54,4 +57,61 @@
 .profileButton:hover {
     background-color: rgba(255, 255, 255, 0.2);
     color: rgb(200, 200, 200);
+}
+
+/* Dropdown Menu */
+.dropdownMenu {
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background-color: rgb(164, 1, 1);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    width: 160px; /* Adjust width as needed */
+}
+
+/* Dropdown Item */
+.dropdownItem {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.dropdownItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.addBalance {
+    position: absolute;
+    right: 10px;
+    top: 70px;
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.addBalance input {
+    margin-right: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.Balance {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 10px;
 }

@@ -49,6 +49,25 @@ namespace API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActiveGameId()
+        {
+            try
+            {
+                var activeGame = await _gameService.GetActiveGameAsync();
+                
+                if (activeGame == null)
+                {
+                    return NotFound(new { message = "No active game found." });
+                }
+                return Ok(new { gameId = activeGame.Id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching the active game ID.", error = ex.Message });
+            }
+        }
+
     }
 
 }

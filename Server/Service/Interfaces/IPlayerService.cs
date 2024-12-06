@@ -11,7 +11,9 @@ namespace Service.Interfaces
     {
 
         Task<PlayerResponseDto> GetPlayerByIdAsync(Guid playerId);
+        Task<PlayerResponseDto> GetPlayerByUsernameAsync(string username);
 
+        
         Task<List<PlayerResponseDto>> GetAllPlayersAsync();
 
         Task<PlayerResponseDto> UpdatePlayerAsync(Guid playerId, PlayerUpdateDto updateDto);
@@ -19,6 +21,9 @@ namespace Service.Interfaces
         Task DeletePlayerAsync(Guid playerId);
 
         Task<PlayerResponseDto> TogglePlayerActiveStatusAsync(Guid playerId, bool isActive);
+        Task<Guid> GetPlayerIdByUsernameAsync(string username); 
         Task<PlayerTransactionResponseDto> AddBalanceAsync(Guid playerId, TransactionCreateDto transactionCreateDto);
+        
+        Task<decimal> GetPlayerBalanceAsync(Guid playerId);
     }
 }
