@@ -22,7 +22,7 @@ const BoxGrid: React.FC = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5229/api/Player/current`, {
+                const response = await axios.get(`http://localhost:6329/api/Player/current`, {
                     headers: {
                         Authorization: "Bearer " + user?.token
                     }
@@ -35,7 +35,7 @@ const BoxGrid: React.FC = () => {
 
         const fetchGameData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5229/api/Games/active`);
+                const response = await axios.get(`http://localhost:6329/api/Games/active`);
                 setGameId(response.data.gameId);
             } catch (err) {
                 setError('Failed to fetch game data');
@@ -77,7 +77,7 @@ const BoxGrid: React.FC = () => {
         console.log('Payload:', payload); // Logs the payload sent to the backend
 
         try {
-            const response = await axios.post(`http://localhost:5229/api/Board/${playerId}/buy`, payload);
+            const response = await axios.post(`http://localhost:6329/api/Board/${playerId}/buy`, payload);
             setMessage(response.data.message || 'Board purchased successfully!');
             setSelectedBoxes([]); // Clear selected numbers after purchase
         } catch (err) {

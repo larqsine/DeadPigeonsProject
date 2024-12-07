@@ -9,8 +9,10 @@ import {
     isCreateUserModalOpenAtom,
     isEditUserModalOpenAtom,
     editUserAtom,
-    newUserAtom, User,
+    newUserAtom, User, gameIdAtom, errorAtom, messageAtom,
 } from './ComponentsJotaiStore';
+import axios from "axios";
+
 
 const AdminPage: React.FC = () => {
     const [selectedWinningNumbers, setSelectedWinningNumbers] = useAtom(selectedWinningNumbersAtom);
@@ -21,6 +23,10 @@ const AdminPage: React.FC = () => {
     const [isEditUserModalOpen, setIsEditUserModalOpen] = useAtom(isEditUserModalOpenAtom);
     const [editUser, setEditUser] = useAtom(editUserAtom);
     const [newUser, setNewUser] = useAtom(newUserAtom);
+    const [ gameId,setGameId] = useAtom(gameIdAtom);
+    const [, setError] = useAtom(errorAtom);
+    const [, setMessage] = useAtom(messageAtom);
+    
 
     // Lock body scroll when any modal is open
     useEffect(() => {
@@ -35,7 +41,7 @@ const AdminPage: React.FC = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:5229/api/player');
+                const response = await fetch('http://localhost:6329/api/player');
                 if (!response.ok) throw new Error('Failed to fetch users');
                 const data = await response.json();
                 setUsers(data);
@@ -43,8 +49,19 @@ const AdminPage: React.FC = () => {
                 console.error('Failed to fetch users:', error);
             }
         };
+
+        const fetchGameData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:6329/api/Games/active`);
+                setGameId(response.data.gameId);
+            } catch (err) {
+                setError('Failed to fetch game data');
+            }
+        };
+        
+        fetchGameData();
         fetchUsers();
-    }, [setUsers]);
+    }, [setUsers, setGameId, setError]);
 
     const handleBoxClick = (num: number) => {
         if (selectedWinningNumbers.includes(num)) {
@@ -56,8 +73,48 @@ const AdminPage: React.FC = () => {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        const payload = {
+            winningNumbers: selectedWinningNumbers, 
+            gameId: gameId,
+        };
+        
+        console.log('GameId:', gameId); // Logs the active game ID
+        console.log('Number', selectedWinningNumbers); //Logs the selected wining numbers
+        console.log('Payload:', payload); // Logs the payload sent to the backend
+
+        try {
+            const response = await axios.post(`http://localhost:6329/api/Games/${gameId}/close`, payload);
+            setMessage(response.data.message || 'Game closed successfully!');
+            setSelectedWinningNumbers([]); // Clear selected numbers after purchase
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                console.error('Error Status:', err.response?.status);
+                console.error('Error Response:', err.response?.data);
+                setError(err.response?.data?.message || 'An error occurred during closing the game.');
+            } else {
+                console.error('Unexpected Error:', err);
+                setError('An unexpected error occurred.');
+            }
+        }
         alert(`Winning numbers are: ${selectedWinningNumbers.join(', ')}`);
+    };
+    
+    const handeNewGame = async () => {
+        try {
+            const response = await axios.post(`http://localhost:6329/api/Games/new`);
+            setMessage(response.data.message || 'Game created successfully!');
+        }
+        catch (err){
+            if (axios.isAxiosError(err)) {
+                console.error('Error Status:', err.response?.status);
+                console.error('Error Response:', err.response?.data);
+                setError(err.response?.data?.message || 'An error occurred during creating the game.');
+            } else {
+                console.error('Unexpected Error:', err);
+                setError('An unexpected error occurred.');
+            }
+        }
     };
 
     const handleUserClick = (user: User) => {
@@ -99,7 +156,7 @@ const AdminPage: React.FC = () => {
     const handleEditUserSubmit = async () => {
         if (editUser) {
             try {
-                const response = await fetch(`http://localhost:5229/api/player/${editUser.id}`, {
+                const response = await fetch(`http://localhost:6329/api/player/${editUser.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -109,7 +166,7 @@ const AdminPage: React.FC = () => {
 
                 if (response.ok) {
                     alert('User updated successfully');
-                    const usersResponse = await fetch('http://localhost:5229/api/player');
+                    const usersResponse = await fetch('http://localhost:6329/api/player');
                     const data = await usersResponse.json();
                     setUsers(data);
                     handleCloseModal();
@@ -130,7 +187,7 @@ const AdminPage: React.FC = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5229/api/Account/register', {
+            const response = await fetch('http://localhost:6329/api/Account/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -158,7 +215,7 @@ const AdminPage: React.FC = () => {
                     password: '',
                     role: '',
                 });
-                const usersResponse = await fetch('http://localhost:5229/api/player');
+                const usersResponse = await fetch('http://localhost:6329/api/player');
                 const data = await usersResponse.json();
                 setUsers(data);
             } else {
@@ -175,7 +232,7 @@ const AdminPage: React.FC = () => {
         if (!confirmed) return;
 
         try {
-            const response = await fetch(`http://localhost:5229/api/player/${userId}`, {
+            const response = await fetch(`http://localhost:6329/api/player/${userId}`, {
                 method: 'DELETE',
             });
 
@@ -198,9 +255,15 @@ const AdminPage: React.FC = () => {
 
             {/* Winning Numbers Section */}
             <section className={styles.WiningSection}>
+                <button
+                    className={styles.actionButton}
+                    onClick={handeNewGame}
+                >
+                    Start New Game
+                </button>
                 <p className={styles.subheader}>Select up to 3 winning numbers:</p>
                 <div className={styles.gridContainer}>
-                    {Array.from({ length: 16 }, (_, i) => (
+                    {Array.from({length: 16}, (_, i) => (
                         <div
                             key={i + 1}
                             className={`${styles.box} ${selectedWinningNumbers.includes(i + 1) ? styles.selected : ''}`}
@@ -217,13 +280,14 @@ const AdminPage: React.FC = () => {
                 >
                     Confirm Winning Numbers
                 </button>
+
             </section>
 
             {/* Users Section */}
             <section className={styles.UserSection}>
                 <h2 className={styles.subheader}>Users</h2>
                 <button className={styles.actionButton} onClick={() => setIsCreateUserModalOpen(true)}>
-                    New User
+                New User
                 </button>
                 <ul className={styles.userList}>
                     {users.map((user) => (

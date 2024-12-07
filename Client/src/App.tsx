@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAtom } from 'jotai'; // Import Jotai's useAtom hook
+import { useAtom } from 'jotai';
 import {
     isLoggedInAtom,
     isAdminAtom,
@@ -32,13 +32,13 @@ const App: React.FC = () => {
             setTransitioning(false);
 
             try {
-                const playerIdResponse = await fetch(`http://localhost:5229/api/player/username/${username}`);
+                const playerIdResponse = await fetch(`http://localhost:6329/api/player/username/${username}`);
                 if (!playerIdResponse.ok) {
                     throw new Error('Failed to fetch player ID');
                 }
                 const playerId = await playerIdResponse.json();
 
-                const balanceResponse = await fetch(`http://localhost:5229/api/player/${playerId}/balance`);
+                const balanceResponse = await fetch(`http://localhost:6329/api/player/${playerId}/balance`);
                 if (!balanceResponse.ok) {
                     throw new Error('Failed to fetch player balance');
                 }
