@@ -10,7 +10,7 @@ import {
     isEditUserModalOpenAtom,
     editUserAtom,
     newUserAtom, User, gameIdAtom, errorAtom, messageAtom,
-} from './ComponentsJotaiStore';
+} from './PagesJotaiStore.ts';
 import axios from "axios";
 
 

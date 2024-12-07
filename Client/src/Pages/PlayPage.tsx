@@ -1,24 +1,23 @@
 ﻿import React, { useEffect } from 'react';
 import { useAtom } from 'jotai';
 import axios from 'axios';
-import styles from './BoxGrid.module.css';
+import styles from './PlayPage.module.css'
 import {
     selectedBoxesAtom,
     playerIdAtom,
     gameIdAtom,
     messageAtom,
     errorAtom, userAtom,
-} from './ComponentsJotaiStore';
+} from './PagesJotaiStore.ts';
 
-const BoxGrid: React.FC = () => {
+const PlayPage: React.FC = () => {
     const [selectedBoxes, setSelectedBoxes] = useAtom(selectedBoxesAtom);
     const [user] = useAtom(userAtom);
     const [playerId, setPlayerId] = useAtom(playerIdAtom);
     const [gameId, setGameId] = useAtom(gameIdAtom);
     const [message, setMessage] = useAtom(messageAtom);
     const [error, setError] = useAtom(errorAtom);
-
-    // Fetch PlayerId and GameId when the component is mounted
+    
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -54,7 +53,6 @@ const BoxGrid: React.FC = () => {
             // Add the box if under the 8-box limit
             setSelectedBoxes([...selectedBoxes, num]);
         } else {
-            // Alert when attempting to select more than 8 boxes
             alert('You can choose a maximum of 8 numbers');
         }
     };
@@ -148,4 +146,4 @@ const BoxGrid: React.FC = () => {
     );
 };
 
-export default BoxGrid;
+export default PlayPage;
