@@ -2,7 +2,7 @@
 import { useAtom } from 'jotai';
 import axios from 'axios';
 import styles from './LoginPage.module.css';
-import { loginFormAtom, userAtom, isLoggedInAtom } from './ComponentsJotaiStore';
+import { loginFormAtom, userAtom, isLoggedInAtom } from './PagesJotaiStore.ts';
 
 interface LoginPageProps {
     onLogin: (email: string, roles: string[]) => void;
@@ -22,7 +22,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const handleLoginSubmit = async () => {
         if (loginForm.email && loginForm.password) {
             try {
-                const response = await axios.post('http://localhost:5229/api/account/login', {
+                const response = await axios.post('http://localhost:6329/api/account/login', {
                     email: loginForm.email,
                     password: loginForm.password,
                 });
@@ -34,7 +34,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 setUser({ userName: user, roles, token });
                 setIsLoggedIn(true); // Set the logged-in status to true
 
-                onLogin(user, roles); // Pass user details to parent component or state
+                onLogin(user, roles); 
             } catch (error) {
                 console.log(error);
                 console.error(error);

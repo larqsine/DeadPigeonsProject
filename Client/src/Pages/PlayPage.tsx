@@ -1,28 +1,27 @@
 ﻿import React, { useEffect } from 'react';
 import { useAtom } from 'jotai';
 import axios from 'axios';
-import styles from './BoxGrid.module.css';
+import styles from './PlayPage.module.css'
 import {
     selectedBoxesAtom,
     playerIdAtom,
     gameIdAtom,
     messageAtom,
     errorAtom, userAtom,
-} from './ComponentsJotaiStore';
+} from './PagesJotaiStore.ts';
 
-const BoxGrid: React.FC = () => {
+const PlayPage: React.FC = () => {
     const [selectedBoxes, setSelectedBoxes] = useAtom(selectedBoxesAtom);
     const [user] = useAtom(userAtom);
     const [playerId, setPlayerId] = useAtom(playerIdAtom);
     const [gameId, setGameId] = useAtom(gameIdAtom);
     const [message, setMessage] = useAtom(messageAtom);
     const [error, setError] = useAtom(errorAtom);
-
-    // Fetch PlayerId and GameId when the component is mounted
+    
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5229/api/Player/current`, {
+                const response = await axios.get(`http://localhost:6329/api/Player/current`, {
                     headers: {
                         Authorization: "Bearer " + user?.token
                     }
@@ -35,7 +34,7 @@ const BoxGrid: React.FC = () => {
 
         const fetchGameData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5229/api/Games/active`);
+                const response = await axios.get(`http://localhost:6329/api/Games/active`);
                 setGameId(response.data.gameId);
             } catch (err) {
                 setError('Failed to fetch game data');
@@ -54,7 +53,6 @@ const BoxGrid: React.FC = () => {
             // Add the box if under the 8-box limit
             setSelectedBoxes([...selectedBoxes, num]);
         } else {
-            // Alert when attempting to select more than 8 boxes
             alert('You can choose a maximum of 8 numbers');
         }
     };
@@ -77,7 +75,7 @@ const BoxGrid: React.FC = () => {
         console.log('Payload:', payload); // Logs the payload sent to the backend
 
         try {
-            const response = await axios.post(`http://localhost:5229/api/Board/${playerId}/buy`, payload);
+            const response = await axios.post(`http://localhost:6329/api/Board/${playerId}/buy`, payload);
             setMessage(response.data.message || 'Board purchased successfully!');
             setSelectedBoxes([]); // Clear selected numbers after purchase
         } catch (err) {
@@ -148,4 +146,4 @@ const BoxGrid: React.FC = () => {
     );
 };
 
-export default BoxGrid;
+export default PlayPage;

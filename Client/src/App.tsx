@@ -1,5 +1,6 @@
-import React from 'react';
-import { useAtom } from 'jotai'; // Import Jotai's useAtom hook
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useAtom } from "jotai";
 import {
     isLoggedInAtom,
     isAdminAtom,
@@ -7,12 +8,12 @@ import {
     transitioningAtom,
     usernameAtom,
     balanceAtom,
-} from './AppJotaiStore.ts'; // Import your atoms
-import Navbar from './components/Navbar';
-import BoxGrid from './components/BoxGrid';
-import AdminPage from './components/AdminPage';
-import LoginPage from './components/LoginPage';
-import styles from './App.module.css';
+} from "./AppJotaiStore";
+import Navbar from "./components/Navbar";
+import AdminPage from "./Pages/AdminPage";
+import LoginPage from "./Pages/LoginPage";
+import PlayPage from "./Pages/PlayPage";
+import styles from "./App.module.css";
 
 const App: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
@@ -26,27 +27,23 @@ const App: React.FC = () => {
         setTransitioning(true);
         setTimeout(async () => {
             setIsLoggedIn(true);
-            setIsAdmin(username.toLowerCase() === 'admin');
+            setIsAdmin(username.toLowerCase() === "admin");
             setUsername(username);
-            setShowBoxGrid(username.toLowerCase() !== 'admin');
+            setShowBoxGrid(username.toLowerCase() !== "admin");
             setTransitioning(false);
 
             try {
-                const playerIdResponse = await fetch(`http://localhost:5229/api/player/username/${username}`);
-                if (!playerIdResponse.ok) {
-                    throw new Error('Failed to fetch player ID');
-                }
+                const playerIdResponse = await fetch(`http://localhost:6329/api/player/username/${username}`);
+                if (!playerIdResponse.ok) throw new Error("Failed to fetch player ID");
                 const playerId = await playerIdResponse.json();
 
-                const balanceResponse = await fetch(`http://localhost:5229/api/player/${playerId}/balance`);
-                if (!balanceResponse.ok) {
-                    throw new Error('Failed to fetch player balance');
-                }
+                const balanceResponse = await fetch(`http://localhost:6329/api/player/${playerId}/balance`);
+                if (!balanceResponse.ok) throw new Error("Failed to fetch player balance");
 
                 const balanceData = await balanceResponse.json();
                 setBalance(balanceData);
             } catch (error) {
-                console.error('Error fetching player data:', error);
+                console.error("Error fetching player data:", error);
                 setBalance(null);
             }
         }, 500);
@@ -62,41 +59,68 @@ const App: React.FC = () => {
     const handlePlayClick = () => setShowBoxGrid(true);
     const handleGoToAdminPage = () => setShowBoxGrid(false);
 
-    const generatePlayerId = (username: string): string => username.toLowerCase();
-
     return (
-        <div className={styles.app}>
-            {/* Login Page */}
-            <div
-                className={`${styles.page} ${!isLoggedIn ? styles.active : ''} ${
-                    transitioning ? styles.fadeOut : ''
-                }`}
-            >
-                <LoginPage onLogin={handleLogin} />
-            </div>
-
-            {/* Main Application Page */}
-            <div
-                className={`${styles.page} ${isLoggedIn ? styles.active : ''} ${
-                    transitioning ? styles.fadeIn : ''
-                }`}
-            >
+        <Router>
+            <div className={styles.app}>
+                {/* Navbar */}
                 {isLoggedIn && (
-                    <>
-                        <Navbar
-                            onPlayClick={handlePlayClick}
-                            username={username || 'Guest'}
-                            balance={balance !== null ? balance : 0}
-                            onSignOut={handleSignOut}
-                            isAdmin={isAdmin}
-                            onGoToAdminPage={handleGoToAdminPage}
-                            playerId={generatePlayerId(username || 'Guest')}
-                        />
-                        {showBoxGrid ? <BoxGrid /> : <AdminPage />}
-                    </>
+                    <Navbar
+                        onPlayClick={handlePlayClick}
+                        username={username || "Guest"}
+                        balance={balance !== null ? balance : 0}
+                        onSignOut={handleSignOut}
+                        isAdmin={isAdmin}
+                        onGoToAdminPage={handleGoToAdminPage}
+                        playerId={username?.toLowerCase() || "guest"}
+                    />
                 )}
+
+                {/* Main Content */}
+                <div className={styles.mainContent}>
+                    {/* Routes with Page Transition Styling */}
+                    <div
+                        className={`${styles.page} ${!isLoggedIn ? styles.active : ""} ${
+                            transitioning ? styles.fadeOut : ""
+                        }`}
+                    >
+                        <Routes>
+                            <Route
+                                path="/login"
+                                element={!isLoggedIn ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/" />}
+                            />
+                        </Routes>
+                    </div>
+
+                    <div
+                        className={`${styles.page} ${isLoggedIn ? styles.active : ""} ${
+                            transitioning ? styles.fadeIn : ""
+                        }`}
+                    >
+                        <Routes>
+                            <Route
+                                path="/"
+                                element={
+                                    isLoggedIn ? (
+                                        showBoxGrid ? (
+                                            <PlayPage />
+                                        ) : (
+                                            <Navigate to="/admin" />
+                                        )
+                                    ) : (
+                                        <Navigate to="/login" />
+                                    )
+                                }
+                            />
+                            <Route
+                                path="/admin"
+                                element={isLoggedIn && isAdmin ? <AdminPage /> : <Navigate to="/" />}
+                            />
+                            <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} />} />
+                        </Routes>
+                    </div>
+                </div>
             </div>
-        </div>
+        </Router>
     );
 };
 

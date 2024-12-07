@@ -5,8 +5,8 @@
   overflow-y: auto; /* Enables scrolling for the main app container */
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: flex-start;
+  background-color: #f4f4f9;
 }
 
 .page {
@@ -18,13 +18,15 @@
   opacity: 0;
   transform: scale(0.95);
   transition: opacity 0.5s ease, transform 0.5s ease;
-  pointer-events: none; /* Prevent interactions when inactive */
+  pointer-events: none;
+  z-index: 1;
 }
 
 .page.active {
   opacity: 1;
   transform: scale(1);
   pointer-events: auto;
+  z-index: 2;
 }
 
 .page.fadeOut {
@@ -35,6 +37,24 @@
 .page.fadeIn {
   opacity: 1;
   transform: scale(1);
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .adminToggle {
@@ -52,4 +72,19 @@
 
 .adminToggle:hover {
   background-color: #0056b3;
+}
+
+.navbar {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #333; /* Adjust as needed */
+  color: white;
+}
+
+.mainContent {
+  flex: 1;
+  position: relative;
+  overflow-y: auto;
 }
