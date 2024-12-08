@@ -38,5 +38,5 @@ export const errorAtom = atom<string>('');
 
 // Atoms for LoginPage component
 export const loginFormAtom = atom({ email: '', password: '' });
-export const userAtom = atom<{ userName: string; roles: string[]; token: string[]; } | null>(null); 
+export const userAtom = atom<{ userName: string; roles: string[]; token: string[]; passwordChangeRequired: boolean } | null>(null);
 export const isLoggedInAtom = atom<boolean>(false);

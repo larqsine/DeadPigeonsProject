@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAtom } from "jotai";
 import {
     isLoggedInAtom,
@@ -8,12 +8,15 @@ import {
     transitioningAtom,
     usernameAtom,
     balanceAtom,
+    passwordChangeRequiredAtom,
 } from "./AppJotaiStore";
 import Navbar from "./components/Navbar";
 import AdminPage from "./Pages/AdminPage";
 import LoginPage from "./Pages/LoginPage";
 import PlayPage from "./Pages/PlayPage";
 import styles from "./App.module.css";
+import ChangePasswordPage from "./Pages/ChangePasswordPage";
+import { useNavigate } from "react-router-dom";
 
 const App: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
@@ -22,6 +25,26 @@ const App: React.FC = () => {
     const [transitioning, setTransitioning] = useAtom(transitioningAtom);
     const [username, setUsername] = useAtom(usernameAtom);
     const [balance, setBalance] = useAtom(balanceAtom);
+    const [passwordChangeRequired, setPasswordChangeRequired] = useAtom(passwordChangeRequiredAtom);
+    const navigate = useNavigate();
+
+    // Check localStorage for login state on mount
+    useEffect(() => {
+        const storedIsLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+        const storedUsername = localStorage.getItem("username");
+        const storedIsAdmin = localStorage.getItem("isAdmin") === "true";
+        const storedPasswordChangeRequired = localStorage.getItem("passwordChangeRequired") === "true";
+
+        if (storedIsLoggedIn && storedUsername) {
+            setIsLoggedIn(true);
+            setUsername(storedUsername);
+            setIsAdmin(storedIsAdmin);
+            setPasswordChangeRequired(storedPasswordChangeRequired);
+            setShowBoxGrid(storedIsAdmin !== true);
+        } else {
+            setIsLoggedIn(false);
+        }
+    }, []);
 
     const handleLogin = async (username: string) => {
         setTransitioning(true);
@@ -42,6 +65,19 @@ const App: React.FC = () => {
 
                 const balanceData = await balanceResponse.json();
                 setBalance(balanceData);
+
+                // Persist login state to localStorage
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("username", username);
+                localStorage.setItem("isAdmin", username.toLowerCase() === "admin" ? "true" : "false");
+                localStorage.setItem("passwordChangeRequired", passwordChangeRequired.toString());
+
+                if (passwordChangeRequired) {
+                    navigate("/change-password");
+                    return;
+                } else {
+                    navigate("/");
+                }
             } catch (error) {
                 console.error("Error fetching player data:", error);
                 setBalance(null);
@@ -54,73 +90,76 @@ const App: React.FC = () => {
         setUsername(null);
         setIsAdmin(false);
         setBalance(null);
+        setPasswordChangeRequired(false);
+
+        // Clear localStorage on sign out
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("username");
+        localStorage.removeItem("isAdmin");
+        localStorage.removeItem("passwordChangeRequired");
     };
 
     const handlePlayClick = () => setShowBoxGrid(true);
     const handleGoToAdminPage = () => setShowBoxGrid(false);
 
     return (
-        <Router>
-            <div className={styles.app}>
-                {/* Navbar */}
-                {isLoggedIn && (
-                    <Navbar
-                        onPlayClick={handlePlayClick}
-                        username={username || "Guest"}
-                        balance={balance !== null ? balance : 0}
-                        onSignOut={handleSignOut}
-                        isAdmin={isAdmin}
-                        onGoToAdminPage={handleGoToAdminPage}
-                        playerId={username?.toLowerCase() || "guest"}
-                    />
-                )}
+        <div className={styles.app}>
+            {/* Navbar */}
+            {isLoggedIn && (
+                <Navbar
+                    onPlayClick={handlePlayClick}
+                    username={username || "Guest"}
+                    balance={balance !== null ? balance : 0}
+                    onSignOut={handleSignOut}
+                    isAdmin={isAdmin}
+                    onGoToAdminPage={handleGoToAdminPage}
+                    playerId={username?.toLowerCase() || "guest"}
+                />
+            )}
 
-                {/* Main Content */}
-                <div className={styles.mainContent}>
-                    {/* Routes with Page Transition Styling */}
-                    <div
-                        className={`${styles.page} ${!isLoggedIn ? styles.active : ""} ${
-                            transitioning ? styles.fadeOut : ""
-                        }`}
-                    >
-                        <Routes>
-                            <Route
-                                path="/login"
-                                element={!isLoggedIn ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/" />}
-                            />
-                        </Routes>
-                    </div>
-
-                    <div
-                        className={`${styles.page} ${isLoggedIn ? styles.active : ""} ${
-                            transitioning ? styles.fadeIn : ""
-                        }`}
-                    >
-                        <Routes>
-                            <Route
-                                path="/"
-                                element={
-                                    isLoggedIn ? (
-                                        showBoxGrid ? (
-                                            <PlayPage />
-                                        ) : (
-                                            <Navigate to="/admin" />
-                                        )
+            {/* Main Content */}
+            <div className={styles.mainContent}>
+                <div
+                    className={`${styles.page} ${!isLoggedIn ? styles.active : ""} ${
+                        transitioning ? styles.fadeOut : ""
+                    }`}
+                >
+                    <Routes>
+                        <Route
+                            path="/login"
+                            element={!isLoggedIn ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/" />}
+                        />
+                        <Route
+                            path="/"
+                            element={
+                                isLoggedIn ? (
+                                    showBoxGrid ? (
+                                        <PlayPage />
                                     ) : (
-                                        <Navigate to="/login" />
+                                        <Navigate to="/admin" />
                                     )
-                                }
-                            />
-                            <Route
-                                path="/admin"
-                                element={isLoggedIn && isAdmin ? <AdminPage /> : <Navigate to="/" />}
-                            />
-                            <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} />} />
-                        </Routes>
-                    </div>
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/admin"
+                            element={isLoggedIn && isAdmin ? <AdminPage /> : <Navigate to="/" />}
+                        />
+                        <Route
+                            path="/change-password"
+                            element={isLoggedIn && passwordChangeRequired ? (
+                                <ChangePasswordPage />
+                            ) : (
+                                <Navigate to="/" />
+                            )}
+                        />
+                        <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} />} />
+                    </Routes>
                 </div>
             </div>
-        </Router>
+        </div>
     );
 };
 
