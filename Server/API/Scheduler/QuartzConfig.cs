@@ -15,8 +15,9 @@ public static class QuartzConfig
             q.ScheduleJob<StartNewGameJob>(trigger => trigger
                 .WithIdentity("StartNewGameTrigger")
                 .WithSchedule(CronScheduleBuilder
-                    .CronSchedule("0 25 17 ? * THU") 
+                    .CronSchedule("0 0 0 ? * MON *") 
                     .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"))));
+
 
         });
 
