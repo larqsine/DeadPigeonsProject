@@ -30,7 +30,7 @@ public class TransactionCreateDto
         return new Transaction
         {
             Id = transactionId,
-            Amount = -Amount, // Deducted amount for purchase
+            Amount = Amount, 
             TransactionType = "purchase",
             CreatedAt = DateTime.UtcNow,
             PlayerId = playerId,

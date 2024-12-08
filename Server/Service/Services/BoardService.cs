@@ -69,9 +69,14 @@ public class BoardService : IBoardService
         var denmarkTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
         var currentTimeInDenmark = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, denmarkTimeZone);
 
-        if (currentTimeInDenmark.DayOfWeek == DayOfWeek.Saturday && currentTimeInDenmark.Hour >= 17)
-            throw new Exception("You cannot participate after Saturday 5 PM Danish time.");
+        // Disallow participation on Saturdays after 5 PM or any time on Sunday
+        if ((currentTimeInDenmark.DayOfWeek == DayOfWeek.Saturday && currentTimeInDenmark.Hour >= 17) ||
+            currentTimeInDenmark.DayOfWeek == DayOfWeek.Sunday)
+        {
+            throw new Exception("You cannot participate after Saturday 5 PM or on Sunday.");
+        }
     }
+
 
     private void ValidatePlayerBalance(Player player, int fieldsCount)
     {
@@ -90,6 +95,7 @@ public class BoardService : IBoardService
 
     private async Task<Transaction> ProcessPurchaseTransaction(Player player, int fieldsCount)
     {
+        // Calculate the cost based on the number of fields
         var cost = fieldsCount switch
         {
             5 => 20m,
@@ -99,14 +105,21 @@ public class BoardService : IBoardService
             _ => throw new Exception("Invalid number of fields.")
         };
 
-        var purchaseTransactionDto = new TransactionCreateDto { Amount = cost };
+        // Deduct the cost from the player's balance
+        player.Balance -= cost;
+        await _playerRepository.UpdatePlayerAsync(player); // Update the player's balance in the database
+
+        // Create a transaction record
+        var purchaseTransactionDto = new TransactionCreateDto { Amount = -cost }; // Negative to indicate deduction
         var transactionId = Guid.NewGuid();
         var purchaseTransaction = purchaseTransactionDto.ToPurchaseTransaction(player.Id, transactionId);
 
-        await _playerRepository.AddTransactionAsync(purchaseTransaction);
+        await _playerRepository.AddTransactionAsync(purchaseTransaction); // Add the transaction to the database
 
         return purchaseTransaction;
     }
+
+    
 
     private Board CreateBoard(BuyBoardRequestDto buyBoardRequestDto, Guid playerId, decimal cost)
     {
