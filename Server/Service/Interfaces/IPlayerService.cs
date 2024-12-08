@@ -4,6 +4,7 @@ using Service.DTOs.UserDto;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Service.DTOs.WinnerDto;
 
 namespace Service.Interfaces
 {

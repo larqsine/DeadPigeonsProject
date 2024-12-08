@@ -205,5 +205,19 @@ public class BoardService : IBoardService
             RemainingAutoplayWeeks = board.RemainingAutoplayWeeks - 1
         };
     }
-
+        public async Task<List<BoardResponseDto>> GetBoardsByPlayerIdAsync(Guid playerId)
+        {
+            var boards = await _boardRepository.GetBoardsByPlayerIdAsync(playerId);
+            return boards.Select(BoardResponseDto.FromEntity).ToList();
+        }
+        public async Task<List<BoardResponseDto>> GetBoardsByGameIdAsync(Guid gameId)
+        {
+            var boards = await _boardRepository.GetBoardsByGameIdAsync(gameId);
+            return boards.Select(BoardResponseDto.FromEntity).ToList();
+        }
+        public async Task<List<BoardResponseDto>> GetAllBoardsAsync()
+        {
+            var boards = await _boardRepository.GetAllBoardsAsync();
+            return boards.Select(BoardResponseDto.FromEntity).ToList();
+        }
 }

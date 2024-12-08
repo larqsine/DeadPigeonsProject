@@ -38,5 +38,18 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while buying the board.");
             }
         }
+        [HttpGet("{playerId:guid}/BoardsByPlayerId")]
+        public async Task<IActionResult> GetBoardsByPlayerId(Guid playerId)
+        {
+            var boards = await _boardService.GetBoardsByPlayerIdAsync(playerId);
+            return Ok(boards);
+        }
+
+        [HttpGet("{gameId:guid}/BoardsbyGameId")]
+        public async Task<IActionResult> GetBoardsByGameId(Guid gameId)
+        {
+            var boards = await _boardService.GetBoardsByGameIdAsync(gameId);
+            return Ok(boards);
+        }
     }
 }

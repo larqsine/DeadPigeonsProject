@@ -26,6 +26,16 @@ namespace DataAccess.Repositories
         {
             return await _context.Boards
                 .Where(b => b.PlayerId == playerId)
+                .Include(b => b.Player)
+                .Include(b => b.Game)
+                .ToListAsync();
+        }
+
+        public async Task<List<Board>> GetAllBoardsAsync()
+        {
+            return await _context.Boards
+                .Include(b => b.Player)
+                .Include(b => b.Game)
                 .ToListAsync();
         }
 

@@ -31,9 +31,7 @@ public class WinnerRepository
     public async Task<List<Winner>> GetWinnersByGameIdAsync(Guid gameId)
     {
         return await _context.Winners
-            .Include(w => w.Game)
             .Include(w => w.Player)
-            .Include(w => w.Board)
             .Where(w => w.GameId == gameId)
             .ToListAsync();
     }

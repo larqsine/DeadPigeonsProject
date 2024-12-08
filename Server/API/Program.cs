@@ -40,13 +40,14 @@ builder.Services.AddScoped<PlayerRepository>();
 builder.Services.AddScoped<GameRepository>();
 builder.Services.AddScoped<BoardRepository>();
 builder.Services.AddScoped<WinnerRepository>();
+builder.Services.AddScoped<TransactionRepository>();
 
 // Register services
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IBoardService, BoardService>();
-builder.Services.AddScoped<TransactionRepository>();
 builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<IWinnerService, WinnerService>();
 
 builder.Services.AddQuartzJobs(); // Add Quartz jobs
 
