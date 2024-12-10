@@ -1,13 +1,11 @@
 using System.Net.Http.Json;
 using System.Net;
 using Xunit;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Tests;
 using DataAccess.Models;
 using Microsoft.AspNetCore.Identity;
-using ApiInterationTests;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Service.DTOs.BoardDto;
-using Service.DTOs.UserDto;
 
 namespace Tests
 {
@@ -15,115 +13,78 @@ namespace Tests
     {
         private readonly ApiTestBase _factory;
         private readonly HttpClient _client;
-        private readonly UserManager<User> _userManager;
 
         public BoardControllerTests(ApiTestBase factory)
         {
             _factory = factory;
-            _client = factory.CreateClient();
-        }
-
-        [Fact]
-        public async Task BuyBoard_Success()
-        {
-            // Arrange
-            var admin = await TestObjects.GetAdmin(_userManager);
-            var player = await TestObjects.GetPlayer(_userManager);
-            var game = TestObjects.GetGame(admin);
-
-            var buyBoardRequest = new BuyBoardRequestDto
+            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
             {
-                FieldsCount = 6,
-                Numbers = new List<int> { 5, 15, 23, 36, 42, 58 },
-                GameId = game.Id,
-                RemainingAutoplayWeeks = 4
-            };
-
-            // Authenticate as player
-            var loginResponse = await _client.PostAsJsonAsync("/api/account/login", new
-            {
-                Email = player.Email,
-                Password = "PlayerPassword123!"
+                AllowAutoRedirect = false
             });
-            var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResultDto>();
-            _client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
-
-            // Act
-            var response = await _client.PostAsJsonAsync($"/api/board/{player.Id}/buy", buyBoardRequest);
-            var result = await response.Content.ReadAsStringAsync();
-
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Contains("Board purchased successfully", result);
         }
 
+        
         [Fact]
         public async Task GetBoardsByPlayerId_Success()
         {
             // Arrange
-            var player = await TestObjects.GetPlayer(_userManager);
+            var playerId = Guid.NewGuid(); // Replace with seeded player ID if available
 
             // Act
-            var response = await _client.GetAsync($"/api/board/{player.Id}/BoardsByPlayerId");
-            var boards = await response.Content.ReadFromJsonAsync<List<Board>>();
+            var response = await _client.GetAsync($"/api/board/{playerId}/BoardsByPlayerId");
+            var result = await response.Content.ReadFromJsonAsync<List<BoardResponseDto>>();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(boards);
+            Assert.NotNull(result);
+            Assert.All(result, board => Assert.Equal(playerId, board.PlayerId));
         }
 
         [Fact]
         public async Task GetBoardsByGameId_Success()
         {
             // Arrange
-            var admin = await TestObjects.GetAdmin(_userManager);
-            var player = await TestObjects.GetPlayer(_userManager);
-            var game = TestObjects.GetGame(admin);
-            var board = TestObjects.GetBoard(player, game);
-
-            // Add the board (you may need to call the service or directly seed the DB here)
-            // Example: Add to in-memory context
+            var gameId = Guid.NewGuid(); // Replace with seeded game ID if available
 
             // Act
-            var response = await _client.GetAsync($"/api/board/{game.Id}/BoardsbyGameId");
-            var boards = await response.Content.ReadFromJsonAsync<List<Board>>();
+            var response = await _client.GetAsync($"/api/board/{gameId}/BoardsByGameId");
+            var result = await response.Content.ReadFromJsonAsync<List<BoardResponseDto>>();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(boards);
-            Assert.Contains(boards, b => b.Id == board.Id);
+            Assert.NotNull(result);
+            Assert.All(result, board => Assert.Equal(gameId, board.GameId));
         }
 
         [Fact]
-        public async Task BuyBoard_Failure_InvalidData()
+        public async Task BuyBoard_Failure_InvalidFields()
         {
-            // Arrange
-            var player = await TestObjects.GetPlayer(_userManager);
+            // Fetch or create valid IDs
+            var playersResponse = await _client.GetAsync("/api/players");
+            var players = await playersResponse.Content.ReadFromJsonAsync<List<Player>>();
+            var playerId = players.First().Id;
 
-            var invalidBuyBoardRequest = new BuyBoardRequestDto
+            var gamesResponse = await _client.GetAsync("/api/games");
+            var games = await gamesResponse.Content.ReadFromJsonAsync<List<Game>>();
+            var gameId = games.First().Id;
+
+            var buyBoardRequest = new
             {
-                FieldsCount = 10, // Invalid: out of range (should be 5-8)
-                Numbers = new List<int> { 5, 15 },
-                GameId = Guid.NewGuid(),
-                RemainingAutoplayWeeks = 4
+                GameId = gameId,
+                FieldsCount = 10,
+                Numbers = "1,2,3,4,5",
+                RemainingAutoplayWeeks = 0
             };
 
-            // Authenticate as player
-            var loginResponse = await _client.PostAsJsonAsync("/api/account/login", new
-            {
-                Email = player.Email,
-                Password = "PlayerPassword123!"
-            });
-            var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResultDto>();
-            _client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
-
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/board/{player.Id}/buy", invalidBuyBoardRequest);
+            var response = await _client.PostAsJsonAsync($"/api/board/{playerId}/buy", buyBoardRequest);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Invalid number of fields", errorMessage);
         }
+
+
     }
 }

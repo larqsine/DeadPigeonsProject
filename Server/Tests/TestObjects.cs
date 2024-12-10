@@ -2,15 +2,27 @@ using Microsoft.AspNetCore.Identity;
 using DataAccess.Models;
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Json;
 using Bogus;
+using Service.DTOs.UserDto;
 
-namespace ApiInterationTests;
+namespace Tests;
+
+using System.Collections.Concurrent;
+
+using System.Collections.Concurrent;
 
 public static class TestObjects
 {
-    // Admin Test Object with Password
+    private static readonly ConcurrentDictionary<string, object> SeededData = new();
+
     public static async Task<Admin> GetAdmin(UserManager<User> userManager)
     {
+        if (SeededData.TryGetValue(nameof(Admin), out var existingAdmin))
+        {
+            return (Admin)existingAdmin;
+        }
+
         var admin = new Admin
         {
             Id = Guid.NewGuid(),
@@ -27,12 +39,17 @@ public static class TestObjects
             throw new Exception("Failed to create admin user.");
         }
 
+        SeededData[nameof(Admin)] = admin;
         return admin;
     }
 
-    // Player Test Object with Password
     public static async Task<Player> GetPlayer(UserManager<User> userManager)
     {
+        if (SeededData.TryGetValue(nameof(Player), out var existingPlayer))
+        {
+            return (Player)existingPlayer;
+        }
+
         var player = new Player
         {
             Id = Guid.NewGuid(),
@@ -51,64 +68,32 @@ public static class TestObjects
             throw new Exception("Failed to create player user.");
         }
 
+        SeededData[nameof(Player)] = player;
         return player;
     }
 
-    // Game Test Object
-    public static Game GetGame(Admin admin)
+    public static async Task<string> GetToken(HttpClient client, string email, string password)
     {
-        return new Faker<Game>()
-            .RuleFor(g => g.Id, f => Guid.NewGuid())
-            .RuleFor(g => g.AdminId, admin.Id)
-            .RuleFor(g => g.StartDate, f => DateOnly.FromDateTime(DateTime.UtcNow))
-            .RuleFor(g => g.EndDate, f => f.Random.Bool() ? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)) : null)
-            .RuleFor(g => g.IsClosed, f => f.Random.Bool())
-            .RuleFor(g => g.TotalRevenue, f => f.Finance.Amount())
-            .RuleFor(g => g.PrizePool, f => f.Finance.Amount())
-            .RuleFor(g => g.CreatedAt, f => DateTime.UtcNow)
-            .Generate();
-    }
+        if (SeededData.TryGetValue($"{email}_Token", out var token))
+        {
+            return (string)token;
+        }
 
-    // Board Test Object
-    public static Board GetBoard(Player player, Game game)
-    {
-        return new Faker<Board>()
-            .RuleFor(b => b.Id, f => Guid.NewGuid())
-            .RuleFor(b => b.PlayerId, player.Id)
-            .RuleFor(b => b.GameId, game.Id)
-            .RuleFor(b => b.Numbers, f => string.Join(",", f.Random.Int(1, 100), f.Random.Int(1, 100), f.Random.Int(1, 100)))
-            .RuleFor(b => b.FieldsCount, f => f.Random.Int(5, 8))
-            .RuleFor(b => b.Cost, f => f.Finance.Amount())
-            .RuleFor(b => b.CreatedAt, f => DateTime.UtcNow)
-            .RuleFor(b => b.IsWinning, f => f.Random.Bool())
-            .RuleFor(b => b.RemainingAutoplayWeeks, f => f.Random.Int(0, 10))
-            .RuleFor(b => b.Autoplay, f => f.Random.Bool())
-            .Generate();
-    }
+        var response = await client.PostAsJsonAsync("/api/account/login", new
+        {
+            Email = email,
+            Password = password
+        });
 
-    // Transaction Test Object
-    public static Transaction GetTransaction(Player player)
-    {
-        return new Faker<Transaction>()
-            .RuleFor(t => t.Id, f => Guid.NewGuid())
-            .RuleFor(t => t.PlayerId, player.Id)
-            .RuleFor(t => t.Amount, f => f.Finance.Amount())
-            .RuleFor(t => t.TransactionType, f => f.Commerce.ProductName())
-            .RuleFor(t => t.MobilepayNumber, f => f.Phone.PhoneNumber())
-            .RuleFor(t => t.CreatedAt, f => DateTime.UtcNow)
-            .Generate();
-    }
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<LoginResultDto>();
+        if (result == null || string.IsNullOrEmpty(result.Token))
+        {
+            throw new Exception("Failed to login and retrieve token.");
+        }
 
-    // Winner Test Object
-    public static Winner GetWinner(Game game, Player player, Board board)
-    {
-        return new Faker<Winner>()
-            .RuleFor(w => w.Id, f => Guid.NewGuid())
-            .RuleFor(w => w.GameId, game.Id)
-            .RuleFor(w => w.PlayerId, player.Id)
-            .RuleFor(w => w.BoardId, board.Id)
-            .RuleFor(w => w.WinningAmount, f => f.Finance.Amount())
-            .RuleFor(w => w.CreatedAt, f => DateTime.UtcNow)
-            .Generate();
+        SeededData[$"{email}_Token"] = result.Token;
+        return result.Token;
     }
 }
+

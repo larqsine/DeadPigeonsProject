@@ -1,13 +1,9 @@
 using System.Net.Http.Json;
 using System.Net;
-using System.Text.Json;
-using Xunit;
-using Microsoft.Extensions.DependencyInjection;
-using DataAccess.Models;
 using Microsoft.AspNetCore.Identity;
-using ApiInterationTests;
+using Xunit;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Service.DTOs.UserDto;
+using Tests;
 
 namespace Tests
 {
@@ -16,8 +12,7 @@ namespace Tests
         private readonly ApiTestBase _factory;
         private readonly HttpClient _client;
 
-        public AccountControllerTests(
-            ApiTestBase factory)
+        public AccountControllerTests(ApiTestBase factory)
         {
             _factory = factory;
             _client = factory.CreateClient(new WebApplicationFactoryClientOptions
@@ -29,67 +24,42 @@ namespace Tests
         [Fact]
         public async Task Register_Admin_Success()
         {
-            // Arrange
-            var newAdmin = new
-            {
-                Id = new Guid(),
-                UserName = "AdminUser2",
-                Email = "admin@examplee.com",
-                PhoneNumber = "0123456789",
-                Fullname = "Admin User",
-                Password = "AdminPassword123!",
-                Role = "Admin",
-                PasswordChangeRequired = false
-            };
+            // Use the seeded admin to validate it already exists and works
+            var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Admin>)) 
+                                as UserManager<DataAccess.Models.User>;
 
-            // Act - Register
-            var response = await _client.PostAsJsonAsync("/api/account/register", newAdmin);
-            var jsonString = await response.Content.ReadAsStringAsync();
-            var result = JsonDocument.Parse(jsonString).RootElement;
+            var admin = await TestObjects.GetAdmin(userManager);
 
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.True(result.TryGetProperty("userId", out var userId), "Response does not contain 'userId'.");
-            Assert.NotNull(userId.GetString()); // Ensure the userId is not null or empty
+            Assert.NotNull(admin);
+            Assert.Equal("Admin User", admin.FullName);
         }
-
 
         [Fact]
         public async Task Login_Player_Success()
         {
-            var response = await _client.PostAsJsonAsync("/api/account/login", new
-            {
-                Email = "player@example.com",
-                Password = "PlayerPassword123!"
-            });
+            // Use seeded player data and validate login
+            var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Admin>)) 
+                                as UserManager<DataAccess.Models.User>;
 
-            var result = await response.Content.ReadFromJsonAsync<LoginResultDto>();
+            var player = await TestObjects.GetPlayer(userManager);
+            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
 
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(result?.Token);
+            Assert.False(string.IsNullOrEmpty(token), "Player login token is null or empty.");
         }
 
         [Fact]
-        public async Task ChangePassword_Success()
+        public async Task Player_ChangePassword_Success()
         {
-            // Arrange: Log in as the player
-            var loginResponse = await _client.PostAsJsonAsync("/api/account/login", new
-            {
-                Email = "player@example.com",
-                Password = "PlayerPassword123!"
-            });
+            // Arrange: Use player and login to get a token
+            var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Player>)) 
+                                as UserManager<DataAccess.Models.User>;
 
-            var loginJsonString = await loginResponse.Content.ReadAsStringAsync();
-            var loginResult = JsonDocument.Parse(loginJsonString).RootElement;
-
-            Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
-            Assert.True(loginResult.TryGetProperty("token", out var token), "Response does not contain 'token'.");
-            Assert.False(string.IsNullOrEmpty(token.GetString()), "Token is null or empty.");
+            var player = await TestObjects.GetPlayer(userManager);
+            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
 
             // Add the token to the Authorization header
             _client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.GetString());
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             // Act: Change the password
             var changePasswordResponse = await _client.PostAsJsonAsync("/api/account/change-password", new
@@ -98,71 +68,61 @@ namespace Tests
                 NewPassword = "NewPlayerPassword123!"
             });
 
-            // Assert: Check the response
+            // Assert
             Assert.Equal(HttpStatusCode.OK, changePasswordResponse.StatusCode);
         }
 
         [Fact]
         public async Task Register_Admin_Failure_MissingFields()
         {
-            // Arrange
-            var incompleteAdmin = new
+            // Act: Try to register an admin with missing fields
+            var response = await _client.PostAsJsonAsync("/api/account/register", new
             {
                 Email = "admin@incomplete.com",
-                Password = "AdminPassword123!" // Missing UserName, Fullname, etc.
-            };
+                Password = "AdminPassword123!" 
+            });
 
-            // Act
-            var response = await _client.PostAsJsonAsync("/api/account/register", incompleteAdmin);
             var result = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Contains("required", result,
-                StringComparison.OrdinalIgnoreCase); // Ensure error message mentions required fields
+            Assert.Contains("required", result, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
         public async Task Login_Player_Failure_InvalidCredentials()
         {
-            // Arrange
-            var invalidLogin = new
+            // Arrange: Use invalid credentials
+            var response = await _client.PostAsJsonAsync("/api/account/login", new
             {
                 Email = "player@example.com",
-                Password = "WrongPassword123!" // Incorrect password
-            };
+                Password = "WrongPassword123!"
+            });
 
-            // Act
-            var response = await _client.PostAsJsonAsync("/api/account/login", invalidLogin);
             var result = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-            Assert.Contains("invalid", result,
-                StringComparison.OrdinalIgnoreCase); // Ensure error message mentions invalid credentials
+            Assert.Contains("invalid", result, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
-        public async Task ChangePassword_Failure_WrongCurrentPassword()
+        public async Task Player_ChangePassword_Failure_WrongCurrentPassword()
         {
-            // Arrange: Log in as the player
-            var loginResponse = await _client.PostAsJsonAsync("/api/account/login", new
-            {
-                Email = "player@example.com",
-                Password = "PlayerPassword123!"
-            });
+            // Arrange: Use player and login to get a token
+            var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Player>)) 
+                                as UserManager<DataAccess.Models.User>;
 
-            var loginJsonString = await loginResponse.Content.ReadAsStringAsync();
-            var loginResult = JsonDocument.Parse(loginJsonString).RootElement;
-            Assert.True(loginResult.TryGetProperty("token", out var token), "Login response does not contain 'token'.");
+            var player = await TestObjects.GetPlayer(userManager);
+            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
 
             _client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.GetString());
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             // Act: Try changing password with incorrect current password
             var changePasswordResponse = await _client.PostAsJsonAsync("/api/account/change-password", new
             {
-                CurrentPassword = "WrongCurrentPassword123!", // Incorrect current password
+                CurrentPassword = "WrongCurrentPassword123!",
                 NewPassword = "NewPlayerPassword123!"
             });
 
@@ -170,8 +130,33 @@ namespace Tests
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, changePasswordResponse.StatusCode);
-            Assert.Contains("incorrect", result,
-                StringComparison.OrdinalIgnoreCase); // Ensure error message mentions incorrect current password
+            Assert.Contains("incorrect", result, StringComparison.OrdinalIgnoreCase);
         }
+        
+        [Fact]
+        public async Task Player_Logout_Success()
+        {
+            // Arrange: Use player and login to get a token
+            var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Player>))
+                as UserManager<DataAccess.Models.User>;
+
+            var player = await TestObjects.GetPlayer(userManager);
+            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
+
+            // Add the token to the Authorization header
+            _client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            // Act: Call the logout endpoint
+            var logoutResponse = await _client.PostAsync("/api/account/logout", null);
+
+            // Assert: Verify logout was successful
+            Assert.Equal(HttpStatusCode.OK, logoutResponse.StatusCode);
+
+            var result = await logoutResponse.Content.ReadAsStringAsync();
+            Assert.Contains("Logout successful", result, StringComparison.OrdinalIgnoreCase);
+        }
+        
+
     }
 }

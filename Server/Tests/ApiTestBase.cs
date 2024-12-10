@@ -7,7 +7,7 @@ using DataAccess;
 using DataAccess.Models;
 using System.Threading.Tasks;
 using System.Linq;
-using ApiInterationTests;
+using Tests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using PgCtx;
@@ -33,32 +33,20 @@ namespace Tests
 
         public async Task Seed(IServiceProvider services)
         {
-            var ctx = services.GetRequiredService<DataAccess.DBContext>();
+            using var scope = services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
 
-            // Seed default data for tests
-            var userManager = services.GetRequiredService<UserManager<User>>();
+            var ctx = scopedServices.GetRequiredService<DBContext>();
+            var userManager = scopedServices.GetRequiredService<UserManager<User>>();
+
             var admin = await TestObjects.GetAdmin(userManager);
             var player = await TestObjects.GetPlayer(userManager);
             
-            var game = TestObjects.GetGame(admin);
-            var board = TestObjects.GetBoard(player, game);
-            var transaction = TestObjects.GetTransaction(player);
-            var winner = TestObjects.GetWinner(game, player, board);
-
-            /*
-            ctx.Admins.Add(admin);
-            ctx.Players.Add(player);
-            */
-            ctx.Games.Add(game);
-            ctx.Boards.Add(board);
-            ctx.Transactions.Add(transaction);
-            ctx.Winners.Add(winner);
-        
-            
 
             await ctx.SaveChangesAsync();
-            
         }
+
+
 
         protected override IHost CreateHost(IHostBuilder builder)
         {

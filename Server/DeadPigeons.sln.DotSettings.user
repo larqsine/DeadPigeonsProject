@@ -6,6 +6,7 @@
     &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:AccountControllerTests.cs&lt;/ProjectFile&gt;
     &lt;TestAncestor&gt;
       &lt;TestId&gt;xUnit::1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6::net8.0::Tests.BoardControllerTests.GetBoardsByPlayerId_Success&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6::net8.0::Tests.PlayerControllerTests&lt;/TestId&gt;
     &lt;/TestAncestor&gt;
     &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:BoardControllerTests.cs&lt;/ProjectFile&gt;
   &lt;/Or&gt;
