@@ -6,7 +6,7 @@ import { passwordChangeRequiredAtom, usernameAtom, isLoggedInAtom } from "../App
 import styles from "./ChangePasswordPage.module.css";
 
 const ChangePasswordPage: React.FC = () => {
-    const [username] = useAtom(usernameAtom);
+   // const [username] = useAtom(usernameAtom);
     const [passwordChangeRequired, setPasswordChangeRequired] = useAtom(passwordChangeRequiredAtom);
     const [isLoggedIn] = useAtom(isLoggedInAtom);
     const [currentPassword, setCurrentPassword] = useState("");
@@ -14,10 +14,6 @@ const ChangePasswordPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-
-    if (!isLoggedIn) {
-        navigate("/login");
-    }
 
     const handlePasswordChange = async () => {
         if (!currentPassword || !newPassword) {

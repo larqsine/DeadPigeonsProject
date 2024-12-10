@@ -113,13 +113,13 @@ namespace API.Controllers
             // Generate JWT token using the JwtService
             var token = _jwtService.GenerateJwtToken(user.Id.ToString(), user.UserName, roles.ToList());
 
-            return Ok(new
+            return Ok(new LoginResultDto()
             {
-                message = "Login successful!",
-                user = user.UserName,
-                roles,
-                token,
-                passwordChangeRequired = user.PasswordChangeRequired 
+                Message = "Login successful!",
+                UserName = user.UserName,
+                Roles = roles,
+                Token = token,
+                PasswordChangeRequired = user.PasswordChangeRequired 
             });
         }
 

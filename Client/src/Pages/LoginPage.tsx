@@ -2,8 +2,9 @@
 import { useAtom } from 'jotai';
 import axios from 'axios';
 import styles from './LoginPage.module.css';
-import { loginFormAtom, userAtom, isLoggedInAtom } from './PagesJotaiStore';
+import { loginFormAtom, userAtom } from './PagesJotaiStore';
 import { useNavigate } from 'react-router-dom';
+import {isLoggedInAtom} from "../AppJotaiStore.ts";
 
 interface LoginPageProps {
     onLogin: (email: string, roles: string[]) => void;

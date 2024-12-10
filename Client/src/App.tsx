@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useAtom } from "jotai";
+import React, {useEffect} from "react";
+import {Routes, Route, Navigate} from "react-router-dom";
+import {useAtom} from "jotai";
 import {
     isLoggedInAtom,
     isAdminAtom,
@@ -16,7 +16,7 @@ import LoginPage from "./Pages/LoginPage";
 import PlayPage from "./Pages/PlayPage";
 import styles from "./App.module.css";
 import ChangePasswordPage from "./Pages/ChangePasswordPage";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 const App: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
@@ -127,35 +127,39 @@ const App: React.FC = () => {
                     <Routes>
                         <Route
                             path="/login"
-                            element={!isLoggedIn ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/" />}
+                            element={!isLoggedIn ? <LoginPage onLogin={handleLogin}/> : <Navigate to="/"/>}
                         />
                         <Route
                             path="/"
                             element={
                                 isLoggedIn ? (
                                     showBoxGrid ? (
-                                        <PlayPage />
+                                        <PlayPage/>
                                     ) : (
-                                        <Navigate to="/admin" />
+                                        <Navigate to="/admin"/>
                                     )
                                 ) : (
-                                    <Navigate to="/login" />
+                                    <Navigate to="/login"/>
                                 )
                             }
                         />
                         <Route
                             path="/admin"
-                            element={isLoggedIn && isAdmin ? <AdminPage /> : <Navigate to="/" />}
+                            element={isLoggedIn && isAdmin ? <AdminPage/> : <Navigate to="/"/>}
                         />
                         <Route
+                            path="/change-password"
+                            element={<ChangePasswordPage/>}
+                        />
+                        {/*                         <Route
                             path="/change-password"
                             element={isLoggedIn && passwordChangeRequired ? (
                                 <ChangePasswordPage />
                             ) : (
                                 <Navigate to="/" />
                             )}
-                        />
-                        <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} />} />
+                        />*/}
+                        <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"}/>}/>
                     </Routes>
                 </div>
             </div>
