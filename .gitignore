@@ -14,6 +14,7 @@ obj
 bin
 Migrations
 *.local
+DeadPigeons.sln.DotSettings
 
 # Editor directories and files
 .vscode/*
