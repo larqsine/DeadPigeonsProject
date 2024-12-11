@@ -1,6 +1,8 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAtom } from "jotai"; // Import the useAtom hook
 import styles from "./NavBar.module.css";
+import { playerIdAtom } from "../Pages/PagesJotaiStore.ts"; // Ensure this is the correct path to your store
 
 interface NavbarProps {
     onPlayClick: () => void;
@@ -8,7 +10,6 @@ interface NavbarProps {
     onSignOut: () => void;
     isAdmin: boolean;
     onGoToAdminPage: () => void;
-    playerId: string;
     balance: number;
 }
 
@@ -22,33 +23,50 @@ const NavBar: React.FC<NavbarProps> = ({
                                        }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isAddBalanceOpen, setIsAddBalanceOpen] = useState(false);
-    const [transactionId, setTransactionId] = useState("");
+    const [desiredAmount, setDesiredAmount] = useState(""); // For desired amount
+    const [mobilePayNumber, setMobilePayNumber] = useState(""); // For MobilePay number
+    const [playerId] = useAtom(playerIdAtom); // Correctly access the atom using useAtom
     const dropdownRef = React.useRef<HTMLDivElement | null>(null);
-    const transactionInputRef = React.useRef<HTMLInputElement | null>(null);
-
     const navigate = useNavigate();
 
-    // Handle Add Balance button click
     const handleAddBalanceClick = () => {
         setIsAddBalanceOpen(true);
         setIsDropdownOpen(false);
     };
 
-    const handleTransactionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTransactionId(event.target.value);
-    };
-
-    const handleSubmitTransaction = () => {
-        if (!transactionId) {
-            alert("Please enter a valid transaction ID");
+    const handleSubmitTransaction = async () => {
+        if (!desiredAmount || !mobilePayNumber) {
+            alert("Please enter both the desired amount and MobilePay number.");
             return;
         }
 
-        console.log("Transaction ID entered:", transactionId);
-        alert(`Transaction number: "${transactionId}" has been sent.`);
+        try {
+            const response = await fetch(`http://localhost:6329/api/Player/${playerId}/deposit`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    playerId,
+                    amount: parseFloat(desiredAmount),
+                    mobilePayNumber,
+                }),
+            });
 
-        setTransactionId("");
-        setIsAddBalanceOpen(false);
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("Balance added successfully!");
+                setDesiredAmount(""); // Clear inputs
+                setMobilePayNumber("");
+                setIsAddBalanceOpen(false);
+            } else {
+                alert(result.message || "Failed to add balance.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred while adding balance.");
+        }
     };
 
     // Close the dropdown if clicked outside
@@ -56,9 +74,6 @@ const NavBar: React.FC<NavbarProps> = ({
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsDropdownOpen(false);
-            }
-            if (transactionInputRef.current && !transactionInputRef.current.contains(event.target as Node)) {
-                setIsAddBalanceOpen(false);
             }
         };
 
@@ -68,10 +83,13 @@ const NavBar: React.FC<NavbarProps> = ({
         };
     }, []);
 
-    // Handle navigation events
+    useEffect(() => {
+        console.log("Player ID in NavBar:", playerId);
+    }, [playerId]);
+
     const handlePlayClick = () => {
         onPlayClick();
-        navigate("/");
+        navigate("/play");
     };
 
     const handleGoToAdminPage = () => {
@@ -83,12 +101,16 @@ const NavBar: React.FC<NavbarProps> = ({
         onSignOut();
         navigate("/login");
     };
-
+    
+    const handleTransactionsClick = () => {
+        navigate("/transactions");
+    };
+    
     return (
         <div className={styles.nav}>
             {/* Logo */}
             <div className={styles.logo}>
-                <img src="/logo.png" alt="App Logo" className={styles.logo} />
+                <img src="/logo.png" alt="App Logo" className={styles.logo}/>
             </div>
 
             {/* Center Buttons */}
@@ -98,6 +120,7 @@ const NavBar: React.FC<NavbarProps> = ({
                 </li>
                 <li className={styles.navItem}>Board History</li>
                 <li className={styles.navItem}>Current Winnings</li>
+                <li className={styles.navItem} onClick={handleTransactionsClick}>Transactions</li>
             </ul>
 
             {/* Balance Display */}
@@ -112,7 +135,11 @@ const NavBar: React.FC<NavbarProps> = ({
             </div>
 
             {isDropdownOpen && (
-                <div ref={dropdownRef} className={styles.dropdownMenu}>
+                <div
+                    ref={dropdownRef}
+                    className={styles.dropdownMenu}
+                    onClick={(e) => e.stopPropagation()} // Prevent click propagation
+                >
                     {isAdmin ? (
                         <button onClick={handleGoToAdminPage}>Admin Page</button>
                     ) : (
@@ -124,14 +151,23 @@ const NavBar: React.FC<NavbarProps> = ({
 
             {/* Add Balance Input */}
             {isAddBalanceOpen && (
-                <div className={styles.addBalanceContainer}>
-                    <input
-                        ref={transactionInputRef}
-                        type="text"
-                        placeholder="Enter Transaction ID"
-                        value={transactionId}
-                        onChange={handleTransactionChange}
-                    />
+                <div className={styles.addBalance}>
+                    <div className={styles.amountInputContainer}>
+                        <input
+                            type="number"
+                            placeholder="Enter desired amount"
+                            value={desiredAmount}
+                            onChange={(e) => setDesiredAmount(e.target.value)}
+                        />
+                    </div>
+                    <div className={styles.mobilePayInputContainer}>
+                        <input
+                            type="text"
+                            placeholder="Enter MobilePay number"
+                            value={mobilePayNumber}
+                            onChange={(e) => setMobilePayNumber(e.target.value)}
+                        />
+                    </div>
                     <button onClick={handleSubmitTransaction}>Submit</button>
                 </div>
             )}

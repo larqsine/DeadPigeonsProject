@@ -11,6 +11,15 @@ export type User = {
     createdAt: string;
 };
 
+export interface Transaction {
+    id: string;
+    amount: number;
+    status: string;
+    transactionType: string;
+    createdAt?: string; // Optional
+}
+
+
 // Atoms for AdminPage
 export const selectedWinningNumbersAtom = atom<number[]>([]);
 export const usersAtom = atom<User[]>([]);
@@ -29,14 +38,18 @@ export const newUserAtom = atom({
     role: '',
 });
 
-// Atoms for BoxGrid component
+// Atoms for Play page
 export const selectedBoxesAtom = atom<number[]>([]);
 export const playerIdAtom = atom<string>('');
 export const gameIdAtom = atom<string>('');
 export const messageAtom = atom<string>('');
 export const errorAtom = atom<string>('');
 
-// Atoms for LoginPage component
+// Atoms for LoginPage 
 export const loginFormAtom = atom({ email: '', password: '' });
 export const userAtom = atom<{ userName: string; roles: string[]; token: string[]; } | null>(null); 
 export const isLoggedInAtom = atom<boolean>(false);
+
+// Atoms for transactions page
+export const transactionsAtom = atom<Transaction[]>([]);
+export const loadingAtom = atom(true);

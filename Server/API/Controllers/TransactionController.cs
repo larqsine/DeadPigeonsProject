@@ -12,7 +12,7 @@ public class TransactionController : ControllerBase
         _transactionService = transactionService;
     }
 
-    [HttpPut("{transactionId}/approve")]
+    [HttpPut("transaction/{transactionId}/approve")]
     public async Task<IActionResult> ApproveTransaction(Guid transactionId)
     {
         var transaction = await _transactionService.ApproveTransactionAsync(transactionId);
@@ -24,7 +24,7 @@ public class TransactionController : ControllerBase
         return Ok(transaction);
     }
 
-    [HttpPut("{transactionId}/decline")]
+    [HttpPut("transaction/{transactionId}/decline")]
     public async Task<IActionResult> DeclineTransaction(Guid transactionId)
     {
         var transaction = await _transactionService.DeclineTransactionAsync(transactionId);
@@ -34,5 +34,13 @@ public class TransactionController : ControllerBase
         }
 
         return Ok(transaction);
+    }
+    
+    //Get deposit transactions
+    [HttpGet("transaction/deposit")]
+    public async Task<IActionResult> GetDepositTransactions()
+    {
+        var transactions = await _transactionService.GetTransactionsByTypeAsync("deposit");
+        return Ok(transactions);
     }
 }

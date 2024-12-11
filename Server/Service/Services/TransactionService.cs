@@ -52,6 +52,15 @@ namespace Service.Services
             await _transactionRepository.SaveAsync();
 
             return TransactionResponseDto.FromEntity(transaction);
+            
         }
+        public async Task<List<TransactionResponseDto>> GetTransactionsByTypeAsync(string type)
+        {
+            var transactions = await _transactionRepository.GetTransactionsByTypeAsync(type);
+
+            return transactions.Select(TransactionResponseDto.FromEntity).ToList();
+        }
+
+
     }
 }

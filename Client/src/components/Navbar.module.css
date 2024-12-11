@@ -1,6 +1,6 @@
 ﻿.nav {
     display: flex;
-    justify-content: space-between; /* Logo on the left, Profile on the right */
+    justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
     background-color: rgb(164, 1, 1);
@@ -22,7 +22,7 @@
     margin: 0;
     padding: 0;
     flex-grow: 1; /* Ensures buttons take up remaining space */
-    justify-content: center; /* Centers the buttons */
+    margin-left: 30px;
 }
 
 .navItem {
@@ -101,6 +101,7 @@
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
 }
 
 .addBalance input {
@@ -108,6 +109,7 @@
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 3px;
+    margin-right: 10px;
 }
 
 .Balance {
@@ -115,3 +117,12 @@
     font-weight: bold;
     margin-right: 10px;
 }
+
+.amountInputContainer{
+    margin-bottom: 10px;
+}
+
+.mobilePayInputContainer{
+    margin-bottom: 10px;
+}
+

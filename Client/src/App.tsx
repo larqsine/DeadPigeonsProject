@@ -13,6 +13,7 @@ import Navbar from "./components/Navbar";
 import AdminPage from "./Pages/AdminPage";
 import LoginPage from "./Pages/LoginPage";
 import PlayPage from "./Pages/PlayPage";
+import TransactionPage from "./Pages/TransactionPage.tsx";
 import styles from "./App.module.css";
 
 const App: React.FC = () => {
@@ -71,13 +72,11 @@ const App: React.FC = () => {
                         onSignOut={handleSignOut}
                         isAdmin={isAdmin}
                         onGoToAdminPage={handleGoToAdminPage}
-                        playerId={username?.toLowerCase() || "guest"}
                     />
                 )}
 
                 {/* Main Content */}
                 <div className={styles.mainContent}>
-                    {/* Routes with Page Transition Styling */}
                     <div
                         className={`${styles.page} ${!isLoggedIn ? styles.active : ""} ${
                             transitioning ? styles.fadeOut : ""
@@ -114,6 +113,10 @@ const App: React.FC = () => {
                             <Route
                                 path="/admin"
                                 element={isLoggedIn && isAdmin ? <AdminPage /> : <Navigate to="/" />}
+                            />
+                            <Route
+                                path="/transactions"
+                                element={isLoggedIn && isAdmin ? <TransactionPage /> : <Navigate to="/" />}
                             />
                             <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} />} />
                         </Routes>

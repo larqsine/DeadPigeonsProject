@@ -2,17 +2,17 @@
 import { useAtom } from 'jotai';
 import axios from 'axios';
 import styles from './LoginPage.module.css';
-import { loginFormAtom, userAtom, isLoggedInAtom } from './PagesJotaiStore.ts';
+import { loginFormAtom, userAtom, isLoggedInAtom, playerIdAtom } from './PagesJotaiStore.ts';
 
 interface LoginPageProps {
     onLogin: (email: string, roles: string[]) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-    // Using Jotai atoms to manage form state
     const [loginForm, setLoginForm] = useAtom(loginFormAtom);
     const [, setUser] = useAtom(userAtom);
     const [, setIsLoggedIn] = useAtom(isLoggedInAtom);
+    const [, setPlayerId] = useAtom(playerIdAtom); // Use the correct playerIdAtom here
 
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -27,17 +27,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     password: loginForm.password,
                 });
 
-                const { user, roles, token } = response.data;
+                const { user, roles, token, playerId } = response.data;
                 alert(`Login successful! Welcome ${user}`);
 
-                // Store user data in Jotai atoms
+                // Set user data in userAtom
                 setUser({ userName: user, roles, token });
-                setIsLoggedIn(true); // Set the logged-in status to true
 
-                onLogin(user, roles); 
+                // Set playerId in playerIdAtom
+                setPlayerId(playerId);
+
+                // Mark the user as logged in
+                setIsLoggedIn(true);
+
+                onLogin(user, roles);
             } catch (error) {
-                console.log(error);
-                console.error(error);
+                console.error("Login Error:", error);
                 alert('Login failed. Please check your credentials.');
             }
         } else {

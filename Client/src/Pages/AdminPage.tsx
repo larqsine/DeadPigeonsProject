@@ -37,7 +37,7 @@ const AdminPage: React.FC = () => {
         }
     }, [isModalOpen, isEditUserModalOpen, isCreateUserModalOpen]);
 
-    // Fetch all users
+    
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -86,7 +86,7 @@ const AdminPage: React.FC = () => {
         try {
             const response = await axios.post(`http://localhost:6329/api/Games/${gameId}/close`, payload);
             setMessage(response.data.message || 'Game closed successfully!');
-            setSelectedWinningNumbers([]); // Clear selected numbers after purchase
+            setSelectedWinningNumbers([]); 
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Error Status:', err.response?.status);
@@ -457,7 +457,6 @@ const AdminPage: React.FC = () => {
                                 >
                                     <option value="admin">Admin</option>
                                     <option value="player">Player</option>
-                                    {/* Updated option */}
                                 </select>
                             </label>
                             <button type="submit">Create User</button>
