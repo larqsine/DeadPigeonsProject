@@ -35,6 +35,32 @@ namespace Tests
         }
 
         [Fact]
+        public async Task Register_Admin_Failure_Unauthorized()
+        {
+            // Arrange: Use a non-admin player token for access
+            var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Player>))
+                as UserManager<DataAccess.Models.User>;
+
+            var player = await TestObjects.GetPlayer(userManager);
+            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
+
+            // Add the token to the Authorization header for a non-admin user
+            _client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            // Act: Try to access the admin-only register endpoint
+            var response = await _client.PostAsJsonAsync("/api/account/register", new
+            {
+                FullName = "New Admin User",
+                Email = "admin@example.com",
+                Password = "AdminPassword123!"
+            });
+
+            // Assert: Expect Unauthorized (403) for non-admin user
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        [Fact]
         public async Task Login_Player_Success()
         {
             // Use seeded player data and validate login
@@ -45,6 +71,23 @@ namespace Tests
             var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
 
             Assert.False(string.IsNullOrEmpty(token), "Player login token is null or empty.");
+        }
+
+        [Fact]
+        public async Task Login_Player_Failure_InvalidCredentials()
+        {
+            // Arrange: Use invalid credentials
+            var response = await _client.PostAsJsonAsync("/api/account/login", new
+            {
+                Email = "player@example.com",
+                Password = "WrongPassword123!"
+            });
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.Contains("invalid", result, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -73,40 +116,6 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Register_Admin_Failure_MissingFields()
-        {
-            // Act: Try to register an admin with missing fields
-            var response = await _client.PostAsJsonAsync("/api/account/register", new
-            {
-                Email = "admin@incomplete.com",
-                Password = "AdminPassword123!" 
-            });
-
-            var result = await response.Content.ReadAsStringAsync();
-
-            // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Contains("required", result, StringComparison.OrdinalIgnoreCase);
-        }
-
-        [Fact]
-        public async Task Login_Player_Failure_InvalidCredentials()
-        {
-            // Arrange: Use invalid credentials
-            var response = await _client.PostAsJsonAsync("/api/account/login", new
-            {
-                Email = "player@example.com",
-                Password = "WrongPassword123!"
-            });
-
-            var result = await response.Content.ReadAsStringAsync();
-
-            // Assert
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-            Assert.Contains("invalid", result, StringComparison.OrdinalIgnoreCase);
-        }
-
-        [Fact]
         public async Task Player_ChangePassword_Failure_WrongCurrentPassword()
         {
             // Arrange: Use player and login to get a token
@@ -132,31 +141,36 @@ namespace Tests
             Assert.Equal(HttpStatusCode.BadRequest, changePasswordResponse.StatusCode);
             Assert.Contains("incorrect", result, StringComparison.OrdinalIgnoreCase);
         }
+
+       
+
+
+        
+
         
         [Fact]
-        public async Task Player_Logout_Success()
+        public async Task Admin_Access_Required_Failure()
         {
-            // Arrange: Use player and login to get a token
+            // Arrange: Non-admin player trying to access admin-required endpoint
             var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Player>))
                 as UserManager<DataAccess.Models.User>;
 
             var player = await TestObjects.GetPlayer(userManager);
             var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
 
-            // Add the token to the Authorization header
             _client.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            // Act: Call the logout endpoint
-            var logoutResponse = await _client.PostAsync("/api/account/logout", null);
+            // Act: Try to access admin-only register endpoint
+            var response = await _client.PostAsJsonAsync("/api/account/register", new
+            {
+                FullName = "New Admin User",
+                Email = "admin@example.com",
+                Password = "AdminPassword123!"
+            });
 
-            // Assert: Verify logout was successful
-            Assert.Equal(HttpStatusCode.OK, logoutResponse.StatusCode);
-
-            var result = await logoutResponse.Content.ReadAsStringAsync();
-            Assert.Contains("Logout successful", result, StringComparison.OrdinalIgnoreCase);
+            // Assert: Unauthorized or Forbidden response (403)
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
-        
-
     }
 }

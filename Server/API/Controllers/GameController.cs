@@ -38,6 +38,11 @@ namespace API.Controllers
         [HttpPost("{gameId}/close")]
         public async Task<IActionResult> CloseGame(Guid gameId, [FromBody] GameCloseDto gameCloseDto)
         {
+            if (gameCloseDto.WinningNumbers == null || !gameCloseDto.WinningNumbers.Any())
+            {
+                return BadRequest(new { message = "Winning numbers cannot be null or empty." });
+            }
+
             try
             {
                 await _gameService.CloseGameAsync(gameId, gameCloseDto.WinningNumbers);
@@ -48,6 +53,7 @@ namespace API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [HttpGet("active")]
         public async Task<IActionResult> GetActiveGameId()
         {

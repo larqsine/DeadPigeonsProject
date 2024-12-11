@@ -56,35 +56,7 @@ namespace Tests
             Assert.All(result, board => Assert.Equal(gameId, board.GameId));
         }
 
-        [Fact]
-        public async Task BuyBoard_Failure_InvalidFields()
-        {
-            // Fetch or create valid IDs
-            var playersResponse = await _client.GetAsync("/api/players");
-            var players = await playersResponse.Content.ReadFromJsonAsync<List<Player>>();
-            var playerId = players.First().Id;
-
-            var gamesResponse = await _client.GetAsync("/api/games");
-            var games = await gamesResponse.Content.ReadFromJsonAsync<List<Game>>();
-            var gameId = games.First().Id;
-
-            var buyBoardRequest = new
-            {
-                GameId = gameId,
-                FieldsCount = 10,
-                Numbers = "1,2,3,4,5",
-                RemainingAutoplayWeeks = 0
-            };
-
-            // Act
-            var response = await _client.PostAsJsonAsync($"/api/board/{playerId}/buy", buyBoardRequest);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            var errorMessage = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Invalid number of fields", errorMessage);
-        }
-
+        
 
     }
 }

@@ -45,12 +45,7 @@ public class PlayerRepository
             await _context.SaveChangesAsync();
         }
     }
-
-    public async Task AddTransactionAsync(Transaction transaction)
-    {
-        await _context.Transactions.AddAsync(transaction);
-        await _context.SaveChangesAsync();
-    }
+    
     public async Task SaveAsync()
     {
         await _context.SaveChangesAsync();
@@ -71,34 +66,32 @@ public class PlayerRepository
 
     public async Task<Player> GetByIdAsync(Guid playerId)
     {
-        return await _context.Players.FindAsync(playerId); // Fetch player from DbContext
+        return await _context.Players.FindAsync(playerId); 
     }
     
     public async Task<Guid> GetPlayerIdByUsernameAsync(string username)
     {
-        // Find the player by username using case-insensitive comparison
         var player = await _context.Players
-            .FirstOrDefaultAsync(p => p.UserName.ToLower() == username.ToLower()); // Case-insensitive comparison
+            .FirstOrDefaultAsync(p => p.UserName.ToLower() == username.ToLower());
 
         if (player == null)
         {
             throw new KeyNotFoundException($"Player with username {username} not found.");
         }
 
-        return player.Id; // Return the player's Id
+        return player.Id; 
     }
     public async Task<Player> GetPlayerByUsernameAsync(string username)
     {
-        // Find the player by username using case-insensitive comparison
         var player = await _context.Players
-            .FirstOrDefaultAsync(p => p.UserName.ToLower() == username.ToLower()); // Case-insensitive comparison
+            .FirstOrDefaultAsync(p => p.UserName.ToLower() == username.ToLower()); 
 
         if (player == null)
         {
             throw new KeyNotFoundException($"Player with username {username} not found.");
         }
 
-        return player; // Return the player's Id
+        return player; 
     }
 
 }

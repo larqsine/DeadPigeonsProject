@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using PgCtx;
 using API;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Tests
 {
@@ -20,17 +21,11 @@ namespace Tests
         private readonly PgCtxSetup<DBContext> pgctx;
         
 
-        // Initialize the environment and set up required services
         public ApiTestBase()
         {
-            
-            
             pgctx = new PgCtxSetup<DBContext>("postgres:latest");
-
-            
         }
         
-
         public async Task Seed(IServiceProvider services)
         {
             using var scope = services.CreateScope();
@@ -39,47 +34,45 @@ namespace Tests
             var ctx = scopedServices.GetRequiredService<DBContext>();
             var userManager = scopedServices.GetRequiredService<UserManager<User>>();
 
+            
+            await ctx.Database.EnsureCreatedAsync();
+
+            // Seed admin and player users
             var admin = await TestObjects.GetAdmin(userManager);
             var player = await TestObjects.GetPlayer(userManager);
-            
 
+            // Save changes explicitly
             await ctx.SaveChangesAsync();
         }
 
 
-
         protected override IHost CreateHost(IHostBuilder builder)
         {
-            // Remove the existing DBContext setup
             builder.ConfigureServices(services =>
             {
-                // Remove existing DbContextOptions
-                var descriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(DbContextOptions<DBContext>));
+                // Remove existing DbContextOptions and add a new scoped DbContext
+                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<DBContext>));
                 if (descriptor != null)
                 {
                     services.Remove(descriptor);
                 }
 
-                // Use the PostgreSQL connection string from PgCtx
+                // Re-add DbContext scoped to the test environment
                 services.AddDbContext<DBContext>(options =>
                     options.UseNpgsql(pgctx._postgres.GetConnectionString()));
-                var constring = pgctx._postgres.GetConnectionString();
-                Console.WriteLine(constring);
+                
             });
 
-            // Build the host
             var host = builder.Build();
 
-            // Seed the database (initialize services before starting)
+            // Seed the database only after the host is created and services are available
             using (var scope = host.Services.CreateScope())
             {
                 Seed(scope.ServiceProvider).GetAwaiter().GetResult();
             }
-            
 
             return host;
         }
-
+        
     }
 }

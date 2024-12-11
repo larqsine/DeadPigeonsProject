@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Xunit;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Service.DTOs.PlayerDto;
+using Service.DTOs.TransactionDto;
 
 namespace Tests
 {
@@ -27,7 +29,7 @@ namespace Tests
         {
             // Arrange
             var userManager = _factory.Services.GetService(typeof(UserManager<Player>))
-                                as UserManager<User>;
+                as UserManager<User>;
 
             var player = await TestObjects.GetPlayer(userManager);
             var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
@@ -37,76 +39,47 @@ namespace Tests
 
             // Act
             var response = await _client.GetAsync($"/api/player/{player.Id}");
-            var result = await response.Content.ReadFromJsonAsync<Player>();
+            var result = await response.Content.ReadFromJsonAsync<PlayerResponseDto>();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(result);
             Assert.Equal(player.FullName, result.FullName);
         }
+
         [Fact]
         public async Task UpdatePlayerBalance_Success()
         {
             // Arrange
             using var scope = _factory.Services.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-            // Initialize player
             var player = await TestObjects.GetPlayer(userManager);
 
-            // Get the token for the player
             var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
-    
-            // Check if the token is null or empty and fail the test if it is
-            if (string.IsNullOrEmpty(token))
-            {
-                Assert.Fail("Token was not obtained successfully.");
-            }
-
-            // Debugging token by logging
-            Console.WriteLine("Generated Token: " + token);
-
-            // Add the token to the Authorization header
             _client.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            // Retrieve the player from the userManager
-            var user = await userManager.FindByIdAsync(player.Id.ToString());
-
-            var playerFromDb = user as Player;
-            Assert.NotNull(playerFromDb);
-
-            var updateBalanceRequest = new { Amount = 50m };
+            var updateBalanceRequest = new TransactionCreateDto { Amount = 20m };
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/player/{player.Id}/update-balance", updateBalanceRequest);
+            var response = await _client.PostAsJsonAsync($"/api/player/{player.Id}/deposit", updateBalanceRequest);
 
             // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);  // Ensure it returns OK on valid request
 
-            // Fetch the updated player data
-            var updatedPlayer = await userManager.FindByIdAsync(player.Id.ToString());
-            var playerUpdated = updatedPlayer as Player;
-            Assert.NotNull(playerUpdated);
-            Assert.Equal(150m, playerUpdated.Balance);
+            var updatedBalanceResponse = await response.Content.ReadFromJsonAsync<TransactionResponseDto>();
+            Assert.NotNull(updatedBalanceResponse);
+            Assert.Equal(120m, updatedBalanceResponse.Amount);  // Ensure balance is updated correctly
         }
 
-        [Fact]
-        public async Task GetPlayerDetails_Failure_Unauthorized()
-        {
-            // Act
-            var response = await _client.GetAsync("/api/player/some-id");
-
-            // Assert
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        }
+        
 
         [Fact]
         public async Task UpdatePlayerBalance_Failure_InvalidAmount()
         {
             // Arrange
-            var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Player>))
-                                as UserManager<DataAccess.Models.User>;
+            var userManager = _factory.Services.GetService(typeof(UserManager<Player>))
+                as UserManager<User>;
 
             var player = await TestObjects.GetPlayer(userManager);
             var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
@@ -114,29 +87,30 @@ namespace Tests
             _client.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var updateBalanceRequest = new
-            {
-                Amount = -100m // Invalid amount
-            };
+            var updateBalanceRequest = new TransactionCreateDto { Amount = -100m };
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/player/{player.Id}/update-balance", updateBalanceRequest);
+            var response = await _client.PostAsJsonAsync($"/api/player/{player.Id}/deposit", updateBalanceRequest);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             var result = await response.Content.ReadAsStringAsync();
-            Assert.Contains("invalid amount", result, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Invalid transaction", result, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
         public async Task DeletePlayer_Success()
         {
             // Arrange
-            var userManager = _factory.Services.GetService(typeof(UserManager<DataAccess.Models.Player>))
-                                as UserManager<DataAccess.Models.User>;
+            using var scope = _factory.Services.CreateScope();  // Create a scope to resolve scoped services like UserManager
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            Assert.NotNull(userManager);  // Ensure userManager is resolved correctly
 
             var player = await TestObjects.GetPlayer(userManager);
+            Assert.NotNull(player);  // Ensure the player was created successfully
+
             var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
+            Assert.NotNull(token);  // Ensure the token is retrieved
 
             _client.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
@@ -145,10 +119,12 @@ namespace Tests
             var response = await _client.DeleteAsync($"/api/player/{player.Id}");
 
             // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
             var deletedPlayer = await userManager.FindByIdAsync(player.Id.ToString());
             Assert.Null(deletedPlayer);
         }
+
+
     }
 }

@@ -1,17 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using DataAccess.Models;
-using System;
-using System.Collections.Generic;
 using System.Net.Http.Json;
-using Bogus;
 using Service.DTOs.UserDto;
-
 namespace Tests;
 
 using System.Collections.Concurrent;
-
-using System.Collections.Concurrent;
-
 public static class TestObjects
 {
     private static readonly ConcurrentDictionary<string, object> SeededData = new();
@@ -95,5 +88,6 @@ public static class TestObjects
         SeededData[$"{email}_Token"] = result.Token;
         return result.Token;
     }
+    
 }
 

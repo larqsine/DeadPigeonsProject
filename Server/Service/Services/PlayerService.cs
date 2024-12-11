@@ -13,13 +13,17 @@ namespace Service.Services
     public class PlayerService : IPlayerService
     {
         private readonly PlayerRepository _repository;
+        private readonly TransactionRepository _transactionRepository;
         private readonly UserManager<User> _userManager;
 
 
-        public PlayerService(PlayerRepository repository, UserManager<User> userManager)
+        public PlayerService(PlayerRepository repository,
+            TransactionRepository transactionRepository,
+            UserManager<User> userManager)
         {
             _repository = repository;
             _userManager = userManager;
+            _transactionRepository = transactionRepository;
         }
         
         
@@ -153,7 +157,7 @@ namespace Service.Services
                 // Create and save the transaction with default status as Pending
                 var transaction = transactionCreateDto.ToDepositTransaction(playerId, transactionId);
                 transaction.Status = TransactionStatus.Pending; // Default status
-                await _repository.AddTransactionAsync(transaction);
+                await _transactionRepository.AddTransactionAsync(transaction);
 
                 // Return the transaction details without modifying the balance
                 return new PlayerTransactionResponseDto

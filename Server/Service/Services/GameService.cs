@@ -30,7 +30,7 @@ public class GameService : IGameService
     public async Task<List<GameResponseDto>> GetAllGamesAsync()
     {
         var games = await _gameRepository.GetAllGamesAsync();
-        return null; //games.Select(GameResponseDto.FromEntity).ToList();
+        return games.Select(GameResponseDto.FromEntity).ToList();
     }
 
 

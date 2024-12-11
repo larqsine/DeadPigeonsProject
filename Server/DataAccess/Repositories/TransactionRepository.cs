@@ -18,6 +18,12 @@ namespace DataAccess.Repositories
                 .FirstOrDefaultAsync(t => t.Id == transactionId);
         }
         
+        public async Task AddTransactionAsync(Transaction transaction)
+        {
+            await _context.Transactions.AddAsync(transaction);
+            await _context.SaveChangesAsync();
+        }
+        
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

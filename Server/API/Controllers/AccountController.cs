@@ -31,7 +31,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        //[Authorize(Policy = "AdminPolicy")] 
+        [Authorize(Policy = "AdminPolicy")] 
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
             if (string.IsNullOrEmpty(model.Role))
@@ -130,34 +130,51 @@ namespace API.Controllers
         }
         
         [HttpPost("change-password")]
-        //[Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
         {
+            // Check if the user is authenticated
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized(new { message = "User is not authenticated. Please log in." });
+            }
+
+            // Get the user ID from the token
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 
-                         ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub); // Try both
+                         ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub); 
 
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(new { message = "Invalid token. User ID not found." });
             }
 
+            // Find the user by their ID
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return Unauthorized(new { message = "User not found." });
             }
 
-            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            // Check if the current password provided matches the user's actual current password
+            var result = await _signInManager.PasswordSignInAsync(user, model.CurrentPassword, false, false);
             if (!result.Succeeded)
             {
-                return BadRequest(new { message = "Password change failed.", errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new { message = "Current password is incorrect." });
             }
 
+            // Change the password
+            var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!changePasswordResult.Succeeded)
+            {
+                return BadRequest(new { message = "Password change failed.", errors = changePasswordResult.Errors.Select(e => e.Description) });
+            }
+
+            // Update the user's PasswordChangeRequired flag
             user.PasswordChangeRequired = false;
             await _userManager.UpdateAsync(user);
 
-            return Ok(new { message = "Password changed successfully!" });
+            return Ok(new { message = "Password changed successfully!", user.UserName });
         }
+
 
     }
 }

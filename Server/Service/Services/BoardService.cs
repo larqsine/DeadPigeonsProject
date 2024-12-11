@@ -13,16 +13,19 @@ public class BoardService : IBoardService
     private readonly BoardRepository _boardRepository;
     private readonly PlayerRepository _playerRepository;
     private readonly GameRepository _gameRepository;
+    private readonly TransactionRepository _transactionRepository;
     private readonly ILogger<BoardService> _logger;
     public BoardService(
         BoardRepository boardRepository,
         PlayerRepository playerRepository,
         GameRepository gameRepository,
+        TransactionRepository transactionRepository,
         ILogger<BoardService> logger)
     {
         _boardRepository = boardRepository;
         _playerRepository = playerRepository;
         _gameRepository = gameRepository;
+        _transactionRepository = transactionRepository;
         _logger=logger;
     }
         
@@ -114,7 +117,7 @@ public class BoardService : IBoardService
         var transactionId = Guid.NewGuid();
         var purchaseTransaction = purchaseTransactionDto.ToPurchaseTransaction(player.Id, transactionId);
 
-        await _playerRepository.AddTransactionAsync(purchaseTransaction); // Add the transaction to the database
+        await _transactionRepository.AddTransactionAsync(purchaseTransaction); // Add the transaction to the database
 
         return purchaseTransaction;
     }
