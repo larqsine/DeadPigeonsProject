@@ -11,7 +11,6 @@ namespace API.Controllers
     public class GamesController : ControllerBase
     {
         private readonly IGameService _gameService;
-
         public GamesController(IGameService gameService)
         {
             _gameService = gameService;
@@ -39,6 +38,11 @@ namespace API.Controllers
         [HttpPost("{gameId}/close")]
         public async Task<IActionResult> CloseGame(Guid gameId, [FromBody] GameCloseDto gameCloseDto)
         {
+            if (gameCloseDto.WinningNumbers == null || !gameCloseDto.WinningNumbers.Any())
+            {
+                return BadRequest(new { message = "Winning numbers cannot be null or empty." });
+            }
+
             try
             {
                 await _gameService.CloseGameAsync(gameId, gameCloseDto.WinningNumbers);
@@ -49,6 +53,7 @@ namespace API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [HttpGet("active")]
         public async Task<IActionResult> GetActiveGameId()
         {
@@ -68,6 +73,19 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllGames()
+        {
+            try
+            {
+                var games = await _gameService.GetAllGamesAsync();
+                return Ok(new { message = "Games retrieved successfully.", data = games });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while fetching games.");
+            }
+        }
     }
 
 }

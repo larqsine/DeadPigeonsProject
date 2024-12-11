@@ -4,6 +4,7 @@ using Service.DTOs.UserDto;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Service.DTOs.WinnerDto;
 
 namespace Service.Interfaces
 {
@@ -20,6 +21,7 @@ namespace Service.Interfaces
 
         Task DeletePlayerAsync(Guid playerId);
 
+        Task<PlayerResponseDto> TogglePlayerActiveStatusAsync(Guid playerId, bool isActive);
         Task<Guid> GetPlayerIdByUsernameAsync(string username); 
         Task<PlayerTransactionResponseDto> AddBalanceAsync(Guid playerId, TransactionCreateDto transactionCreateDto);
         

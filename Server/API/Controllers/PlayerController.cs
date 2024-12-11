@@ -23,14 +23,26 @@ namespace API.Controllers
         [HttpGet("current")]
         public async Task<ActionResult<PlayerResponseDto>> GetCurrentPlayer()
         {
-            var username = HttpContext.User.Identities.First().Name;
-            var player = await _playerService.GetPlayerByUsernameAsync(username);
-            return Ok(player);
+            try
+            {
+                var username = HttpContext.User.Identity?.Name;
+                if (string.IsNullOrEmpty(username))
+                {
+                    return Unauthorized("User is not logged in.");
+                }
+
+                var player = await _playerService.GetPlayerByUsernameAsync(username);
+                return Ok(player);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching the current player.");
+                return StatusCode(500, "An error occurred while retrieving the player.");
+            }
         }
 
         [HttpGet("{playerId:guid}")]
-       //[Authorize(Policy = "AdminPolicy")] 
-
+        //[Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<PlayerResponseDto>> GetPlayer([FromRoute] Guid playerId)
         {
             try
@@ -51,8 +63,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        //[Authorize(Policy = "AdminPolicy")] 
-
+        //[Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<List<PlayerResponseDto>>> GetAllPlayers()
         {
             try
@@ -68,8 +79,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{playerId:guid}")]
-        //[Authorize(Policy = "AdminPolicy")] 
-
+        //[Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<PlayerResponseDto>> UpdatePlayer(
             [FromRoute] Guid playerId,
             [FromBody] PlayerUpdateDto updateDto)
@@ -97,8 +107,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{playerId:guid}")]
-        //[Authorize(Policy = "AdminPolicy")] 
-
+        //[Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
         {
             try
@@ -149,13 +158,37 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while adding balance.");
             }
         }
+
+        [HttpPut("{playerId:guid}/toggle-active")]
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<ActionResult<PlayerResponseDto>> TogglePlayerActiveStatus(
+            [FromRoute] Guid playerId,
+            [FromBody] bool isActive)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var updatedPlayer = await _playerService.TogglePlayerActiveStatusAsync(playerId, isActive);
+                return Ok(updatedPlayer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while toggling player active status.");
+                return StatusCode(500, "An error occurred while updating the player status.");
+            }
+        }
+
         [HttpGet("{playerId:guid}/balance")]
         //[Authorize]
         public async Task<ActionResult<decimal>> GetBalance([FromRoute] Guid playerId)
         {
             try
             {
-                var balance = await _playerService.GetPlayerBalanceAsync(playerId); // Use a service method to retrieve the balance
+                var balance = await _playerService.GetPlayerBalanceAsync(playerId);
                 return Ok(balance);
             }
             catch (KeyNotFoundException ex)
@@ -175,7 +208,7 @@ namespace API.Controllers
         {
             try
             {
-                var playerId = await _playerService.GetPlayerIdByUsernameAsync(username); // Implement this method in your service
+                var playerId = await _playerService.GetPlayerIdByUsernameAsync(username);
                 return Ok(playerId);
             }
             catch (KeyNotFoundException ex)
@@ -189,6 +222,5 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while retrieving the player ID.");
             }
         }
-
     }
 }

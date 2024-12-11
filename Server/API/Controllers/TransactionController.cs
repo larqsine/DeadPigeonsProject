@@ -43,4 +43,11 @@ public class TransactionController : ControllerBase
         var transactions = await _transactionService.GetTransactionsByTypeAsync("deposit");
         return Ok(transactions);
     }
+
+[HttpPut("{playerId}/GetPlayerTransaction")]
+public async Task<IActionResult> GetTransactionsByPlayerId(Guid playerId)
+    {
+        var transactions = await _transactionService.GetTransactionsByPlayerIdAsync(playerId);
+        return Ok(transactions);
+    }
 }

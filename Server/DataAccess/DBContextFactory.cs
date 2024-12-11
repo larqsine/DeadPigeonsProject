@@ -1,3 +1,4 @@
+/*
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -5,6 +6,7 @@ using System.IO;
 
 namespace DataAccess
 {
+    
     public class DBContextFactory : IDesignTimeDbContextFactory<DBContext>
     {
         public DBContext CreateDbContext(string[] args)
@@ -25,4 +27,6 @@ namespace DataAccess
             return new DBContext(optionsBuilder.Options);
         }
     }
+    
 }
+*/

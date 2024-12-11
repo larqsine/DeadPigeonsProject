@@ -62,5 +62,11 @@ namespace Service.Services
         }
 
 
+        
+        public async Task<List<TransactionResponseDto>> GetTransactionsByPlayerIdAsync(Guid playerId)
+        {
+            var transactions = await _transactionRepository.GetTransactionsByPlayerIdAsync(playerId);
+            return transactions.Select(TransactionResponseDto.FromEntity).ToList();
+        }
     }
 }

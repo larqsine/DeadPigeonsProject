@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Service.DTOs.PlayerDto;
 using Service.DTOs.TransactionDto;
 using Service.DTOs.UserDto;
+using Service.DTOs.WinnerDto;
 using Service.Interfaces;
 
 namespace Service.Services
@@ -12,13 +13,17 @@ namespace Service.Services
     public class PlayerService : IPlayerService
     {
         private readonly PlayerRepository _repository;
+        private readonly TransactionRepository _transactionRepository;
         private readonly UserManager<User> _userManager;
 
-        
-        public PlayerService(PlayerRepository repository, UserManager<User> userManager)
+
+        public PlayerService(PlayerRepository repository,
+            TransactionRepository transactionRepository,
+            UserManager<User> userManager)
         {
             _repository = repository;
             _userManager = userManager;
+            _transactionRepository = transactionRepository;
         }
         
         
@@ -152,7 +157,7 @@ namespace Service.Services
                 // Create and save the transaction with default status as Pending
                 var transaction = transactionCreateDto.ToDepositTransaction(playerId, transactionId);
                 transaction.Status = TransactionStatus.Pending; // Default status
-                await _repository.AddTransactionAsync(transaction);
+                await _transactionRepository.AddTransactionAsync(transaction);
 
                 // Return the transaction details without modifying the balance
                 return new PlayerTransactionResponseDto
@@ -177,17 +182,16 @@ namespace Service.Services
                 throw new ApplicationException("An error occurred while adding balance to the player.");
             }
         }
-        public async Task<decimal> GetPlayerBalanceAsync(Guid playerId)
+        public async Task<PlayerResponseDto> TogglePlayerActiveStatusAsync(Guid playerId, bool isActive)
         {
             try
             {
-                var player = await _repository.GetPlayerByIdAsync(playerId);
-                if (player == null)
-                {
-                    throw new KeyNotFoundException("Player not found.");
-                }
+                // Update the player's annual fee paid status based on active/inactive toggle
+                await _repository.UpdatePlayerAnnualFeeStatusAsync(playerId, isActive);
 
-                return player.Balance ?? 0; 
+                // Retrieve the updated player and return the PlayerResponseDto
+                var player = await _repository.GetPlayerByIdAsync(playerId);
+                return PlayerResponseDto.FromEntity(player);  // Convert player to DTO
             }
             catch (KeyNotFoundException ex)
             {
@@ -196,8 +200,8 @@ namespace Service.Services
             }
             catch (Exception ex)
             {
-                LogError("GetPlayerBalanceAsync failed", ex);
-                throw new ApplicationException("An error occurred while retrieving the player's balance.");
+                LogError("TogglePlayerActiveStatusAsync failed", ex);
+                throw new ApplicationException("An error occurred while toggling the player status.");
             }
         }
 
@@ -229,6 +233,31 @@ namespace Service.Services
                 throw new KeyNotFoundException($"Player with username {username} not found.", ex);
             }
         }
+        
+        public async Task<decimal> GetPlayerBalanceAsync(Guid playerId)
+        {
+            try
+            {
+                var player = await _repository.GetPlayerByIdAsync(playerId);
+                if (player == null)
+                {
+                    throw new KeyNotFoundException("Player not found.");
+                }
+
+                return player.Balance ?? 0; 
+            }
+            catch (KeyNotFoundException ex)
+            {
+                LogError($"Player not found for ID: {playerId}", ex);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LogError("GetPlayerBalanceAsync failed", ex);
+                throw new ApplicationException("An error occurred while retrieving the player's balance.");
+            }
+        }
+
 
         private void LogError(string message, Exception ex)
         {
