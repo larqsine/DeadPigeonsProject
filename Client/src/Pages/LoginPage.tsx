@@ -12,7 +12,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [loginForm, setLoginForm] = useAtom(loginFormAtom);
     const [, setUser] = useAtom(userAtom);
     const [, setIsLoggedIn] = useAtom(isLoggedInAtom);
-    const [, setPlayerId] = useAtom(playerIdAtom); // Use the correct playerIdAtom here
+    const [, setIsAdmin] = useAtom(playerIdAtom);
 
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -27,27 +27,39 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     password: loginForm.password,
                 });
 
-                const { user, roles, token, playerId } = response.data;
-                alert(`Login successful! Welcome ${user}`);
+                const { userName, roles, token } = response.data;
 
-                // Set user data in userAtom
-                setUser({ userName: user, roles, token });
+                // Store the token in localStorage
+                localStorage.setItem("token", token);
 
-                // Set playerId in playerIdAtom
-                setPlayerId(playerId);
+                // Update user and roles in state
+                setUser({ userName, roles, token });
 
-                // Mark the user as logged in
+                // Check if the user has an admin role
+                const isAdmin = roles.includes("admin");
                 setIsLoggedIn(true);
+                setIsAdmin(isAdmin);
 
-                onLogin(user, roles);
-            } catch (error) {
-                console.error("Login Error:", error);
-                alert('Login failed. Please check your credentials.');
+                // Redirect or update the UI accordingly
+                onLogin(userName, roles);
+            } 
+            catch (error) {
+                if (axios.isAxiosError(error)) {
+                    // Handle Axios errors
+                    console.error("Login Error:", error.response?.data || error.message);
+                    alert(error.response?.data?.message || "Login failed. Please check your credentials.");
+                } else {
+                    // Handle non-Axios errors
+                    console.error("Unexpected Error:", error);
+                    alert("An unexpected error occurred.");
+                }
             }
         } else {
             alert('Please enter email and password.');
         }
     };
+
+
 
     return (
         <div className={styles.container}>

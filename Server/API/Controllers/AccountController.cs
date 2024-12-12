@@ -31,7 +31,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        [Authorize(Policy = "AdminPolicy")] 
+        //[Authorize(Policy = "AdminPolicy")] 
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
             if (string.IsNullOrEmpty(model.Role))
@@ -101,7 +101,9 @@ namespace API.Controllers
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
+            {
                 return Unauthorized(new { message = "Invalid email or password." });
+            }
 
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
             if (!result.Succeeded)

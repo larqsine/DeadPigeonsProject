@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTOs.PlayerDto;
@@ -21,17 +22,32 @@ namespace API.Controllers
         }
 
         [HttpGet("current")]
-        public async Task<ActionResult<PlayerResponseDto>> GetCurrentPlayer()
+        //[Authorize]
+        public async Task<IActionResult> GetCurrentPlayer()
         {
             try
             {
-                var username = HttpContext.User.Identity?.Name;
-                if (string.IsNullOrEmpty(username))
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized("User is not logged in.");
                 }
+                _logger.LogInformation("Fetching user with ID: {UserId}", userId);
+                
+                var roles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+                if (roles.Contains("admin"))
+                {
+                    _logger.LogInformation("User is an admin. Skipping player-specific data.");
+                    return Ok(new { isAdmin = true, message = "Admin user logged in." });
+                }
+                
+                var player = await _playerService.GetPlayerByIdAsync(Guid.Parse(userId));
+                if (player == null)
+                {
+                    _logger.LogWarning("Player not found for User ID: {UserId}", userId);
+                    return NotFound("Player not found.");
+                }
 
-                var player = await _playerService.GetPlayerByUsernameAsync(username);
                 return Ok(player);
             }
             catch (Exception ex)
@@ -40,6 +56,8 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while retrieving the player.");
             }
         }
+
+
 
         [HttpGet("{playerId:guid}")]
         //[Authorize(Policy = "AdminPolicy")]
@@ -160,7 +178,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{playerId:guid}/toggle-active")]
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<PlayerResponseDto>> TogglePlayerActiveStatus(
             [FromRoute] Guid playerId,
             [FromBody] bool isActive)

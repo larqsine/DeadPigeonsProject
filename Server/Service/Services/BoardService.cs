@@ -31,20 +31,45 @@ public class BoardService : IBoardService
         
     public async Task<BoardResponseDto> BuyBoardAsync(Guid playerId, BuyBoardRequestDto buyBoardRequestDto)
     {
-        var player = await GetPlayerAsync(playerId);
-        var game = await GetGameAsync(buyBoardRequestDto.GameId);
+        try
+        {
+            _logger.LogInformation("BuyBoardAsync called for Player ID: {PlayerId} and Game ID: {GameId}", playerId, buyBoardRequestDto.GameId);
 
-        CheckParticipationDeadline();
+            // Validate the player
+            var player = await GetPlayerAsync(playerId);
+            _logger.LogInformation("Player validated: {PlayerId}", playerId);
 
-        ValidatePlayerBalance(player, buyBoardRequestDto.FieldsCount);
+            // Validate the game
+            var game = await GetGameAsync(buyBoardRequestDto.GameId);
+            _logger.LogInformation("Game validated: {GameId}", buyBoardRequestDto.GameId);
 
-        var transaction = await ProcessPurchaseTransaction(player, buyBoardRequestDto.FieldsCount);
-        var board = CreateBoard(buyBoardRequestDto, playerId, transaction.Amount);
+            // Check participation deadline
+            CheckParticipationDeadline();
+            _logger.LogInformation("Participation deadline check passed.");
 
-        var createdBoard = await _boardRepository.CreateBoardAsync(board);
+            // Validate player balance
+            ValidatePlayerBalance(player, buyBoardRequestDto.FieldsCount);
+            _logger.LogInformation("Player balance validated for cost of fields count: {FieldsCount}", buyBoardRequestDto.FieldsCount);
 
-        return MapToBoardResponseDto(createdBoard);
+            // Process purchase transaction
+            var transaction = await ProcessPurchaseTransaction(player, buyBoardRequestDto.FieldsCount);
+            _logger.LogInformation("Purchase transaction processed for amount: {Amount}", transaction.Amount);
+
+            // Create the board
+            var board = CreateBoard(buyBoardRequestDto, playerId, transaction.Amount);
+            var createdBoard = await _boardRepository.CreateBoardAsync(board);
+            _logger.LogInformation("Board created successfully: {BoardId}", createdBoard.Id);
+
+            // Map and return the board response
+            return MapToBoardResponseDto(createdBoard);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred in BuyBoardAsync for Player ID: {PlayerId}", playerId);
+            throw;
+        }
     }
+
 
     private async Task<Player> GetPlayerAsync(Guid playerId)
     {

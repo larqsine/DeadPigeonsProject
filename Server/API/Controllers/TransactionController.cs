@@ -44,10 +44,10 @@ public class TransactionController : ControllerBase
         return Ok(transactions);
     }
 
-[HttpPut("{playerId}/GetPlayerTransaction")]
-public async Task<IActionResult> GetTransactionsByPlayerId(Guid playerId)
-    {
-        var transactions = await _transactionService.GetTransactionsByPlayerIdAsync(playerId);
-        return Ok(transactions);
-    }
+    [HttpPut("{playerId}/GetPlayerTransaction")]
+    public async Task<IActionResult> GetTransactionsByPlayerId(Guid playerId)
+        {
+            var transactions = await _transactionService.GetTransactionsByPlayerIdAsync(playerId);
+            return Ok(transactions);
+        }
 }
