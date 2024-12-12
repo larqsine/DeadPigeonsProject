@@ -45,9 +45,9 @@ export const gameIdAtom = atom<string>('');
 export const messageAtom = atom<string>('');
 export const errorAtom = atom<string>('');
 
-// Atoms for LoginPage 
+// Atoms for LoginPage
 export const loginFormAtom = atom({ email: '', password: '' });
-export const userAtom = atom<{ userName: string; roles: string[]; token: string[]; } | null>(null); 
+export const userAtom = atom<{ userName: string; roles: string[]; token: string[]; passwordChangeRequired: boolean } | null>(null);
 export const isLoggedInAtom = atom<boolean>(false);
 
 // Atoms for transactions page

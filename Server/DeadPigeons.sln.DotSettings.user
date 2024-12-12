@@ -1,15 +1,8 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AExceptionDispatchInfo_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2024_002E2_003Fresharper_002Dhost_003FSourcesCache_003Fbf9021a960b74107a7e141aa06bc9d8a0a53c929178c2fb95b1597be8af8dc_003FExceptionDispatchInfo_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AWebApplicationFactoryClientOptions_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2024_002E2_003Fresharper_002Dhost_003FSourcesCache_003Fffe6feb94922a1d8a83cd8f7a6e3626069f85af81016fed3197ba23f50599528_003FWebApplicationFactoryClientOptions_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fcc4b74d_002Dd595_002D4149_002D8a6d_002Dc59eeb76546a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CloseGame_ShouldReturnOk_WhenGameIsClosed" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Or&gt;&#xD;
-    &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:AccountControllerTests.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:ApiTestBase.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:BoardControllerTests.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:GameControllerTests.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:GameRepositoryTests.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:PlayerControllerTests.cs&lt;/ProjectFile&gt;&#xD;
-  &lt;/Or&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fcc4b74d_002Dd595_002D4149_002D8a6d_002Dc59eeb76546a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CloseGame_ShouldReturnOk_WhenGameIsClosed" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Project Location="/Users/niltwi/Documents/DeadPigeonsProject/Server/Tests" Presentation="&amp;lt;Server&amp;gt;\&amp;lt;Tests&amp;gt;" /&gt;
 &lt;/SessionState&gt;</s:String>
 	
 	

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {Routes, Route, Navigate, useNavigate} from "react-router-dom";
 import { useAtom } from "jotai";
 import {
     isLoggedInAtom,
@@ -15,6 +15,7 @@ import LoginPage from "./Pages/LoginPage";
 import PlayPage from "./Pages/PlayPage";
 import TransactionPage from "./Pages/TransactionPage.tsx";
 import styles from "./App.module.css";
+import ChangePasswordPage from "./Pages/ChangePasswordPage.tsx";
 
 const App: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
@@ -23,8 +24,10 @@ const App: React.FC = () => {
     const [transitioning, setTransitioning] = useAtom(transitioningAtom);
     const [username, setUsername] = useAtom(usernameAtom);
     const [balance, setBalance] = useAtom(balanceAtom);
+    const navigate = useNavigate();
 
-    const handleLogin = async (username: string, roles: string[]) => {
+
+    const handleLogin = async (username: string, roles: string[], passwordChangeRequired: boolean) => {
         setTransitioning(true);
 
         try {
@@ -34,6 +37,12 @@ const App: React.FC = () => {
             const isAdminRole = roles.includes("admin");
             setIsAdmin(isAdminRole);
             setShowBoxGrid(!isAdminRole);
+
+            if (passwordChangeRequired) {
+                // Redirect to change-password page
+                navigate("/change-password");
+                return;
+            }
 
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Token is missing. Please log in again.");
@@ -98,7 +107,6 @@ const App: React.FC = () => {
     const handleGoToAdminPage = () => setShowBoxGrid(false);
 
     return (
-        <Router>
             <div className={styles.app}>
                 {/* Navbar */}
                 {isLoggedIn && (
@@ -155,12 +163,17 @@ const App: React.FC = () => {
                                 path="/transactions"
                                 element={isLoggedIn && isAdmin ? <TransactionPage /> : <Navigate to="/" />}
                             />
+
+                            <Route
+                                path="/change-password"
+                                element={<ChangePasswordPage />}
+                            />
+
                             <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} />} />
                         </Routes>
                     </div>
                 </div>
             </div>
-        </Router>
     );
 };
 

@@ -5,7 +5,7 @@ import styles from './LoginPage.module.css';
 import { loginFormAtom, userAtom, isLoggedInAtom, playerIdAtom } from './PagesJotaiStore.ts';
 
 interface LoginPageProps {
-    onLogin: (email: string, roles: string[]) => void;
+    onLogin: (email: string, roles: string[], passwordChangeRequired: boolean) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
@@ -13,6 +13,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [, setUser] = useAtom(userAtom);
     const [, setIsLoggedIn] = useAtom(isLoggedInAtom);
     const [, setIsAdmin] = useAtom(playerIdAtom);
+
 
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -27,13 +28,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     password: loginForm.password,
                 });
 
-                const { userName, roles, token } = response.data;
+                const { userName, roles, token, passwordChangeRequired } = response.data;
 
                 // Store the token in localStorage
                 localStorage.setItem("token", token);
 
                 // Update user and roles in state
-                setUser({ userName, roles, token });
+                setUser({ userName, roles, token, passwordChangeRequired });
 
                 // Check if the user has an admin role
                 const isAdmin = roles.includes("admin");
@@ -41,8 +42,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 setIsAdmin(isAdmin);
 
                 // Redirect or update the UI accordingly
-                onLogin(userName, roles);
-            } 
+                onLogin(userName, roles, passwordChangeRequired);
+            }
             catch (error) {
                 if (axios.isAxiosError(error)) {
                     // Handle Axios errors

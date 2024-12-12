@@ -31,7 +31,8 @@ public class TransactionServiceTests
             Id = transactionId,
             PlayerId = playerId,
             Amount = 100m,
-            Status = TransactionStatus.Pending
+            Status = TransactionStatus.Pending,
+            TransactionType = "deposit"
         };
         var player = new Player
         {
@@ -82,7 +83,8 @@ public class TransactionServiceTests
         var transaction = new Transaction
         {
             Id = transactionId,
-            Status = TransactionStatus.Pending
+            Status = TransactionStatus.Pending,
+            TransactionType = "deposit"
         };
         dbContext.Transactions.Add(transaction);
         await dbContext.SaveChangesAsync();
@@ -108,8 +110,8 @@ public class TransactionServiceTests
         var playerId = Guid.NewGuid();
         var transactions = new List<Transaction>
         {
-            new Transaction { Id = Guid.NewGuid(), PlayerId = playerId, Amount = 100m, Status = TransactionStatus.Approved },
-            new Transaction { Id = Guid.NewGuid(), PlayerId = playerId, Amount = 200m, Status = TransactionStatus.Pending }
+            new Transaction { Id = Guid.NewGuid(), PlayerId = playerId,TransactionType = "deposit", Amount = 100m, Status = TransactionStatus.Approved },
+            new Transaction { Id = Guid.NewGuid(), PlayerId = playerId,TransactionType = "deposit", Amount = 200m, Status = TransactionStatus.Pending }
         };
         dbContext.Transactions.AddRange(transactions);
         await dbContext.SaveChangesAsync();

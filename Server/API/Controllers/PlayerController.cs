@@ -125,7 +125,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{playerId:guid}")]
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
         {
             try
