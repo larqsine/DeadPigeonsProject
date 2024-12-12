@@ -102,9 +102,13 @@ const NavBar: React.FC<NavbarProps> = ({
         navigate("/login");
     };
     
-    const handleTransactionsClick = () => {
+    const handleGoToTransactionsPage = () => {
         navigate("/transactions");
     };
+    
+    const handleGoToBoardsHistoryPage = () => {
+        navigate("/board-history");
+    }
     
     return (
         <div className={styles.nav}>
@@ -118,9 +122,11 @@ const NavBar: React.FC<NavbarProps> = ({
                 <li className={styles.navItem} onClick={handlePlayClick}>
                     Play
                 </li>
-                <li className={styles.navItem}>Board History</li>
+                <li className={styles.navItem} onClick={handleGoToBoardsHistoryPage}>
+                    Board History
+                </li>
                 <li className={styles.navItem}>Current Winnings</li>
-                <li className={styles.navItem} onClick={handleTransactionsClick}>Transactions</li>
+                <li className={styles.navItem} onClick={handleGoToTransactionsPage}>Transactions</li>
             </ul>
 
             {/* Balance Display */}

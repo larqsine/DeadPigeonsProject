@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Service.DTOs.BoardDto;
 using Service.DTOs.TransactionDto;
 using Service.Interfaces;
+using System.Globalization;
 
 namespace Service.Services;
 
@@ -261,4 +262,18 @@ public class BoardService : IBoardService
             var boards = await _boardRepository.GetAllBoardsAsync();
             return boards.Select(BoardResponseDto.FromEntity).ToList();
         }
+        public async Task<IEnumerable<BoardResponseDto>> GetRecentBoardsAsync(Guid playerId)
+        {
+            var currentWeekStart = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek);
+            var previousWeekStart = currentWeekStart.AddDays(-7);
+            var previousWeekEnd = currentWeekStart.AddSeconds(-1);
+
+            var boards = await _boardRepository.GetBoardsByPlayerIdAsync(playerId);
+
+            return boards.Where(board => 
+                    board.CreatedAt >= previousWeekStart && 
+                    board.CreatedAt <= currentWeekStart.AddDays(6))
+                .Select(BoardResponseDto.FromEntity);
+        }
+
 }
