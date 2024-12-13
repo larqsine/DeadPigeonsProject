@@ -138,7 +138,7 @@ public class BoardService : IBoardService
         await _playerRepository.UpdatePlayerAsync(player); // Update the player's balance in the database
 
         // Create a transaction record
-        var purchaseTransactionDto = new TransactionCreateDto { Amount = -cost }; // Negative to indicate deduction
+        var purchaseTransactionDto = new TransactionCreateDto { Amount = cost }; // Negative to indicate deduction
         var transactionId = Guid.NewGuid();
         var purchaseTransaction = purchaseTransactionDto.ToPurchaseTransaction(player.Id, transactionId);
 

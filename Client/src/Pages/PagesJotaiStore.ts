@@ -28,6 +28,7 @@ export const isModalOpenAtom = atom(false);
 export const isCreateUserModalOpenAtom = atom(false);
 export const isEditUserModalOpenAtom = atom(false);
 export const editUserAtom = atom<User | null>(null);
+export const authAtom = atom<{ token: string | null }>({ token: null });
 
 export const newUserAtom = atom({
     userName: '',

@@ -6,6 +6,4 @@ export const showBoxGridAtom = atom(true);
 export const transitioningAtom = atom(false);
 export const usernameAtom = atom<string | null>(null);
 export const balanceAtom = atom<number | null>(null);
-export const passwordChangeRequiredAtom = atom(false);
-export const tokenAtom = atom<string | null>(null); // New atom for the token
 

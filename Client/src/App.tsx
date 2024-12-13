@@ -27,6 +27,7 @@ const App: React.FC = () => {
     const navigate = useNavigate();
 
 
+
     const handleLogin = async (username: string, roles: string[], passwordChangeRequired: boolean) => {
         setTransitioning(true);
 
@@ -44,10 +45,13 @@ const App: React.FC = () => {
                 return;
             }
 
-            const token = localStorage.getItem("token");
+                const token = localStorage.getItem('token');
+
+
             if (!token) throw new Error("Token is missing. Please log in again.");
 
             console.log("Fetching player ID using token:", token);
+
 
             const playerIdResponse = await fetch(`http://localhost:6329/api/player/current`, {
                 method: "GET",

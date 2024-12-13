@@ -2,7 +2,7 @@
 import { useAtom } from 'jotai';
 import axios from 'axios';
 import styles from './LoginPage.module.css';
-import { loginFormAtom, userAtom, isLoggedInAtom, playerIdAtom } from './PagesJotaiStore.ts';
+import {loginFormAtom, userAtom, isLoggedInAtom, playerIdAtom, authAtom} from './PagesJotaiStore.ts';
 
 interface LoginPageProps {
     onLogin: (email: string, roles: string[], passwordChangeRequired: boolean) => void;
@@ -13,6 +13,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [, setUser] = useAtom(userAtom);
     const [, setIsLoggedIn] = useAtom(isLoggedInAtom);
     const [, setIsAdmin] = useAtom(playerIdAtom);
+    const [, setAuth] = useAtom(authAtom);
+
 
 
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,7 +34,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
                 // Store the token in localStorage
                 localStorage.setItem("token", token);
-
+                setAuth(token);
+                console.log("in loginPage  " + token)
                 // Update user and roles in state
                 setUser({ userName, roles, token, passwordChangeRequired });
 

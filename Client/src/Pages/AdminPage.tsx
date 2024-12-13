@@ -9,7 +9,7 @@ import {
     isCreateUserModalOpenAtom,
     isEditUserModalOpenAtom,
     editUserAtom,
-    newUserAtom, User, gameIdAtom, errorAtom, messageAtom,
+    newUserAtom, User, gameIdAtom, errorAtom, messageAtom, authAtom,
 } from './PagesJotaiStore.ts';
 import axios from "axios";
 
@@ -26,7 +26,8 @@ const AdminPage: React.FC = () => {
     const [ gameId,setGameId] = useAtom(gameIdAtom);
     const [, setError] = useAtom(errorAtom);
     const [, setMessage] = useAtom(messageAtom);
-    
+    const [auth] = useAtom(authAtom);
+
 
     // Lock body scroll when any modal is open
     useEffect(() => {
@@ -99,23 +100,53 @@ const AdminPage: React.FC = () => {
         }
         alert(`Winning numbers are: ${selectedWinningNumbers.join(', ')}`);
     };
-    
+
     const handeNewGame = async () => {
         try {
-            const response = await axios.post(`http://localhost:6329/api/Games/new`);
-            setMessage(response.data.message || 'Game created successfully!');
-        }
-        catch (err){
+            // Retrieve the token from authAtom or localStorage
+            const token = auth || localStorage.getItem('token');
+
+            if (!token) {
+                alert('Unauthorized: No token found. Please log in again.');
+                return;
+            }
+
+            // Prepare the GameCreateDto payload
+            const gameCreateDto = {
+                startDate: new Date().toISOString().split('T')[0], // ISO string in "YYYY-MM-DD" format
+            };
+
+            // Make the request
+            const response = await axios.post(
+                `http://localhost:6329/api/Games/start`,
+                gameCreateDto,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                }
+            );
+
+            // Show alert with the success message
+            alert(response.data.message || 'Game created successfully!');
+        } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Error Status:', err.response?.status);
                 console.error('Error Response:', err.response?.data);
-                setError(err.response?.data?.message || 'An error occurred during creating the game.');
+                setError(err.response?.data?.message || 'An error occurred while creating the game.');
+
+                // Show alert with the error message
+                alert(err.response?.data?.message || 'Failed to start the game.');
             } else {
                 console.error('Unexpected Error:', err);
                 setError('An unexpected error occurred.');
+
+                // Show alert for unexpected errors
+                alert('An unexpected error occurred.');
             }
         }
     };
+
 
     const handleUserClick = (user: User) => {
         setSelectedUser(user);
@@ -153,30 +184,51 @@ const AdminPage: React.FC = () => {
         }));
     };
 
-    const handleEditUserSubmit = async () => {
-        if (editUser) {
-            try {
-                const response = await fetch(`http://localhost:6329/api/player/${editUser.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(editUser),
-                });
 
-                if (response.ok) {
-                    alert('User updated successfully');
-                    const usersResponse = await fetch('http://localhost:6329/api/player');
-                    const data = await usersResponse.json();
-                    setUsers(data);
-                    handleCloseModal();
-                } else {
-                    alert('Failed to update user');
-                }
-            } catch (error) {
-                console.error('Error updating user:', error);
-                alert('Error updating user');
+
+    const handleEditUserSubmit = async () => {
+        if (!editUser) {
+            alert('No user selected for editing.');
+            return;
+        }
+
+        // Ensure token is retrieved correctly
+        const token = auth || localStorage.getItem('token');
+
+        if (!token) {
+            alert('Unauthorized: No token found. Please log in again.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:6329/api/player/${editUser.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(editUser),
+            });
+
+            if (response.ok) {
+                alert('User updated successfully');
+
+                // Refresh the user list
+                const usersResponse = await fetch('http://localhost:6329/api/player', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                const data = await usersResponse.json();
+                setUsers(data);
+                handleCloseModal();
+            } else {
+                const result = await response.json();
+                alert(result.message || 'Failed to update user');
             }
+        } catch (error) {
+            console.error('Error updating user:', error);
+            alert('An error occurred while updating the user.');
         }
     };
 
@@ -186,11 +238,13 @@ const AdminPage: React.FC = () => {
             return;
         }
 
+        const token = auth;
         try {
             const response = await fetch('http://localhost:6329/api/Account/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     userName: newUser.userName,
@@ -215,7 +269,11 @@ const AdminPage: React.FC = () => {
                     password: '',
                     role: '',
                 });
-                const usersResponse = await fetch('http://localhost:6329/api/player');
+                const usersResponse = await fetch('http://localhost:6329/api/player', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
                 const data = await usersResponse.json();
                 setUsers(data);
             } else {
@@ -231,23 +289,37 @@ const AdminPage: React.FC = () => {
         const confirmed = window.confirm('Are you sure you want to delete this user?');
         if (!confirmed) return;
 
+        // Retrieve the token from authAtom or fallback to localStorage
+        const token = auth || localStorage.getItem('token');
+
+        if (!token) {
+            alert('Unauthorized: No token found. Please log in again.');
+            return;
+        }
+
         try {
             const response = await fetch(`http://localhost:6329/api/player/${userId}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
             });
 
             if (response.ok) {
                 alert('User deleted successfully');
+                // Update the UI by filtering out the deleted user
                 setUsers(users.filter((user) => user.id !== userId));
                 handleCloseModal();
             } else {
-                alert('Failed to delete user');
+                const result = await response.json();
+                alert(result.message || 'Failed to delete user');
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert('Error deleting user');
+            alert('An error occurred while deleting the user.');
         }
     };
+
 
     return (
         <div className={styles.container}>

@@ -22,7 +22,6 @@ namespace API.Controllers
         }
 
         [HttpGet("current")]
-        //[Authorize]
         public async Task<IActionResult> GetCurrentPlayer()
         {
             try
@@ -60,7 +59,6 @@ namespace API.Controllers
 
 
         [HttpGet("{playerId:guid}")]
-        //[Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<PlayerResponseDto>> GetPlayer([FromRoute] Guid playerId)
         {
             try
@@ -81,7 +79,6 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        //[Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<List<PlayerResponseDto>>> GetAllPlayers()
         {
             try
@@ -97,7 +94,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{playerId:guid}")]
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<PlayerResponseDto>> UpdatePlayer(
             [FromRoute] Guid playerId,
             [FromBody] PlayerUpdateDto updateDto)
@@ -178,7 +175,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{playerId:guid}/toggle-active")]
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<PlayerResponseDto>> TogglePlayerActiveStatus(
             [FromRoute] Guid playerId,
             [FromBody] bool isActive)
@@ -201,7 +198,6 @@ namespace API.Controllers
         }
 
         [HttpGet("{playerId:guid}/balance")]
-        //[Authorize]
         public async Task<ActionResult<decimal>> GetBalance([FromRoute] Guid playerId)
         {
             try
