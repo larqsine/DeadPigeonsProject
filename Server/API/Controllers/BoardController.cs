@@ -38,6 +38,7 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while buying the board.");
             }
         }
+        
         [HttpGet("{playerId:guid}/BoardsByPlayerId")]
         public async Task<IActionResult> GetBoardsByPlayerId(Guid playerId)
         {
@@ -50,6 +51,21 @@ namespace API.Controllers
         {
             var boards = await _boardService.GetBoardsByGameIdAsync(gameId);
             return Ok(boards);
+        }
+        
+        [HttpGet("{playerId:guid}/recent-boards")]
+        public async Task<IActionResult> GetRecentBoards(Guid playerId)
+        {
+            try
+            {
+                var boards = await _boardService.GetRecentBoardsAsync(playerId);
+                return Ok(boards);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching recent boards.");
+                return StatusCode(500, "An error occurred while fetching boards.");
+            }
         }
     }
 }

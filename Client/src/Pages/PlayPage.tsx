@@ -64,9 +64,8 @@ const PlayPage: React.FC = () => {
         }
 
         const payload = {
-                    playerId: playerId,
                     fieldsCount: selectedBoxes.length,
-                    numbers: selectedBoxes, // Convert selected numbers to a comma-separated string
+                    numbers: selectedBoxes, 
                     gameId: gameId,
         };
         

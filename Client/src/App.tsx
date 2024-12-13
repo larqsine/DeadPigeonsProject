@@ -14,6 +14,7 @@ import AdminPage from "./Pages/AdminPage";
 import LoginPage from "./Pages/LoginPage";
 import PlayPage from "./Pages/PlayPage";
 import TransactionPage from "./Pages/TransactionPage.tsx";
+import BoardHistoryPage from "./Pages/BoardsHistoryPage.tsx";
 import styles from "./App.module.css";
 import ChangePasswordPage from "./Pages/ChangePasswordPage.tsx";
 
@@ -158,6 +159,10 @@ const App: React.FC = () => {
                                         <Navigate to="/login" />
                                     )
                                 }
+                            />
+                            <Route
+                                path="/board-history"
+                                element={isLoggedIn ? <BoardHistoryPage /> : <Navigate to="/login" />}
                             />
                             <Route
                                 path="/admin"

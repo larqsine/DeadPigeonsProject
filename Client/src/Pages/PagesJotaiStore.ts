@@ -19,6 +19,14 @@ export interface Transaction {
     createdAt?: string; // Optional
 }
 
+interface Board {
+    id: string;
+    numbers: string;
+    fieldsCount: number;
+    cost: number;
+    createdAt: string;
+    isWinning: boolean;
+}
 
 // Atoms for AdminPage
 export const selectedWinningNumbersAtom = atom<number[]>([]);
@@ -54,3 +62,5 @@ export const isLoggedInAtom = atom<boolean>(false);
 // Atoms for transactions page
 export const transactionsAtom = atom<Transaction[]>([]);
 export const loadingAtom = atom(true);
+
+export const boardHistoryAtom = atom<Board[]>([]);
