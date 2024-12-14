@@ -130,7 +130,10 @@ const NavBar: React.FC<NavbarProps> = ({
             </ul>
 
             {/* Balance Display */}
-            <div className={styles.Balance}>Balance: {balance.toFixed(2)} DKK</div>
+            {!isAdmin && (
+                <div className={styles.Balance}>Balance: {balance.toFixed(2)} DKK</div>
+            )}
+
 
             {/* Username/Profile Dropdown */}
             <div
