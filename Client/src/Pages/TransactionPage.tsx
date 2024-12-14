@@ -1,12 +1,12 @@
 ﻿import React, { useEffect } from "react";
 import { useAtom } from "jotai";
-import { transactionsAtom, loadingAtom, errorAtom } from "./PagesJotaiStore";
+import {transactionsAtom, loadingAtom, errorAtom, authAtom} from "./PagesJotaiStore";
 import styles from "./TransactionPage.module.css";
 
 export interface Transaction {
     id: string;
     amount: number;
-    status: string;
+    status: number;
     transactionType: string;
     createdAt?: string;
 }
@@ -15,21 +15,30 @@ const TransactionPage: React.FC = () => {
     const [transactions, setTransactions] = useAtom(transactionsAtom);
     const [loading, setLoading] = useAtom(loadingAtom);
     const [error, setError] = useAtom(errorAtom);
+    const [auth] = useAtom(authAtom);
+
 
     useEffect(() => {
         const fetchTransactions = async () => {
             setLoading(true);
             setError("");
             try {
-                const response = await fetch("http://localhost:6329/transaction/deposit", {
+                const response = await fetch("http://localhost:6329/api/Transaction/deposit", {
+
                 });
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error("Error response:", errorText);
                     throw new Error(`Failed to fetch transactions: ${response.statusText}`);
                 }
+
                 const data: Transaction[] = await response.json();
-                setTransactions(data);
+
+                // Filter the transactions to only show those with status 0
+                const filteredTransactions = data.filter(transaction => transaction.status === 0);
+
+                setTransactions(filteredTransactions);
             } catch (err: unknown) {
                 if (err instanceof Error) {
                     console.error("Error fetching transactions:", err.message);
@@ -43,12 +52,23 @@ const TransactionPage: React.FC = () => {
         fetchTransactions();
     }, [setTransactions, setLoading, setError]);
 
+
     const handleApprove = async (transactionId: string) => {
         try {
+
+            // Retrieve the token from authAtom or fallback to localStorage
+            const token = auth || localStorage.getItem('token');
+
             const response = await fetch(
                 `http://localhost:6329/api/transaction/${transactionId}/approve`,
-                { method: "PUT" }
+                {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
             );
+
             if (!response.ok) {
                 throw new Error("Failed to approve transaction.");
             }
@@ -64,9 +84,17 @@ const TransactionPage: React.FC = () => {
 
     const handleDecline = async (transactionId: string) => {
         try {
+
+            const token = auth || localStorage.getItem('token');
+
             const response = await fetch(
                 `http://localhost:6329/api/transaction/${transactionId}/decline`,
-                { method: "PUT" }
+                {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
             );
             if (!response.ok) {
                 throw new Error("Failed to decline transaction.");

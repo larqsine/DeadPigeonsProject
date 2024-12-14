@@ -14,7 +14,7 @@ export type User = {
 export interface Transaction {
     id: string;
     amount: number;
-    status: string;
+    status: number;
     transactionType: string;
     createdAt?: string; // Optional
 }

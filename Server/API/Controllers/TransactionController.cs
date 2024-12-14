@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Services;
 
 namespace API.Controllers;
 
+[Route("api/[controller]")]
+[ApiController]
 public class TransactionController : ControllerBase
 {
     private readonly TransactionService _transactionService;
@@ -12,7 +15,9 @@ public class TransactionController : ControllerBase
         _transactionService = transactionService;
     }
 
-    [HttpPut("transaction/{transactionId}/approve")]
+    [HttpPut("{transactionId}/approve")]
+    [Authorize(Policy = "AdminPolicy")]
+
     public async Task<IActionResult> ApproveTransaction(Guid transactionId)
     {
         var transaction = await _transactionService.ApproveTransactionAsync(transactionId);
@@ -24,7 +29,9 @@ public class TransactionController : ControllerBase
         return Ok(transaction);
     }
 
-    [HttpPut("transaction/{transactionId}/decline")]
+    [HttpPut("{transactionId}/decline")]
+    [Authorize(Policy = "AdminPolicy")]
+
     public async Task<IActionResult> DeclineTransaction(Guid transactionId)
     {
         var transaction = await _transactionService.DeclineTransactionAsync(transactionId);
@@ -35,9 +42,8 @@ public class TransactionController : ControllerBase
 
         return Ok(transaction);
     }
-    
-    //Get deposit transactions
-    [HttpGet("transaction/deposit")]
+
+    [HttpGet("deposit")]
     public async Task<IActionResult> GetDepositTransactions()
     {
         var transactions = await _transactionService.GetTransactionsByTypeAsync("deposit");
@@ -46,8 +52,8 @@ public class TransactionController : ControllerBase
 
     [HttpPut("{playerId}/GetPlayerTransaction")]
     public async Task<IActionResult> GetTransactionsByPlayerId(Guid playerId)
-        {
-            var transactions = await _transactionService.GetTransactionsByPlayerIdAsync(playerId);
-            return Ok(transactions);
-        }
+    {
+        var transactions = await _transactionService.GetTransactionsByPlayerIdAsync(playerId);
+        return Ok(transactions);
+    }
 }

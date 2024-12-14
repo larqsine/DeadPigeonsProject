@@ -4,7 +4,9 @@ using Service.Services;
 
 namespace API.Controllers;
 
-public class WinnerController: ControllerBase
+[Route("api/[controller]")]
+[ApiController]
+public class WinnerController : ControllerBase
 {
     private readonly IWinnerService _winnerService;
 
@@ -13,7 +15,7 @@ public class WinnerController: ControllerBase
         _winnerService = winnerService;
     }
 
-    [HttpGet("games/{gameId:guid}/GetAllWinners")]
+    [HttpGet("{gameId:guid}/GetAllWinners")]
     public async Task<IActionResult> GetWinnersByGameId(Guid gameId)
     {
         try
