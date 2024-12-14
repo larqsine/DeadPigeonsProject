@@ -38,14 +38,12 @@ const AdminPage: React.FC = () => {
         }
     }, [isModalOpen, isEditUserModalOpen, isCreateUserModalOpen]);
 
-    
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:6329/api/player');
-                if (!response.ok) throw new Error('Failed to fetch users');
-                const data = await response.json();
-                setUsers(data);
+                const response = await axios.get('http://localhost:6329/api/player');
+                setUsers(response.data);
             } catch (error) {
                 console.error('Failed to fetch users:', error);
             }
@@ -59,7 +57,7 @@ const AdminPage: React.FC = () => {
                 setError('Failed to fetch game data');
             }
         };
-        
+
         fetchGameData();
         fetchUsers();
     }, [setUsers, setGameId, setError]);
@@ -192,7 +190,6 @@ const AdminPage: React.FC = () => {
             return;
         }
 
-        // Ensure token is retrieved correctly
         const token = auth || localStorage.getItem('token');
 
         if (!token) {
@@ -201,30 +198,25 @@ const AdminPage: React.FC = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:6329/api/player/${editUser.id}`, {
-                method: 'PUT',
+            const response = await axios.put(`http://localhost:6329/api/player/${editUser.id}`, editUser, {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify(editUser),
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 alert('User updated successfully');
 
                 // Refresh the user list
-                const usersResponse = await fetch('http://localhost:6329/api/player', {
+                const usersResponse = await axios.get('http://localhost:6329/api/player', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
-                const data = await usersResponse.json();
-                setUsers(data);
+                setUsers(usersResponse.data);
                 handleCloseModal();
             } else {
-                const result = await response.json();
-                alert(result.message || 'Failed to update user');
+                alert(response.data?.message || 'Failed to update user');
             }
         } catch (error) {
             console.error('Error updating user:', error);
@@ -240,25 +232,20 @@ const AdminPage: React.FC = () => {
 
         const token = auth;
         try {
-            const response = await fetch('http://localhost:6329/api/Account/register', {
-                method: 'POST',
+            const response = await axios.post('http://localhost:6329/api/Account/register', {
+                userName: newUser.userName,
+                fullName: newUser.fullName,
+                email: newUser.email,
+                phone: newUser.phoneNumber,
+                password: newUser.password,
+                role: newUser.role,
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    userName: newUser.userName,
-                    fullName: newUser.fullName,
-                    email: newUser.email,
-                    phone: newUser.phoneNumber,
-                    password: newUser.password,
-                    role: newUser.role,
-                }),
             });
 
-            const result = await response.json();
-
-            if (response.ok) {
+            if (response.status === 200) {
                 alert('User created successfully');
                 setIsCreateUserModalOpen(false);
                 setNewUser({
@@ -269,21 +256,21 @@ const AdminPage: React.FC = () => {
                     password: '',
                     role: '',
                 });
-                const usersResponse = await fetch('http://localhost:6329/api/player', {
+                const usersResponse = await axios.get('http://localhost:6329/api/player', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
-                const data = await usersResponse.json();
-                setUsers(data);
+                setUsers(usersResponse.data);
             } else {
-                alert(result.message || 'Failed to create user');
+                alert(response.data?.message || 'Failed to create user');
             }
         } catch (error) {
             console.error('Error creating user:', error);
             alert('An error occurred while creating the user.');
         }
     };
+
 
     const handleDeleteUser = async (userId: string) => {
         const confirmed = window.confirm('Are you sure you want to delete this user?');
@@ -381,10 +368,10 @@ const AdminPage: React.FC = () => {
                             &times;
                         </button>
                         <h3>User Details</h3>
-                        <p>UserName: {selectedUser.userName}</p>
+                        <p>Username: {selectedUser.userName}</p>
                         <p>Full Name: {selectedUser.fullName}</p>
-                        <p>Email: {selectedUser.email}</p>
-                        <p>Phone Number: {selectedUser.phoneNumber}</p>
+                        <p>E-mail: {selectedUser.email}</p>
+                        <p>Phone Number:{selectedUser.phoneNumber || "Not provided"}</p>
                         <p>Balance: {selectedUser.balance}</p>
                         <p>Annual Fee Paid: {selectedUser.annualFeePaid ? 'Yes' : 'No'}</p>
                         <p>Created At: {selectedUser.createdAt}</p>
