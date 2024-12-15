@@ -117,7 +117,7 @@ public class TransactionControllerTests(ApiTestBase factory) : IClassFixture<Api
     }
 
     [Fact]
-    public async Task GetBoardsByPlayerId_Success()
+    public async Task GetTransactionsByPlayerId_Success()
     {
         using var scope = factory.Services.CreateScope();
         var scopedServices = scope.ServiceProvider;
