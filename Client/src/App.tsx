@@ -54,7 +54,7 @@ const App: React.FC = () => {
             console.log("Fetching player ID using token:", token);
 
 
-            const playerIdResponse = await fetch(`http://localhost:6329/api/player/current`, {
+            const playerIdResponse = await fetch(`https://server-587187818392.europe-west1.run.app/api/player/current`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ const App: React.FC = () => {
             const { id: playerId } = await playerIdResponse.json();
             console.log("Fetched Player ID:", playerId);
 
-            const balanceResponse = await fetch(`http://localhost:6329/api/player/${playerId}/balance`, {
+            const balanceResponse = await fetch(`https://server-587187818392.europe-west1.run.app/api/player/${playerId}/balance`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,

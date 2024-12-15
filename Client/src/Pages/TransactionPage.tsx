@@ -23,7 +23,7 @@ const TransactionPage: React.FC = () => {
             setLoading(true);
             setError("");
             try {
-                const response = await fetch("http://localhost:6329/api/Transaction/deposit", {
+                const response = await fetch("https://server-587187818392.europe-west1.run.app/api/Transaction/deposit", {
 
                 });
 
@@ -60,7 +60,7 @@ const TransactionPage: React.FC = () => {
             const token = auth || localStorage.getItem('token');
 
             const response = await fetch(
-                `http://localhost:6329/api/transaction/${transactionId}/approve`,
+                `https://server-587187818392.europe-west1.run.app/api/transaction/${transactionId}/approve`,
                 {
                     method: "PUT",
                     headers: {
@@ -88,7 +88,7 @@ const TransactionPage: React.FC = () => {
             const token = auth || localStorage.getItem('token');
 
             const response = await fetch(
-                `http://localhost:6329/api/transaction/${transactionId}/decline`,
+                `https://server-587187818392.europe-west1.run.app/api/transaction/${transactionId}/decline`,
                 {
                     method: "PUT",
                     headers: {

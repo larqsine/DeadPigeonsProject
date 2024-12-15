@@ -25,7 +25,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const handleLoginSubmit = async () => {
         if (loginForm.email && loginForm.password) {
             try {
-                const response = await axios.post('http://localhost:6329/api/account/login', {
+                const response = await axios.post('https://server-587187818392.europe-west1.run.app/api/account/login', {
                     email: loginForm.email,
                     password: loginForm.password,
                 });

@@ -25,3 +25,4 @@ DeadPigeons.sln.DotSettings.user
 *.ntvs*
 *.njsproj
 *.sw?
+.env
