@@ -20,7 +20,7 @@ const ChangePasswordPage: React.FC = () => {
             const token = localStorage.getItem("token");
 
             const response = await axios.post(
-                "http://https://server-587187818392.europe-west1.run.app/api/account/change-password",
+                "https://server-587187818392.europe-west1.run.app/api/account/change-password",
                 { currentPassword, newPassword },
                 {
                     headers: { Authorization: `Bearer ${token}` },

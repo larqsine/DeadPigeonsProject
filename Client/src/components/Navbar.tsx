@@ -41,7 +41,7 @@ const NavBar: React.FC<NavbarProps> = ({
         }
 
         try {
-            const response = await fetch(`http://localhost:6329/api/Player/${playerId}/deposit`, {
+            const response = await fetch(`https://server-587187818392.europe-west1.run.app/api/Player/${playerId}/deposit`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
