@@ -12,6 +12,7 @@
     &lt;TestAncestor&gt;&#xD;
       &lt;TestId&gt;xUnit::1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6::net8.0::Tests.TransactionRepositoryTests&lt;/TestId&gt;&#xD;
       &lt;TestId&gt;xUnit::1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6::net8.0::Tests.TransactionControllerTests&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6::net8.0::Tests.WinnerControllerTests&lt;/TestId&gt;&#xD;
     &lt;/TestAncestor&gt;&#xD;
     &lt;ProjectFile&gt;1F7C8F47-2229-402D-AC62-D5CE4A6EFEA6/f:TransactionServiceTests.cs&lt;/ProjectFile&gt;&#xD;
   &lt;/Or&gt;&#xD;
