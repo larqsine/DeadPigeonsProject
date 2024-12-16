@@ -56,13 +56,3 @@ button {
 button:hover {
     background-color: rgb(112, 1, 1);
 }
-
-p {
-    font-size: 0.9rem;
-}
-
-.link {
-    color: #007bff;
-    cursor: pointer;
-    text-decoration: underline;
-}

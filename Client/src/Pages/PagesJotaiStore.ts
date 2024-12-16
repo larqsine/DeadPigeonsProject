@@ -5,7 +5,7 @@ export type User = {
     userName: string;
     fullName: string;
     email: string;
-    phoneNumber: string;
+    phone: string;
     balance: number;
     annualFeePaid: boolean;
     createdAt: string;
@@ -16,7 +16,7 @@ export interface Transaction {
     amount: number;
     status: number;
     transactionType: string;
-    createdAt?: string; // Optional
+    createdAt?: string; 
 }
 
 interface Board {
@@ -42,7 +42,7 @@ export const newUserAtom = atom({
     userName: '',
     fullName: '',
     email: '',
-    phoneNumber: '',
+    phone: '',
     password: '',
     role: '',
 });

@@ -14,9 +14,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [, setIsLoggedIn] = useAtom(isLoggedInAtom);
     const [, setIsAdmin] = useAtom(playerIdAtom);
     const [, setAuth] = useAtom(authAtom);
-
-
-
+    
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setLoginForm((prev) => ({ ...prev, [name]: value }));
@@ -25,7 +23,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const handleLoginSubmit = async () => {
         if (loginForm.email && loginForm.password) {
             try {
-                const response = await axios.post('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/account/login', {
+                const response = await axios.post('https://server-587187818392.europe-west1.run.app/api/account/login', {
                     email: loginForm.email,
                     password: loginForm.password,
                 });

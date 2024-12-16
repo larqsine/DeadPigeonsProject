@@ -1,16 +1,16 @@
 ﻿.container {
     text-align: center;
-    margin-top: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+    padding: 10px;
 }
 
 .gridContainer {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr); /* 4 columns for larger screens */
     gap: 20px;
     justify-content: center;
-    align-items: center;
     margin: 20px auto;
-    width: 300px;
 }
 
 .box {
@@ -66,4 +66,50 @@
     font-size: 16px;
     color: #333;
     font-weight: bold;
+}
+
+/* Media Queries */
+
+/* For tablets and smaller devices */
+@media (max-width: 768px) {
+    .gridContainer {
+        grid-template-columns: repeat(4, 1fr); /* 3 columns */
+    }
+
+    .box {
+        width: 90px;
+        height: 80px;
+        font-size: 16px;
+    }
+
+    .actionButton {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .priceText {
+        font-size: 14px;
+    }
+}
+
+/* For mobile devices */
+@media (max-width: 480px) {
+    .gridContainer {
+        grid-template-columns: repeat(4, 1fr); /* 2 columns */
+    }
+
+    .box {
+        width: 70px;
+        height: 70px;
+        font-size: 14px;
+    }
+
+    .actionButton {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .priceText {
+        font-size: 12px;
+    }
 }

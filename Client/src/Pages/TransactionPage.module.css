@@ -34,6 +34,12 @@
     flex-direction: column;
 }
 
+.transactionActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px; /* Default gap for larger screens */
+}
+
 .transactionActions button {
     margin-left: 10px;
     padding: 8px 12px;
@@ -61,4 +67,25 @@
 
 .transactionActions .decline:hover {
     background-color: #c82333;
+}
+
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+    .transactionActions {
+        gap: 15px; /* Increase gap between buttons for tablets */
+    }
+}
+
+/* Mobile Devices (480px and below) */
+@media (max-width: 480px) {
+    .transactionActions {
+        gap: 20px; /* Increase gap between buttons for mobile */
+        flex-wrap: wrap; /* Allow buttons to stack if needed */
+    }
+
+    .transactionActions button {
+        flex: 1 1 calc(50% - 20px); /* Buttons take 50% width minus the gap */
+        max-width: none; /* Allow buttons to stretch */
+    }
 }

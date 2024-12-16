@@ -48,7 +48,7 @@ const App: React.FC = () => {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Token is missing. Please log in again.");
 
-            const playerIdResponse = await fetch(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player/current`, {
+            const playerIdResponse = await fetch(`https://server-587187818392.europe-west1.run.app/api/player/current`, {
                 method: "GET",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -56,7 +56,7 @@ const App: React.FC = () => {
             if (!playerIdResponse.ok) throw new Error(`Failed to fetch player ID. Status: ${playerIdResponse.status}`);
             const { id: playerId } = await playerIdResponse.json();
 
-            const balanceResponse = await fetch(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player/${playerId}/balance`, {
+            const balanceResponse = await fetch(`https://server-587187818392.europe-west1.run.app/api/player/${playerId}/balance`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,

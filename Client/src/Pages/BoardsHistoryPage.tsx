@@ -44,7 +44,7 @@ const BoardHistoryPage: React.FC = () => {
 
                 // Fetch all games
                 const gamesResponse = await axios.get<{ message: string; data: Game[] }>(
-                    'https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games',
+                    'https://server-587187818392.europe-west1.run.app/api/Games',
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -55,7 +55,7 @@ const BoardHistoryPage: React.FC = () => {
 
                 // Fetch the active game ID
                 const activeGameResponse = await axios.get<{ gameId: string }>(
-                    'https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/active',
+                    'https://server-587187818392.europe-west1.run.app/api/Games/active',
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ const BoardHistoryPage: React.FC = () => {
                 
                 if (active) {
                     const activeBoardsResponse = await axios.get<Board[]>(
-                        `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${active.id}/BoardsbyGameId`,
+                        `https://server-587187818392.europe-west1.run.app/api/Board/${active.id}/BoardsbyGameId`,
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -100,7 +100,7 @@ const BoardHistoryPage: React.FC = () => {
 
             // Fetch boards for the selected game
             const boardsResponse = await axios.get<Board[]>(
-                `http://https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${game.id}/BoardsbyGameId`,
+                `https://server-587187818392.europe-west1.run.app/api/Board/${game.id}/BoardsbyGameId`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

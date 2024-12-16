@@ -1,8 +1,8 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAtom } from "jotai"; // Import the useAtom hook
+import { useAtom } from "jotai";
 import styles from "./NavBar.module.css";
-import { playerIdAtom } from "../Pages/PagesJotaiStore.ts"; // Ensure this is the correct path to your store
+import { playerIdAtom } from "../Pages/PagesJotaiStore.ts"; 
 
 interface NavbarProps {
     onPlayClick: () => void;
@@ -23,25 +23,24 @@ const NavBar: React.FC<NavbarProps> = ({
                                        }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isAddBalanceOpen, setIsAddBalanceOpen] = useState(false);
-    const [desiredAmount, setDesiredAmount] = useState(""); // For desired amount
-    const [mobilePayNumber, setMobilePayNumber] = useState(""); // For MobilePay number
-    const [playerId] = useAtom(playerIdAtom); // Correctly access the atom using useAtom
+    const [desiredAmount, setDesiredAmount] = useState(""); 
+    const [mobilePayNumber, setMobilePayNumber] = useState(""); 
+    const [playerId] = useAtom(playerIdAtom); 
     const dropdownRef = React.useRef<HTMLDivElement | null>(null);
+    const addBalanceRef = React.useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
-
-    const handleAddBalanceClick = () => {
-        setIsAddBalanceOpen(true);
-        setIsDropdownOpen(false);
-    };
-
+    const [isNavOpen, setIsNavOpen] = useState(false);
+    const [isMobileScreen, setIsMobileScreen] = useState(false);
+    
+    
+    
     const handleSubmitTransaction = async () => {
         if (!desiredAmount || !mobilePayNumber) {
             alert("Please enter both the desired amount and MobilePay number.");
             return;
         }
-
         try {
-            const response = await fetch(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Player/${playerId}/deposit`, {
+            const response = await fetch(`https://server-587187818392.europe-west1.run.app/api/Player/${playerId}/deposit`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -69,11 +68,20 @@ const NavBar: React.FC<NavbarProps> = ({
         }
     };
 
-    // Close the dropdown if clicked outside
+    // Close the dropdown menus if clicked outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
                 setIsDropdownOpen(false);
+            }
+            if (
+                addBalanceRef.current &&
+                !addBalanceRef.current.contains(event.target as Node)
+            ) {
+                setIsAddBalanceOpen(false);
             }
         };
 
@@ -87,28 +95,59 @@ const NavBar: React.FC<NavbarProps> = ({
         console.log("Player ID in NavBar:", playerId);
     }, [playerId]);
 
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobileScreen(window.innerWidth < 450);
+        };
+
+        handleResize();
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+    
+    const handleAddBalanceClick = () => {
+        setIsAddBalanceOpen(true);
+        setIsDropdownOpen(false);
+    };
+    
     const handlePlayClick = () => {
+        closeNav();
         onPlayClick();
         navigate("/play");
     };
 
     const handleGoToAdminPage = () => {
+        closeNav();
         onGoToAdminPage();
         navigate("/admin");
     };
 
     const handleSignOutClick = () => {
+        closeNav();
         onSignOut();
         navigate("/login");
     };
     
     const handleGoToTransactionsPage = () => {
+        closeNav();
         navigate("/transactions");
     };
     
     const handleGoToBoardsHistoryPage = () => {
+        closeNav();
         navigate("/board-history");
     }
+    
+    const toggleNav = () => {
+        setIsNavOpen(!isNavOpen);
+    };
+    
+    const closeNav = () => {
+        setIsNavOpen(false); // Close hamburger menu
+    };
     
     return (
         <div className={styles.nav}>
@@ -117,16 +156,43 @@ const NavBar: React.FC<NavbarProps> = ({
                 <img src="/logo.png" alt="App Logo" className={styles.logo}/>
             </div>
 
+            {/* Hamburger Menu */}
+            <div className={styles.hamburger} onClick={toggleNav}>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            
             {/* Center Buttons */}
-            <ul className={styles.navButtons}>
+            <ul className={`${styles.navButtons} ${isNavOpen ? styles.show : ""}`}>
                 <li className={styles.navItem} onClick={handlePlayClick}>
                     Play
                 </li>
                 <li className={styles.navItem} onClick={handleGoToBoardsHistoryPage}>
                     Board History
                 </li>
-                <li className={styles.navItem}>Current Winnings</li>
-                <li className={styles.navItem} onClick={handleGoToTransactionsPage}>Transactions</li>
+                {isAdmin && (
+                    <li className={styles.navItem} onClick={handleGoToTransactionsPage}>
+                        Transactions
+                    </li>
+                )}
+
+                {/* Profile Button Inside Hamburger Menu */}
+                {isMobileScreen && (
+                    <li className={`${styles.navItem} ${styles.profileButton}`}>
+                        <div onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+                            {username || "Guest"}
+                        </div>
+                        {isDropdownOpen && (
+                            <div className={styles.dropdownMenu}>
+                                {isAdmin && (
+                                    <button onClick={handleGoToAdminPage}>Admin Page</button>
+                                )}
+                                <button onClick={handleSignOutClick}>Sign Out</button>
+                            </div>
+                        )}
+                    </li>
+                )}
             </ul>
 
             {/* Balance Display */}
@@ -147,7 +213,7 @@ const NavBar: React.FC<NavbarProps> = ({
                 <div
                     ref={dropdownRef}
                     className={styles.dropdownMenu}
-                    onClick={(e) => e.stopPropagation()} // Prevent click propagation
+                    onClick={(e) => e.stopPropagation()}
                 >
                     {isAdmin ? (
                         <button onClick={handleGoToAdminPage}>Admin Page</button>
@@ -160,7 +226,7 @@ const NavBar: React.FC<NavbarProps> = ({
 
             {/* Add Balance Input */}
             {isAddBalanceOpen && (
-                <div className={styles.addBalance}>
+                <div ref={addBalanceRef} className={styles.addBalance}>
                     <div className={styles.amountInputContainer}>
                         <input
                             type="number"
