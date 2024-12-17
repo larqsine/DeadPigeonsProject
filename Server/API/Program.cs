@@ -29,6 +29,8 @@ namespace API
                 string jwtIssuer = GetSecret(projectId, "JWT_ISSUER");
                 string jwtAudience = GetSecret(projectId, "JWT_AUDIENCE");
                 string jwtSecret = GetSecret(projectId, "JWT_SECRET");
+                
+                Console.WriteLine(jwtSecret);
 
                 if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience) || string.IsNullOrEmpty(jwtSecret))
                 {
@@ -47,6 +49,9 @@ namespace API
 
                 // Web application builder
                 var builder = WebApplication.CreateBuilder(args);
+                builder.Configuration["Jwt:Issuer"] = jwtIssuer;
+                builder.Configuration["Jwt:Secret"] = jwtSecret;
+                builder.Configuration["Jwt:Audience"] = jwtAudience;
                 
                 // Configure DbContext using the connection string
                 builder.Services.AddDbContext<DBContext>(options =>
@@ -98,6 +103,33 @@ namespace API
 
                 // Add Swagger for API documentation
                 builder.Services.AddEndpointsApiExplorer();
+                builder.Services.AddAuthentication(options =>
+                    {
+                        options.DefaultAuthenticateScheme = "JwtBearer";
+                        options.DefaultChallengeScheme = "JwtBearer";
+                    })
+                    .AddJwtBearer("JwtBearer", options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                            ValidAudience = builder.Configuration["Jwt:Audience"],
+                            IssuerSigningKey =
+                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
+                        };
+                    });
+
+                builder.Services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("AdminPolicy", policy =>
+                        policy.RequireRole("admin"));
+                });
+                builder.Services.AddLogging();
+
                 builder.Services.AddSwaggerGen(options =>
                 {
                     options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
