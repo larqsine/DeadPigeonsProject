@@ -23,46 +23,41 @@ namespace API
         {
             try
             {
+                var builder = WebApplication.CreateBuilder(args);
                 string projectId = "oval-proxy-444716-g0";
 
-                // Load JWT secrets from Google Secret Manager
-                string jwtIssuer = GetSecret(projectId, "JWT_ISSUER");
-                string jwtAudience = GetSecret(projectId, "JWT_AUDIENCE");
-                string jwtSecret = GetSecret(projectId, "JWT_SECRET");
-                
-                Console.WriteLine(jwtSecret);
-
-                if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience) || string.IsNullOrEmpty(jwtSecret))
+                // Check environment and load secrets
+                if (builder.Environment.IsProduction())
                 {
-                    throw new InvalidOperationException("Missing JWT configuration from Secret Manager.");
+                    Console.WriteLine("Loading secrets from Google Cloud Secret Manager...");
+                    string jwtIssuer = GetSecret(projectId, "JWT_ISSUER");
+                    string jwtAudience = GetSecret(projectId, "JWT_AUDIENCE");
+                    string gCloudSecret = GetSecret(projectId, "JWT_SECRET");
+
+                    if (!string.IsNullOrEmpty(jwtIssuer))
+                        builder.Configuration["Jwt:Issuer"] = jwtIssuer;
+
+                    if (!string.IsNullOrEmpty(jwtAudience))
+                        builder.Configuration["Jwt:Audience"] = jwtAudience;
+
+                    if (!string.IsNullOrEmpty(gCloudSecret))
+                        builder.Configuration["Jwt:Secret"] = gCloudSecret;
+
+                    string connectionString = GetSecret(projectId, "AppDb");
+                    builder.Services.AddDbContext<DBContext>(options =>
+                        options.UseNpgsql(connectionString));
                 }
-
-                Console.WriteLine("Secrets loaded successfully.");
-
-                // Initialize the Secret Manager client to fetch DB connection string
-                var client = SecretManagerServiceClient.Create();
-                var secretVersionName = new SecretVersionName(projectId, "AppDb", "latest");
-                var secretVersion = client.AccessSecretVersion(secretVersionName);
-                string connectionString = secretVersion.Payload.Data.ToStringUtf8();
-
-                //Console.WriteLine("Connection String: " + connectionString);
-
-                // Web application builder
-                var builder = WebApplication.CreateBuilder(args);
-                builder.Configuration["Jwt:Issuer"] = jwtIssuer;
-                builder.Configuration["Jwt:Secret"] = jwtSecret;
-                builder.Configuration["Jwt:Audience"] = jwtAudience;
-                
-                // Configure DbContext using the connection string
-                builder.Services.AddDbContext<DBContext>(options =>
+                else
                 {
-                    options.UseNpgsql(connectionString); // Use the connection string from secret manager
-                });
+                    Console.WriteLine("Using local appsettings.json for development.");
+                    builder.Services.AddDbContext<DBContext>(options =>
+                        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                }
 
                 // Configure Identity
                 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
                 {
-                    options.User.RequireUniqueEmail = true; 
+                    options.User.RequireUniqueEmail = true;
                 })
                 .AddEntityFrameworkStores<DBContext>()
                 .AddDefaultTokenProviders()
@@ -95,41 +90,14 @@ namespace API
                 {
                     options.AddPolicy("AllowAll", policy =>
                     {
-                        policy.AllowAnyOrigin() // Allow any origin
-                              .AllowAnyHeader() // Allow any header
-                              .AllowAnyMethod(); // Allow any method
+                        policy.AllowAnyOrigin()
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
                     });
                 });
 
                 // Add Swagger for API documentation
                 builder.Services.AddEndpointsApiExplorer();
-                builder.Services.AddAuthentication(options =>
-                    {
-                        options.DefaultAuthenticateScheme = "JwtBearer";
-                        options.DefaultChallengeScheme = "JwtBearer";
-                    })
-                    .AddJwtBearer("JwtBearer", options =>
-                    {
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,
-                            ValidateAudience = true,
-                            ValidateLifetime = true,
-                            ValidateIssuerSigningKey = true,
-                            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                            ValidAudience = builder.Configuration["Jwt:Audience"],
-                            IssuerSigningKey =
-                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
-                        };
-                    });
-
-                builder.Services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("AdminPolicy", policy =>
-                        policy.RequireRole("admin"));
-                });
-                builder.Services.AddLogging();
-
                 builder.Services.AddSwaggerGen(options =>
                 {
                     options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -162,10 +130,39 @@ namespace API
                     });
                 });
 
+                // Add Authentication
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = "JwtBearer";
+                    options.DefaultChallengeScheme = "JwtBearer";
+                })
+                .AddJwtBearer("JwtBearer", options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
+                    };
+                });
+
+                builder.Services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("AdminPolicy", policy =>
+                        policy.RequireRole("admin"));
+                });
+
+                builder.Services.AddLogging();
+
                 // Build the app
                 var app = builder.Build();
 
-                // Configure Swagger for Development
+                // Configure Swagger
                 if (app.Environment.IsDevelopment())
                 {
                     app.UseSwagger();
@@ -197,13 +194,21 @@ namespace API
             }
         }
 
-        // Method to get secrets from Google Secret Manager
+        // Method to get secrets from Google Cloud Secret Manager
         public static string GetSecret(string projectId, string secretName)
         {
-            var client = SecretManagerServiceClient.Create();
-            var secretVersionName = new SecretVersionName(projectId, secretName, "latest");
-            var secretVersion = client.AccessSecretVersion(secretVersionName);
-            return secretVersion.Payload.Data.ToStringUtf8();
+            try
+            {
+                var client = SecretManagerServiceClient.Create();
+                var secretVersionName = new SecretVersionName(projectId, secretName, "latest");
+                var secretVersion = client.AccessSecretVersion(secretVersionName);
+                return secretVersion.Payload.Data.ToStringUtf8();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error accessing secret '{secretName}': {ex.Message}");
+                return string.Empty;
+            }
         }
     }
 }
