@@ -1,24 +1,40 @@
 using System.Net.Http.Json;
 using System.Net;
-using DataAccess.Models;
-using Microsoft.AspNetCore.Identity;
-using Xunit;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
+using DataAccess.Models;
 using Service.DTOs.PlayerDto;
 using Service.DTOs.TransactionDto;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using API;
+using DataAccess;
 
 namespace Tests
 {
-    public class PlayerControllerTests : IClassFixture<ApiTestBase>
+    public class PlayerControllerTests : IClassFixture<WebApplicationFactory<Program>>
     {
-        private readonly ApiTestBase _factory;
+        private readonly WebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
 
-        public PlayerControllerTests(ApiTestBase factory)
+        public PlayerControllerTests(WebApplicationFactory<Program> factory)
         {
-            _factory = factory;
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
+            _factory = factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    // Replace DBContext with in-memory database
+                    var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<DBContext>));
+                    if (descriptor != null) services.Remove(descriptor);
+
+                    services.AddDbContext<DBContext>(options => options.UseInMemoryDatabase("TestDb"));
+                });
+            });
+
+            _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false
             });
@@ -28,14 +44,21 @@ namespace Tests
         public async Task GetPlayerDetails_Success()
         {
             // Arrange
-            var userManager = _factory.Services.GetService(typeof(UserManager<Player>))
-                as UserManager<User>;
+            var player = new Player
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Test Player",
+                Email = "testplayer@example.com",
+                Balance = 100m
+            };
 
-            var player = await TestObjects.GetPlayer(userManager);
-            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
-
-            _client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            // Seed the player into the in-memory database
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<DBContext>();
+                context.Players.Add(player);
+                await context.SaveChangesAsync();
+            }
 
             // Act
             var response = await _client.GetAsync($"/api/player/{player.Id}");
@@ -51,13 +74,21 @@ namespace Tests
         public async Task UpdatePlayerBalance_Success()
         {
             // Arrange
-            using var scope = _factory.Services.CreateScope();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-            var player = await TestObjects.GetPlayer(userManager);
+            var player = new Player
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Test Player",
+                Email = "testplayer@example.com",
+                Balance = 100m
+            };
 
-            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
-            _client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            // Seed the player into the in-memory database
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<DBContext>();
+                context.Players.Add(player);
+                await context.SaveChangesAsync();
+            }
 
             var updateBalanceRequest = new TransactionCreateDto { Amount = 20m };
 
@@ -65,27 +96,32 @@ namespace Tests
             var response = await _client.PostAsJsonAsync($"/api/player/{player.Id}/deposit", updateBalanceRequest);
 
             // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);  // Ensure it returns OK on valid request
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var updatedBalanceResponse = await response.Content.ReadFromJsonAsync<TransactionResponseDto>();
             Assert.NotNull(updatedBalanceResponse);
-            Assert.Equal(120m, updatedBalanceResponse.Amount);  // Ensure balance is updated correctly
+            Assert.Equal(120m, updatedBalanceResponse.Amount);
         }
-
-        
 
         [Fact]
         public async Task UpdatePlayerBalance_Failure_InvalidAmount()
         {
             // Arrange
-            var userManager = _factory.Services.GetService(typeof(UserManager<Player>))
-                as UserManager<User>;
+            var player = new Player
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Test Player",
+                Email = "testplayer@example.com",
+                Balance = 100m
+            };
 
-            var player = await TestObjects.GetPlayer(userManager);
-            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
-
-            _client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            // Seed the player into the in-memory database
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<DBContext>();
+                context.Players.Add(player);
+                await context.SaveChangesAsync();
+            }
 
             var updateBalanceRequest = new TransactionCreateDto { Amount = -100m };
 
@@ -102,18 +138,21 @@ namespace Tests
         public async Task DeletePlayer_Success()
         {
             // Arrange
-            using var scope = _factory.Services.CreateScope();  // Create a scope to resolve scoped services like UserManager
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-            Assert.NotNull(userManager);  // Ensure userManager is resolved correctly
+            var player = new Player
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Test Player",
+                Email = "testplayer@example.com",
+                Balance = 100m
+            };
 
-            var player = await TestObjects.GetPlayer(userManager);
-            Assert.NotNull(player);  // Ensure the player was created successfully
-
-            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
-            Assert.NotNull(token);  // Ensure the token is retrieved
-
-            _client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            // Seed the player into the in-memory database
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<DBContext>();
+                context.Players.Add(player);
+                await context.SaveChangesAsync();
+            }
 
             // Act
             var response = await _client.DeleteAsync($"/api/player/{player.Id}");
@@ -121,10 +160,13 @@ namespace Tests
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-            var deletedPlayer = await userManager.FindByIdAsync(player.Id.ToString());
-            Assert.Null(deletedPlayer);
+            // Ensure the player is deleted from the database
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<DBContext>();
+                var deletedPlayer = await context.Players.FindAsync(player.Id);
+                Assert.Null(deletedPlayer);
+            }
         }
-
-
     }
 }
