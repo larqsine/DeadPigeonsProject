@@ -4,8 +4,8 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/Users/niltwi/Documents/DeadPigeonsProject/Server/API/bin/Debug/net8.0/API.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fcc4b74d_002Dd595_002D4149_002D8a6d_002Dc59eeb76546a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CloseGame_ShouldReturnOk_WhenGameIsClosed" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Project Location="/Users/niltwi/Documents/DeadPigeonsProject/Server/Tests" Presentation="&amp;lt;Server&amp;gt;\&amp;lt;Tests&amp;gt;" /&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fcc4b74d_002Dd595_002D4149_002D8a6d_002Dc59eeb76546a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CloseGame_ShouldReturnOk_WhenGameIsClosed" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="\Users\niltwi\Documents\DeadPigeonsProject\Server\Tests" Presentation="&amp;lt;Server&amp;gt;\&amp;lt;Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	
 	

@@ -53,6 +53,7 @@ export const playerIdAtom = atom<string>('');
 export const gameIdAtom = atom<string>('');
 export const messageAtom = atom<string>('');
 export const errorAtom = atom<string>('');
+export const autoPlayAtom = atom(false);
 
 // Atoms for LoginPage
 export const loginFormAtom = atom({ email: '', password: '' });

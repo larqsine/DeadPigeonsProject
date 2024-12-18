@@ -94,19 +94,16 @@ h3 {
 }
 
 .closeButton {
-    position: absolute; /* Position the close button within the modal */
-    top: 10px; /* Space from the top */
-    right: 10px; /* Space from the right */
-    background: transparent;
-    color: #000;
-    font-size: 18px;
-    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
     border: none;
+    font-size: 1.5rem;
     cursor: pointer;
-    padding: 5px 10px;
+    background: #a60505;
+    height: 40px;
+    width: 40px;
 }
 
-.closeButton:hover {
-    color: red; /* Change color on hover for better UX */
-}
 

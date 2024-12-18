@@ -23,7 +23,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const handleLoginSubmit = async () => {
         if (loginForm.email && loginForm.password) {
             try {
-                const response = await axios.post('https://server-587187818392.europe-west1.run.app/api/account/login', {
+                const response = await axios.post('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/account/login', {
                     email: loginForm.email,
                     password: loginForm.password,
                 });
@@ -83,7 +83,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                         value={loginForm.password}
                         onChange={handleLoginChange}
                     />
-                    <button onClick={handleLoginSubmit}>Login</button>
+                    <button className={styles.logInButton} onClick={handleLoginSubmit}>Login</button>
                 </div>
             </div>
         </div>
