@@ -38,6 +38,8 @@ public class Program
                 .AddEntityFrameworkStores<DBContext>()
                 .AddDefaultTokenProviders()
                 .AddUserValidator<CustomEmailValidator<User>>(); // Use a custom validator
+            
+
             builder.Services.AddScoped<IPasswordHasher<User>, Argon2idPasswordHasher<User>>();
             builder.Services.AddScoped<IJwtService, JwtService>();
 
@@ -57,7 +59,7 @@ public class Program
             builder.Services.AddScoped<TransactionService>();
             builder.Services.AddScoped<IWinnerService, WinnerService>();
 
-            //builder.Services.AddQuartzJobs(); // Add Quartz jobs
+            builder.Services.AddQuartzJobs(); // Add Quartz jobs
 
 
 // Add Controllers

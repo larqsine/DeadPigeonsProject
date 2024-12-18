@@ -13,7 +13,7 @@ public class TransactionRepositoryTests
 
     public TransactionRepositoryTests()
     {
-        // In-memory database for testing
+    
         var options = new DbContextOptionsBuilder<DBContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
@@ -21,7 +21,7 @@ public class TransactionRepositoryTests
         _context = new DBContext(options);
         _repository = new TransactionRepository(_context);
 
-        // Adding initial test data to the in-memory database
+       
         _context.Transactions.AddRange(new List<Transaction>
         {
             new Transaction 
@@ -48,13 +48,13 @@ public class TransactionRepositoryTests
     [Fact]
     public async Task GetTransactionByIdAsync_ShouldReturnTransaction_WhenExists()
     {
-        // Arrange
+        
         var transactionId = _context.Transactions.First(t => t.TransactionType == "deposit").Id;
 
-        // Act
+       
         var result = await _repository.GetTransactionByIdAsync(transactionId);
 
-        // Assert
+   
         Assert.NotNull(result);
         Assert.Equal(transactionId, result?.Id);
         Assert.Equal("deposit", result?.TransactionType);
@@ -63,26 +63,25 @@ public class TransactionRepositoryTests
     [Fact]
     public async Task GetTransactionByIdAsync_ShouldReturnNull_WhenNotFound()
     {
-        // Arrange
+      
         var nonExistentTransactionId = Guid.NewGuid();
-
-        // Act
+        
         var result = await _repository.GetTransactionByIdAsync(nonExistentTransactionId);
 
-        // Assert
+       
         Assert.Null(result);
     }
 
     [Fact]
     public async Task GetTransactionsByPlayerIdAsync_ShouldReturnTransactions_ForPlayer()
     {
-        // Arrange
+       
         var playerId = _context.Transactions.First().PlayerId;
 
-        // Act
+     
         var result = await _repository.GetTransactionsByPlayerIdAsync(playerId);
 
-        // Assert
+       
         Assert.NotEmpty(result);
         Assert.All(result, t => Assert.Equal(playerId, t.PlayerId));
     }
@@ -90,20 +89,20 @@ public class TransactionRepositoryTests
     [Fact]
     public async Task GetTransactionsByPlayerIdAsync_ShouldReturnEmptyList_WhenNoTransactionsFound()
     {
-        // Arrange
+       
         var nonExistentPlayerId = Guid.NewGuid();
 
-        // Act
+      
         var result = await _repository.GetTransactionsByPlayerIdAsync(nonExistentPlayerId);
 
-        // Assert
+      
         Assert.Empty(result);
     }
 
     [Fact]
     public async Task SaveAsync_ShouldPersistChanges()
     {
-        // Arrange
+     
         var newTransaction = new Transaction
         {
             Id = Guid.NewGuid(),
@@ -115,10 +114,9 @@ public class TransactionRepositoryTests
 
         _context.Transactions.Add(newTransaction);
 
-        // Act
+        
         await _repository.SaveAsync();
-
-        // Assert
+        
         var savedTransaction = await _context.Transactions.FindAsync(newTransaction.Id);
         Assert.NotNull(savedTransaction);
         Assert.Equal(newTransaction.Amount, savedTransaction?.Amount);

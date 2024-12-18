@@ -21,17 +21,17 @@ public class TransactionServiceTests
     [Fact]
     public async Task ApproveTransactionAsync_TransactionNotFound_ReturnsNull()
     {
-        // Arrange
+      
         var dbContext = GetInMemoryDbContext();
 
         var transactionRepository = new TransactionRepository(dbContext);
         var playerRepository = new PlayerRepository(dbContext);
         var service = new TransactionService(transactionRepository, playerRepository);
 
-        // Act
+       
         var result = await service.ApproveTransactionAsync(Guid.NewGuid());
 
-        // Assert
+      
         Assert.Null(result);
     }
 
@@ -40,17 +40,17 @@ public class TransactionServiceTests
     [Fact]
     public async Task GetTransactionsByPlayerIdAsync_NoTransactions_ReturnsEmptyList()
     {
-        // Arrange
+  
         var dbContext = GetInMemoryDbContext();
 
         var transactionRepository = new TransactionRepository(dbContext);
         var playerRepository = new PlayerRepository(dbContext);
         var service = new TransactionService(transactionRepository, playerRepository);
 
-        // Act
+     
         var result = await service.GetTransactionsByPlayerIdAsync(Guid.NewGuid());
 
-        // Assert
+      
         Assert.NotNull(result);
         Assert.Empty(result);
     }

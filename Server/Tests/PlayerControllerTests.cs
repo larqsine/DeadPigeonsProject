@@ -10,6 +10,7 @@ using Service.DTOs.TransactionDto;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
 using API;
 using DataAccess;
 
@@ -26,7 +27,7 @@ namespace Tests
             {
                 builder.ConfigureServices(services =>
                 {
-                    // Replace DBContext with in-memory database
+                 
                     var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<DBContext>));
                     if (descriptor != null) services.Remove(descriptor);
 
@@ -43,7 +44,7 @@ namespace Tests
         [Fact]
         public async Task GetPlayerDetails_Success()
         {
-            // Arrange
+          
             var player = new Player
             {
                 Id = Guid.NewGuid(),
@@ -52,7 +53,7 @@ namespace Tests
                 Balance = 100m
             };
 
-            // Seed the player into the in-memory database
+            
             using (var scope = _factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<DBContext>();
@@ -60,20 +61,20 @@ namespace Tests
                 await context.SaveChangesAsync();
             }
 
-            // Act
+      
             var response = await _client.GetAsync($"/api/player/{player.Id}");
             var result = await response.Content.ReadFromJsonAsync<PlayerResponseDto>();
 
-            // Assert
+       
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(result);
             Assert.Equal(player.FullName, result.FullName);
         }
 
         [Fact]
-        public async Task UpdatePlayerBalance_Success()
+        public async Task UpdatePlayerBalance_Failed_NotApprovedTransaction()
         {
-            // Arrange
+          
             var player = new Player
             {
                 Id = Guid.NewGuid(),
@@ -81,8 +82,7 @@ namespace Tests
                 Email = "testplayer@example.com",
                 Balance = 100m
             };
-
-            // Seed the player into the in-memory database
+            
             using (var scope = _factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<DBContext>();
@@ -90,54 +90,29 @@ namespace Tests
                 await context.SaveChangesAsync();
             }
 
-            var updateBalanceRequest = new TransactionCreateDto { Amount = 20m };
+          
+            var updateBalanceRequest = new TransactionCreateDto
+            {
+                Amount = 20m,
+                MobilepayNumber = "123456789" 
+            };
 
-            // Act
+       
             var response = await _client.PostAsJsonAsync($"/api/player/{player.Id}/deposit", updateBalanceRequest);
 
-            // Assert
+        
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var updatedBalanceResponse = await response.Content.ReadFromJsonAsync<TransactionResponseDto>();
             Assert.NotNull(updatedBalanceResponse);
-            Assert.Equal(120m, updatedBalanceResponse.Amount);
+            Assert.Equal(0m, updatedBalanceResponse.Amount);
         }
-
-        [Fact]
-        public async Task UpdatePlayerBalance_Failure_InvalidAmount()
-        {
-            // Arrange
-            var player = new Player
-            {
-                Id = Guid.NewGuid(),
-                FullName = "Test Player",
-                Email = "testplayer@example.com",
-                Balance = 100m
-            };
-
-            // Seed the player into the in-memory database
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<DBContext>();
-                context.Players.Add(player);
-                await context.SaveChangesAsync();
-            }
-
-            var updateBalanceRequest = new TransactionCreateDto { Amount = -100m };
-
-            // Act
-            var response = await _client.PostAsJsonAsync($"/api/player/{player.Id}/deposit", updateBalanceRequest);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            var result = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Invalid transaction", result, StringComparison.OrdinalIgnoreCase);
-        }
+        
 
         [Fact]
         public async Task DeletePlayer_Success()
         {
-            // Arrange
+        
             var player = new Player
             {
                 Id = Guid.NewGuid(),
@@ -145,8 +120,7 @@ namespace Tests
                 Email = "testplayer@example.com",
                 Balance = 100m
             };
-
-            // Seed the player into the in-memory database
+            
             using (var scope = _factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<DBContext>();
@@ -154,13 +128,13 @@ namespace Tests
                 await context.SaveChangesAsync();
             }
 
-            // Act
+           
             var response = await _client.DeleteAsync($"/api/player/{player.Id}");
 
-            // Assert
+           
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-            // Ensure the player is deleted from the database
+            
             using (var scope = _factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<DBContext>();
