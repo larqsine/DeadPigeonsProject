@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAtom } from "jotai";
 import styles from "./NavBar.module.css";
-import { playerIdAtom } from "../Pages/PagesJotaiStore.ts"; 
+import { playerIdAtom, balanceAtom } from "../Pages/PagesJotaiStore.ts"; 
 
 interface NavbarProps {
     onPlayClick: () => void;
@@ -10,7 +10,6 @@ interface NavbarProps {
     onSignOut: () => void;
     isAdmin: boolean;
     onGoToAdminPage: () => void;
-    balance: number;
 }
 
 const NavBar: React.FC<NavbarProps> = ({
@@ -19,7 +18,6 @@ const NavBar: React.FC<NavbarProps> = ({
                                            onSignOut,
                                            isAdmin,
                                            onGoToAdminPage,
-                                           balance,
                                        }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isAddBalanceOpen, setIsAddBalanceOpen] = useState(false);
@@ -32,15 +30,58 @@ const NavBar: React.FC<NavbarProps> = ({
     const navigate = useNavigate();
     const [isNavOpen, setIsNavOpen] = useState(false);
     const [isMobileScreen, setIsMobileScreen] = useState(false);
-    
-    
+    const[balance, setBalance] = useAtom(balanceAtom);
+
+    const fetchBalance = async () => {
+        if (!playerId) return;
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("Authorization token is missing.");
+            return;
+        }
+        
+        try {
+            const response = await fetch(`http://localhost:6329/api/player/${playerId}/balance`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json(); // Parse raw number response
+                setBalance(data);
+            } else {
+                console.error("Failed to fetch balance");
+            }
+        } catch (error) {
+            console.error("Error fetching balance:", error);
+        }
+    };
+
+    useEffect(() => {
+        console.log("Balance in NavBar:", balance); // Debugging log
+    }, [balance]);
+
+
+    useEffect(() => {
+        if (playerId) fetchBalance(); // Fetch balance when playerId changes
+
+        const intervalId = setInterval(() => {
+            if (playerId) fetchBalance();
+        }, 5000); // Poll every 5 seconds
+
+        return () => clearInterval(intervalId); // Cleanup interval on unmount
+    }, [playerId]);
+
     const handleSubmitTransaction = async () => {
         if (!desiredAmount || !mobilePayNumber) {
             alert("Please enter both the desired amount and MobilePay number.");
             return;
         }
         try {
-            const response = await fetch(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Player/${playerId}/deposit`, {
+            const response = await fetch(`http://localhost:6329/api/Player/${playerId}/deposit`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -56,7 +97,7 @@ const NavBar: React.FC<NavbarProps> = ({
 
             if (response.ok) {
                 alert("Balance added successfully!");
-                setDesiredAmount(""); // Clear inputs
+                setDesiredAmount("");
                 setMobilePayNumber("");
                 setIsAddBalanceOpen(false);
             } else {
@@ -146,6 +187,10 @@ const NavBar: React.FC<NavbarProps> = ({
         setIsNavOpen(false);
         navigate("/board-history");
     }
+    const handleGoToAllUserBoardsPage = () => {
+        setIsNavOpen(false);
+        navigate("/all-user-boards");
+    }
     
     const toggleNav = () => {
         setIsNavOpen(!isNavOpen);
@@ -177,6 +222,11 @@ const NavBar: React.FC<NavbarProps> = ({
                 {isAdmin && (
                     <li className={styles.navItem} onClick={handleGoToTransactionsPage}>
                         Transactions
+                    </li>
+                )}
+                {isAdmin && (
+                    <li className={styles.navItem} onClick={handleGoToAllUserBoardsPage}>
+                        All User Boards
                     </li>
                 )}
 
@@ -214,11 +264,10 @@ const NavBar: React.FC<NavbarProps> = ({
                     </li>
                 )}
             </ul>
-
+            
             {/* Balance Display */}
-            {!isAdmin && (
-                <div className={styles.Balance}>Balance: {balance.toFixed(2)} DKK</div>
-            )}
+            <div className={styles.Balance}>Balance: {balance ? `${balance.toFixed(2)} DKK` : "Loading..."} </div>
+
 
             {/* Username/Profile Dropdown */}
             <div className={styles.profileButton} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>

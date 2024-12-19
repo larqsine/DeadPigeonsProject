@@ -19,13 +19,13 @@ const PlayPage: React.FC = () => {
     const [gameId, setGameId] = useAtom(gameIdAtom);
     const [message, setMessage] = useAtom(messageAtom);
     const [error, setError] = useAtom(errorAtom);
-    const [autoPlay, setAutoPlay] = useAtom(autoPlayAtom); // AutoPlay state from Jotai
+    const [autoPlay, setAutoPlay] = useAtom(autoPlayAtom);
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const response = await axios.get(
-                    `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Player/current`,
+                    `http://localhost:6329/api/Player/current`,
                     {
                         headers: {
                             Authorization: 'Bearer ' + user?.token,
@@ -41,7 +41,7 @@ const PlayPage: React.FC = () => {
         const fetchGameData = async () => {
             try {
                 const response = await axios.get(
-                    `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/active`
+                    `http://localhost:6329/api/Games/active`
                 );
                 setGameId(response.data.gameId);
             } catch (err) {
@@ -73,7 +73,7 @@ const PlayPage: React.FC = () => {
             fieldsCount: selectedBoxes.length,
             numbers: selectedBoxes,
             gameId: gameId,
-            remainingAutoplayWeeks: autoPlay ? 4 : 0, // Add AutoPlay logic
+            remainingAutoplayWeeks: autoPlay ? 4 : 0, 
         };
 
         console.log('PlayerId:', playerId);
@@ -82,7 +82,7 @@ const PlayPage: React.FC = () => {
 
         try {
             const response = await axios.post(
-                `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${playerId}/buy`,
+                `http://localhost:6329/api/Board/${playerId}/buy`,
                 payload
             );
             setMessage(response.data.message || 'Board purchased successfully!');

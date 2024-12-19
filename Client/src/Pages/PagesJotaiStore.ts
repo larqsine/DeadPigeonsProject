@@ -16,16 +16,30 @@ export interface Transaction {
     amount: number;
     status: number;
     transactionType: string;
-    createdAt?: string; 
+    createdAt?: string;
 }
 
 interface Board {
     id: string;
     numbers: string;
-    fieldsCount: number;
-    cost: number;
+    fieldsCount?: number;
+    cost?: number;
     createdAt: string;
-    isWinning: boolean;
+    isWinning?: boolean;
+}
+
+interface Game {
+    id: string;
+    startDate: string;
+    endDate: string | null;
+    isClosed: boolean;
+    winningNumbers?: number[] | null;
+}
+
+interface PlayerBoardsSummaryDto {
+    playerId: string;
+    playerName: string;
+    totalBoards: number;
 }
 
 // Atoms for AdminPage
@@ -65,3 +79,13 @@ export const transactionsAtom = atom<Transaction[]>([]);
 export const loadingAtom = atom(true);
 
 export const boardHistoryAtom = atom<Board[]>([]);
+
+// Atoms for AllUserBoardsPage
+export const gamesAtom = atom<Game[]>([]);
+export const selectedGameAtom = atom<Game | null>(null);
+export const playersSummaryAtom = atom<PlayerBoardsSummaryDto[]>([]);
+export const selectedPlayerAtom = atom<PlayerBoardsSummaryDto | null>(null); // Updated to match PlayerBoardsSummaryDto
+export const selectedPlayerBoardsAtom = atom<Board[]>([]);
+export const gameHistoryAtom = atom<Game[]>([]);
+
+export const balanceAtom = atom<number>(0);
