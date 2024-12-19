@@ -50,12 +50,19 @@ const AllUserBoardsPage: React.FC = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                setGameHistory(response.data.data);
+
+                if (response.data?.data && Array.isArray(response.data.data)) {
+                    setGameHistory(response.data.data);
+                } else {
+                    setError('Unexpected data format received.');
+                }
+                
             } catch (err) {
                 console.error('Failed to fetch games:', err);
                 setError('Failed to fetch games.');
             }
         };
+        
 
         fetchGames();
     }, [auth, setGameHistory, setError]);
@@ -129,21 +136,28 @@ const AllUserBoardsPage: React.FC = () => {
             <section className={styles.GameSection}>
                 <h2>Games</h2>
                 <ul className={styles.gameList}>
-                    {gameHistory.map((game) => (
-                        <li
-                            key={game.id}
-                            className={styles.gameItem}
-                            onClick={() => handleGameClick(game)}
-                        >
-                            <p>
-                                <strong>Start Date:</strong> {new Date(game.startDate).toLocaleDateString()}
-                            </p>
-                            <p>
-                                <strong>End Date:</strong>{' '}
-                                {game.endDate ? new Date(game.endDate).toLocaleDateString() : 'Ongoing'}
-                            </p>
-                        </li>
-                    ))}
+                    {gameHistory.length > 0 ? (
+                        gameHistory.map((game) => (
+                            <li
+                                key={game.id}
+                                className={styles.gameItem}
+                                onClick={() => handleGameClick(game)}
+                            >
+                                <p>
+                                    <strong>Start Date:</strong> {new Date(game.startDate).toLocaleDateString()}
+                                </p>
+                                <p>
+                                    <strong>End Date:</strong>{' '}
+                                    {game.endDate ? new Date(game.endDate).toLocaleDateString() : 'Ongoing'}
+                                </p>
+                                <p>
+                                    <strong>Closed:</strong> {game.isClosed ? 'Yes' : 'No'}
+                                </p>
+                            </li>
+                        ))
+                    ) : (
+                        <p>No games found.</p>
+                    )}
                 </ul>
             </section>
 

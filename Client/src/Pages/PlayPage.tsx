@@ -75,11 +75,7 @@ const PlayPage: React.FC = () => {
             gameId: gameId,
             remainingAutoplayWeeks: autoPlay ? 4 : 0, 
         };
-
-        console.log('PlayerId:', playerId);
-        console.log('GameId:', gameId);
-        console.log('Payload:', payload);
-
+        
         try {
             const response = await axios.post(
                 `http://localhost:6329/api/Board/${playerId}/buy`,
@@ -108,6 +104,15 @@ const PlayPage: React.FC = () => {
         };
         return prices[selectedBoxes.length] || '';
     };
+    // Automatically clear the success message after 3 seconds
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => {
+                setMessage('');
+            }, 3000);
+            return () => clearTimeout(timer); 
+        }
+    }, [message, setMessage]);
 
     return (
         <div className={styles.container}>
@@ -115,8 +120,7 @@ const PlayPage: React.FC = () => {
 
             <div className={styles.gridContainer}>
                 {Array.from({length: 16}, (_, i) => (
-                    <div
-                        key={i + 1}
+                    <div key={i + 1}
                         className={`${styles.box} ${
                             selectedBoxes.includes(i + 1) ? styles.selected : ''
                         }`}
@@ -135,28 +139,19 @@ const PlayPage: React.FC = () => {
 
             <div className={styles.actionRow}>
                 <div>
-                    <button
-                        className={styles.actionButton}
-                        onClick={handleAddBoard}
-                        disabled={selectedBoxes.length < 5 || selectedBoxes.length > 8}
-                    >
-                        Add Board
+                    <button className={styles.actionButton} onClick={handleAddBoard} disabled={selectedBoxes.length < 5 || selectedBoxes.length > 8}>
+                        Buy Board
                     </button>
                 </div>
                 <div>
                     <label className={styles.autoPlayLabel}>
-                        <input
-                            type="checkbox"
-                            checked={autoPlay}
-                            onChange={() => setAutoPlay(!autoPlay)}
-                        />
+                        <input type="checkbox" checked={autoPlay} onChange={() => setAutoPlay(!autoPlay)}/>
                         AutoPlay
                     </label>
                 </div>
             </div>
-
+            
             {message && message !== '' ? <p style={{color: 'green'}}>{message}</p> : null}
-
             {error && error !== '' ? <p style={{color: 'red'}}>{error}</p> : null}
         </div>
     );

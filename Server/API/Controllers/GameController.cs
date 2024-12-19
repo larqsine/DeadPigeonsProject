@@ -21,7 +21,6 @@ namespace API.Controllers
         {
             try
             {
-
                 var game = await _gameService.StartNewGameAsync();
                 return Ok(new
                 {
@@ -86,6 +85,22 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while fetching games.");
             }
         }
+        
+        [HttpGet("closed")]
+        public async Task<IActionResult> GetClosedGames()
+        {
+            try
+            {
+                var closedGames = await _gameService.GetClosedGamesAsync();
+                return Ok(new { message = "Closed games retrieved successfully.", data = closedGames });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching closed games.", error = ex.Message });
+            }
+        }
+
+
     }
 
 }

@@ -57,13 +57,15 @@ const AdminPage: React.FC = () => {
 
         const fetchGameData = async () => {
             try {
-                const response = await axios.get(`hhttp://localhost:6329/api/Games/active`);
+                const response = await axios.get(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/active`);
                 setGameId(response.data.gameId);
             } catch (err) {
                 setError('Failed to fetch game data');
             }
         };
 
+        
+        
         fetchGameData();
         fetchUsers();
     }, [setUsers, setGameId, setError]);
@@ -84,12 +86,8 @@ const AdminPage: React.FC = () => {
             gameId: gameId,
         };
         
-        console.log('GameId:', gameId); // Logs the active game ID
-        console.log('Number', selectedWinningNumbers); //Logs the selected wining numbers
-        console.log('Payload:', payload); // Logs the payload sent to the backend
-
         try {
-            const response = await axios.post(`http://localhost:6329/api/Games/${gameId}/close`, payload);
+            const response = await axios.post(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/${gameId}/close`, payload);
             setMessage(response.data.message || 'Game closed successfully!');
             setSelectedWinningNumbers([]); 
         } catch (err) {
@@ -107,45 +105,22 @@ const AdminPage: React.FC = () => {
 
     const handeNewGame = async () => {
         try {
-            // Retrieve the token from authAtom or localStorage
-            const token = auth || localStorage.getItem('token');
-
-            if (!token) {
-                alert('Unauthorized: No token found. Please log in again.');
-                return;
-            }
-
-            // Prepare the GameCreateDto payload
             const gameCreateDto = {
                 startDate: new Date().toISOString().split('T')[0], // ISO string in "YYYY-MM-DD" format
             };
-
-            // Make the request
-            const response = await axios.post(
-                `http://localhost:6329/api/Games/start`,
-                gameCreateDto,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                }
-            );
-
-            // Show alert with the success message
+            const response = await axios.post(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/start`, gameCreateDto);
             alert(response.data.message || 'Game created successfully!');
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Error Status:', err.response?.status);
                 console.error('Error Response:', err.response?.data);
                 setError(err.response?.data?.message || 'An error occurred while creating the game.');
-
-                // Show alert with the error message
+                
                 alert(err.response?.data?.message || 'Failed to start the game.');
             } else {
                 console.error('Unexpected Error:', err);
                 setError('An unexpected error occurred.');
-
-                // Show alert for unexpected errors
+                
                 alert('An unexpected error occurred.');
             }
         }
@@ -320,10 +295,7 @@ const AdminPage: React.FC = () => {
 
             {/* Winning Numbers Section */}
             <section className={styles.WiningSection}>
-                <button
-                    className={styles.actionButton}
-                    onClick={handeNewGame}
-                >
+                <button className={styles.actionButton} onClick={handeNewGame}>
                     Start New Game
                 </button>
                 <p className={styles.subheader}>Select up to 3 winning numbers:</p>
@@ -338,14 +310,9 @@ const AdminPage: React.FC = () => {
                         </div>
                     ))}
                 </div>
-                <button
-                    className={styles.actionButton}
-                    onClick={handleSubmit}
-                    disabled={selectedWinningNumbers.length !== 3}
-                >
+                <button className={styles.actionButton} onClick={handleSubmit} disabled={selectedWinningNumbers.length !== 3}>
                     Confirm Winning Numbers
                 </button>
-
             </section>
 
             {/* Users Section */}
@@ -433,7 +400,7 @@ const AdminPage: React.FC = () => {
                                 Phone Number:
                                 <input
                                     type="text"
-                                    name="phoneNumber"
+                                    name="phone"
                                     value={editUser.phone}
                                     onChange={handleEditInputChange}
                                 />
@@ -499,7 +466,7 @@ const AdminPage: React.FC = () => {
                                 Phone Number:
                                 <input
                                     type="text"
-                                    name="phoneNumber"
+                                    name="phone"
                                     value={newUser.phone}
                                     onChange={handleCreateInputChange}
                                 />

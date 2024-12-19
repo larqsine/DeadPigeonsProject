@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -58,4 +59,11 @@ public class GameRepository
             _context.Games.Update(game);
             await _context.SaveChangesAsync();
         }
+        
+        public async Task<IEnumerable<Game>> GetAllAsync(Expression<Func<Game, bool>> predicate)
+        {
+            return await _context.Games.Where(predicate).ToListAsync();
+        }
+
+
 }

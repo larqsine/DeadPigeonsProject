@@ -14,8 +14,17 @@ interface Game {
     startDate: string;
     endDate: string | null;
     isClosed: boolean;
-    winningNumbers: number[] | null;
+    totalRevenue: number;
+    prizePool: number;
+    rolloverAmount?: number | null;
+    winningNumbers?: number[] | null;
 }
+
+interface ApiResponse<T> {
+    message: string;
+    data: T;
+}
+
 
 interface Board {
     id: string;
@@ -53,8 +62,7 @@ const BoardsHistoryPage: React.FC = () => {
                         },
                     }
                 );
-
-                // Set boards for the current game
+                
                 setBoards(response.data);
             } catch (err) {
                 console.error(err);
@@ -62,7 +70,6 @@ const BoardsHistoryPage: React.FC = () => {
             }
         };
 
-        // Fetch previous games
         const fetchPreviousGames = async () => {
             try {
                 const token = user?.token;
@@ -71,8 +78,8 @@ const BoardsHistoryPage: React.FC = () => {
                     return;
                 }
 
-                const response = await axios.get<Game[]>(
-                    `http://localhost:6329/api/Games/previous`,
+                const response = await axios.get<ApiResponse<Game[]>>(
+                    `http://localhost:6329/api/Games/closed`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -80,12 +87,20 @@ const BoardsHistoryPage: React.FC = () => {
                     }
                 );
 
-                setPreviousGames(response.data);
+                // Sort games by startDate in descending order
+                const sortedGames = response.data.data.sort(
+                    (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+                );
+
+                setPreviousGames(sortedGames);
             } catch (err) {
                 console.error(err);
-                setError('Failed to fetch previous games.');
+                setError('Failed to fetch closed games.');
             }
         };
+
+
+
 
         fetchActiveGameBoards();
         fetchPreviousGames();
@@ -155,9 +170,17 @@ const BoardsHistoryPage: React.FC = () => {
                         onClick={() => handlePreviousGameClick(game)}
                     >
                         <p><strong>Start Date:</strong> {new Date(game.startDate).toLocaleDateString()}</p>
+                        <p><strong>End
+                            Date:</strong> {game.endDate ? new Date(game.endDate).toLocaleDateString() : 'Ongoing'}</p>
+                        <p><strong>Prize Pool:</strong> {game.prizePool.toFixed(2)} DKK</p>
+                        <p><strong>Total Revenue:</strong> {game.totalRevenue.toFixed(2)} DKK</p>
+                        {game.winningNumbers && (
+                            <p><strong>Winning Numbers:</strong> {game.winningNumbers.join(', ')}</p>
+                        )}
                     </div>
                 ))}
             </div>
+
 
             {/* Modal for Selected Game Boards */}
             {selectedGame && (

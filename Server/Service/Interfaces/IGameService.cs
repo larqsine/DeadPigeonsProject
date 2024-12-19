@@ -12,4 +12,5 @@ public interface IGameService
         Task<GameDetailsDto> StartNewGameAsync();
         Task<List<WinnerDto>> CloseGameAsync(Guid gameId, List<int> winningNumbers);
         bool IsWinningBoard(List<int> boardNumbers, List<int> winningNumbers);
+        Task<IEnumerable<GameResponseDto>> GetClosedGamesAsync();
 }

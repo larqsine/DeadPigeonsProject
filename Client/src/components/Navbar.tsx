@@ -59,12 +59,7 @@ const NavBar: React.FC<NavbarProps> = ({
             console.error("Error fetching balance:", error);
         }
     };
-
-    useEffect(() => {
-        console.log("Balance in NavBar:", balance); // Debugging log
-    }, [balance]);
-
-
+    
     useEffect(() => {
         if (playerId) fetchBalance(); // Fetch balance when playerId changes
 
@@ -137,10 +132,6 @@ const NavBar: React.FC<NavbarProps> = ({
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
-
-    useEffect(() => {
-        console.log("Player ID in NavBar:", playerId);
-    }, [playerId]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -266,8 +257,9 @@ const NavBar: React.FC<NavbarProps> = ({
             </ul>
             
             {/* Balance Display */}
+            {!isAdmin && (
             <div className={styles.Balance}>Balance: {balance ? `${balance.toFixed(2)} DKK` : "Loading..."} </div>
-
+            )}
 
             {/* Username/Profile Dropdown */}
             <div className={styles.profileButton} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
