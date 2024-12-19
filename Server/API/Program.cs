@@ -80,7 +80,7 @@ namespace API
                 builder.Services.AddScoped<TransactionService>();
                 builder.Services.AddScoped<IWinnerService, WinnerService>();
 
-                builder.Services.AddQuartzJobs(); // Add Quartz jobs
+                //builder.Services.AddQuartzJobs(); // Add Quartz jobs
 
                 // Add Controllers
                 builder.Services.AddControllers();

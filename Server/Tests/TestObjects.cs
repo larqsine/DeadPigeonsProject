@@ -23,7 +23,7 @@ public static class TestObjects
             Email = "admin@example.com",
             UserName = "AdminUser",
             CreatedAt = DateTime.UtcNow,
-            PasswordChangeRequired = false
+            PasswordChangeRequired = false,
         };
 
         var result = await userManager.CreateAsync(admin, "AdminPassword123!");

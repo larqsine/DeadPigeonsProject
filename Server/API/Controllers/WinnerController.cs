@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
-using Service.Services;
 
 namespace API.Controllers;
 
@@ -9,6 +8,7 @@ namespace API.Controllers;
 public class WinnerController : ControllerBase
 {
     private readonly IWinnerService _winnerService;
+
 
     public WinnerController(IWinnerService winnerService)
     {
