@@ -20,7 +20,7 @@
 .navButtons {
     list-style: none;
     display: flex;
-    gap: 20px; 
+    gap: 20px;
     margin: 0;
     padding: 0;
     flex-grow: 1;
@@ -61,6 +61,12 @@
     color: rgb(200, 200, 200);
 }
 
+.inactiveProfileButton {
+    pointer-events: none; /* Disable hover */
+    background-color: transparent; /* Prevent background color on hover */
+    color: white;
+}
+
 /* Dropdown Menu */
 .dropdownMenu {
     position: static;
@@ -77,18 +83,18 @@
     margin-top: 5px; /* Add slight spacing */
 }
 
-.dropdownMenu button {
-    background: none;
-    border: none;
-    color: white;
-    padding: 10px;
+.dropdownMenuButton {
     font-size: 16px;
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    color: white;
 }
 
-.dropdownMenu button:hover {
+.dropdownMenuButton:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -135,11 +141,11 @@
     margin-right: 10px;
 }
 .addBalance button {
-    background-color: rgb(164, 1, 1);
+    background-color: rgb(112, 1, 1);
 }
 
 .addBalance button:hover {
-        background-color: rgb(112, 1, 1);
+    background-color: rgb(61, 1, 1);
 }
 
 .Balance {
@@ -162,24 +168,34 @@
     }
 
     .navButtons {
-        display: none; /* Hide navigation buttons initially */
+        list-style: none;
+        display: none; /* Hidden initially */
         flex-direction: column; /* Stack items vertically */
-        width: 100%;
-        background-color: rgb(164, 1, 1);
+        background-color: rgb(114, 4, 4);
+        width: 100vw; /* Full width */
         position: absolute;
         top: 90px;
         left: 0;
-        z-index: 100;
+        z-index: 10;
+        padding: 0;
+        margin: 0;
+        border: white;
+        border-radius: 10px;
+        margin-top: 10px;
     }
 
     .navButtons.show {
-        display: flex; /* Show navigation buttons when toggled */
+        display: flex;
     }
 
     .navItem {
+        padding: 15px 20px;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
         text-align: center;
-        padding: 10px;
-        width: 100%; /* Make each item full width */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .hamburger {
@@ -199,6 +215,34 @@
     .profileButton {
         font-size: 16px;
     }
+
+    .dropdownMenu {
+        display: flex;
+        flex-direction: column;
+        background-color: rgb(114, 4, 4);
+        width: 100%; /* Full width within the hamburger menu */
+        flex-wrap: wrap;
+    }
+
+    .dropdownMenuButton {
+        padding: 15px 20px;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .dropdownMenuButton:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .logo img {
+        width: 80px;
+        cursor: pointer;
+    }
 }
 
 @media (max-width: 450px) {
@@ -206,19 +250,21 @@
         display: none; /* Hide the profile button from the main navbar */
     }
 
-    /* Show Profile Button in Hamburger Menu */
+
     .navButtons.show .profileButton {
         display: block;
         text-align: center;
-        background-color: rgb(164, 1, 1); /* Same as other menu items */
+        background-color: rgb(164, 1, 1);
         color: white;
         font-size: 16px;
         font-weight: bold; /* Ensure it's bold like the other buttons */
         padding: 10px;
-        margin: 5px 0; /* Add spacing between items */
-        border-radius: 5px;
+        margin: 5px 5px; /* Add spacing between items */
+        border-radius: 10px;
         position: relative; /* Add relative positioning */
+        align-content: end;
     }
+
 
     /* Dropdown Menu Inside Hamburger */
     .navButtons.show .profileButton .dropdownMenu {
@@ -248,5 +294,15 @@
     .dropdownMenu button:hover {
         background-color: rgba(255, 255, 255, 0.2);
     }
-}
 
+    .logo img {
+        width: 60px;
+        cursor: pointer;
+    }
+
+    .inactiveProfileButton {
+        cursor: default; /* Remove pointer */
+        text-decoration: none;
+        color: white;
+    }
+}

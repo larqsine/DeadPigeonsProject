@@ -17,8 +17,10 @@ body.modalOpen {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    min-height: 100vh; /* Ensures it stretches the viewport */
+    min-height: 100vh;
     box-sizing: border-box;
+    align-items: center; 
+    justify-content: center;
 }
 
 /* Header styling */
@@ -26,6 +28,7 @@ body.modalOpen {
     font-size: 2rem;
     color: #333;
     margin-bottom: 20px;
+    text-align: center;
 }
 
 /* Subheader styling */
@@ -80,6 +83,7 @@ body.modalOpen {
 /* Button styling */
 .actionButton {
     margin-top: 20px;
+    margin-bottom: 30px;
     padding: 10px 20px;
     font-size: 1rem;
     color: #fff;
@@ -88,6 +92,7 @@ body.modalOpen {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    align-self: center; 
 }
 
 /* Disabled button styling */
@@ -145,6 +150,32 @@ body.modalOpen {
     margin-bottom: 20px; 
 }
 
+.editUserButton {
+    background: orange;
+}
+.editUserButton:hover {
+    background-color: darkorange;
+}
+
+.deleteUserButton {
+    background: red;
+}
+.deleteUserButton:hover {
+    background-color: darkred;
+}
+
+.createUserModalButton{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    background-color: green;
+}
+.createUserModalButton:hover {
+    background-color: darkgreen;
+}
 
 .closeButton {
     position: absolute;
@@ -155,6 +186,8 @@ body.modalOpen {
     font-size: 1.5rem;
     cursor: pointer;
     background: #a60505;
+    height: 40px;
+    width: 40px;
 }
 
 /* Modal Input fields */
@@ -168,7 +201,7 @@ body.modalOpen {
     box-sizing: border-box;
 }
 
-/* Modal form submit button */
+
 .modalContent .actionButton {
     margin-top: 20px;
     background-color: #045b12;
@@ -221,7 +254,7 @@ body.modalOpen {
 
 .WiningSection,
 .UserSection {
-    width: 100%;
+    width: 90%;
     max-width: 1200px; 
     margin: 0 auto; 
     padding: 20px;
@@ -229,6 +262,8 @@ body.modalOpen {
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     flex-shrink: 0; /* Prevent sections from shrinking */
+    justify-content: center;
+    align-items: center;
 }
 
 .userList {
@@ -248,7 +283,7 @@ body.modalOpen {
     }
 
     .box, .userItem {
-        font-size: 12px;
+        font-size: 14px;
         height: 60px;
         width: auto; 
         padding: 4px;
@@ -266,31 +301,42 @@ body.modalOpen {
         font-size: 14px;
         padding: 10px;
     }
+    .WiningSection, .UserSection {
+        width: 100%; /* Allow full width */
+        padding: 15px;
+    }
 }
 
 /* Small Mobile Styles */
 @media (max-width: 480px) {
     .gridContainer, .userList {
-        grid-template-columns: repeat(4, 1fr); 
+        grid-template-columns: repeat(4, 1fr);
+        justify-content: center;
+        align-items: center;
     }
 
     .box, .userItem {
-        width: 70px;
-        height: 50px;
-        font-size: 10px;
+        width: auto;
+        height: 40px;
+        font-size: 12px;
     }
 
     .actionButton {
-        padding: 6px 12px;
+        padding: 8px 16px;
         font-size: 12px;
     }
 
     .modalContent {
-        max-width: 100%; /* Use full width on small screens */
+        max-width: 100%;
     }
 
     .userItem {
         font-size: 12px;
         padding: 6px;
+    }
+
+    .WiningSection,
+    .UserSection {
+        width: 90%;
     }
 }

@@ -68,6 +68,30 @@
     font-weight: bold;
 }
 
+.actionRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.autoPlayLabel {
+    display: flex;
+    align-items: center; /* Aligns the checkbox and label text vertically */
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    margin: 0; /* Ensures it stays aligned with the button */
+    padding: 0; /* Removes extra padding for alignment */
+}
+.autoPlayLabel input {
+    margin-right: 10px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+
 /* Media Queries */
 
 /* For tablets and smaller devices */

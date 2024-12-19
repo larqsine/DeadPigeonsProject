@@ -1,13 +1,15 @@
 ﻿import React, { useEffect } from 'react';
 import { useAtom } from 'jotai';
 import axios from 'axios';
-import styles from './PlayPage.module.css'
+import styles from './PlayPage.module.css';
 import {
     selectedBoxesAtom,
     playerIdAtom,
     gameIdAtom,
     messageAtom,
-    errorAtom, userAtom,
+    errorAtom,
+    userAtom,
+    autoPlayAtom, // Add this to manage AutoPlay state
 } from './PagesJotaiStore.ts';
 
 const PlayPage: React.FC = () => {
@@ -17,15 +19,19 @@ const PlayPage: React.FC = () => {
     const [gameId, setGameId] = useAtom(gameIdAtom);
     const [message, setMessage] = useAtom(messageAtom);
     const [error, setError] = useAtom(errorAtom);
-    
+    const [autoPlay, setAutoPlay] = useAtom(autoPlayAtom);
+
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Player/current`, {
-                    headers: {
-                        Authorization: "Bearer " + user?.token
+                const response = await axios.get(
+                    `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Player/current`,
+                    {
+                        headers: {
+                            Authorization: 'Bearer ' + user?.token,
+                        },
                     }
-                });
+                );
                 setPlayerId(response.data.id);
             } catch (err) {
                 setError('Failed to fetch player data');
@@ -34,7 +40,9 @@ const PlayPage: React.FC = () => {
 
         const fetchGameData = async () => {
             try {
-                const response = await axios.get(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/active`);
+                const response = await axios.get(
+                    `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/active`
+                );
                 setGameId(response.data.gameId);
             } catch (err) {
                 setError('Failed to fetch game data');
@@ -47,10 +55,8 @@ const PlayPage: React.FC = () => {
 
     const handleBoxClick = (num: number) => {
         if (selectedBoxes.includes(num)) {
-            // If already selected, remove it from the list
             setSelectedBoxes(selectedBoxes.filter((box) => box !== num));
         } else if (selectedBoxes.length < 8) {
-            // Add the box if under the 8-box limit
             setSelectedBoxes([...selectedBoxes, num]);
         } else {
             alert('You can choose a maximum of 8 numbers');
@@ -64,19 +70,19 @@ const PlayPage: React.FC = () => {
         }
 
         const payload = {
-                    fieldsCount: selectedBoxes.length,
-                    numbers: selectedBoxes, 
-                    gameId: gameId,
+            fieldsCount: selectedBoxes.length,
+            numbers: selectedBoxes,
+            gameId: gameId,
+            remainingAutoplayWeeks: autoPlay ? 4 : 0, 
         };
         
-        console.log('PlayerId:', playerId); // Logs the player ID
-        console.log('GameId:', gameId); // Logs the active game ID
-        console.log('Payload:', payload); // Logs the payload sent to the backend
-
         try {
-            const response = await axios.post(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${playerId}/buy`, payload);
+            const response = await axios.post(
+                `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${playerId}/buy`,
+                payload
+            );
             setMessage(response.data.message || 'Board purchased successfully!');
-            setSelectedBoxes([]); // Clear selected numbers after purchase
+            setSelectedBoxes([]);
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Error Status:', err.response?.status);
@@ -89,7 +95,6 @@ const PlayPage: React.FC = () => {
         }
     };
 
-    // Determine board price based on selected boxes
     const getBoardPrice = () => {
         const prices: Record<number, string> = {
             5: '20 DKK',
@@ -99,17 +104,26 @@ const PlayPage: React.FC = () => {
         };
         return prices[selectedBoxes.length] || '';
     };
+    // Automatically clear the success message after 3 seconds
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => {
+                setMessage('');
+            }, 3000);
+            return () => clearTimeout(timer); 
+        }
+    }, [message, setMessage]);
 
     return (
         <div className={styles.container}>
             <h1>Purchase Your Board</h1>
 
             <div className={styles.gridContainer}>
-                {/* Grid of selectable boxes */}
-                {Array.from({ length: 16 }, (_, i) => (
-                    <div
-                        key={i + 1}
-                        className={`${styles.box} ${selectedBoxes.includes(i + 1) ? styles.selected : ''}`}
+                {Array.from({length: 16}, (_, i) => (
+                    <div key={i + 1}
+                        className={`${styles.box} ${
+                            selectedBoxes.includes(i + 1) ? styles.selected : ''
+                        }`}
                         onClick={() => handleBoxClick(i + 1)}
                     >
                         {i + 1}
@@ -117,30 +131,28 @@ const PlayPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* Show the price only if the user selects between 5 and 8 numbers */}
             {selectedBoxes.length >= 5 && selectedBoxes.length <= 8 && (
                 <p className={styles.priceText}>
                     {selectedBoxes.length} numbers selected. Price: {getBoardPrice()}
                 </p>
             )}
 
-            {/* Add Board button */}
-            <button
-                className={styles.actionButton}
-                onClick={handleAddBoard}
-                disabled={selectedBoxes.length < 5 || selectedBoxes.length > 8}
-            >
-                Add Board
-            </button>
-
-            {/* Show success or error message */}
-            {message && message !== '' ? (
-                <p style={{ color: 'green' }}>{message}</p>
-            ) : null}
-
-            {error && error !== '' ? (
-                <p style={{ color: 'red' }}>{error}</p>
-            ) : null}
+            <div className={styles.actionRow}>
+                <div>
+                    <button className={styles.actionButton} onClick={handleAddBoard} disabled={selectedBoxes.length < 5 || selectedBoxes.length > 8}>
+                        Buy Board
+                    </button>
+                </div>
+                <div>
+                    <label className={styles.autoPlayLabel}>
+                        <input type="checkbox" checked={autoPlay} onChange={() => setAutoPlay(!autoPlay)}/>
+                        AutoPlay
+                    </label>
+                </div>
+            </div>
+            
+            {message && message !== '' ? <p style={{color: 'green'}}>{message}</p> : null}
+            {error && error !== '' ? <p style={{color: 'red'}}>{error}</p> : null}
         </div>
     );
 };

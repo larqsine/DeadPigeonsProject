@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
 using Service.DTOs.BoardDto;
+using System.Security.Claims;
+using System;
+
 
 namespace API.Controllers
 {
@@ -46,11 +49,27 @@ namespace API.Controllers
             return Ok(boards);
         }
 
-        [HttpGet("{gameId:guid}/BoardsbyGameId")]
+        [HttpGet("{gameId:guid}/BoardsByGameId")]
         public async Task<IActionResult> GetBoardsByGameId(Guid gameId)
         {
-            var boards = await _boardService.GetBoardsByGameIdAsync(gameId);
-            return Ok(boards);
+            try
+            {
+                var playerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(playerId))
+                {
+                    return Unauthorized("User is not logged in.");
+                }
+
+                // Fetch boards for the logged-in player and game
+                var boards = await _boardService.GetBoardsByGameAndPlayerIdAsync(gameId, Guid.Parse(playerId));
+                return Ok(boards);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching boards for the game.");
+                return StatusCode(500, "An error occurred while fetching boards.");
+            }
         }
         
         [HttpGet("{playerId:guid}/recent-boards")]
@@ -67,5 +86,46 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while fetching boards.");
             }
         }
+        
+        [HttpGet("my-boards")]
+        public async Task<IActionResult> GetMyBoards()
+        {
+            try
+            {
+                var playerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(playerId))
+                {
+                    return Unauthorized("User is not logged in.");
+                }
+
+                // Fetch boards for the logged-in player
+                var boards = await _boardService.GetBoardsByPlayerIdAsync(Guid.Parse(playerId));
+
+                return Ok(boards);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching boards for the current player.");
+                return StatusCode(500, "An error occurred while fetching boards.");
+            }
+        }
+        [HttpGet("{gameId:guid}/players-summary")]
+        public async Task<IActionResult> GetPlayersSummaryForGame(Guid gameId)
+        {
+            try
+            {
+                var playersSummary = await _boardService.GetPlayersSummaryForGameAsync(gameId);
+                return Ok(playersSummary);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching players summary for game {GameId}.", gameId);
+                return StatusCode(500, "An error occurred while fetching the players summary.");
+            }
+        }
+
+        
+
     }
 }

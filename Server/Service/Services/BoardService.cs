@@ -275,5 +275,28 @@ public class BoardService : IBoardService
                     board.CreatedAt <= currentWeekStart.AddDays(6))
                 .Select(BoardResponseDto.FromEntity);
         }
+        
+        public async Task<List<BoardResponseDto>> GetBoardsByGameAndPlayerIdAsync(Guid gameId, Guid playerId)
+        {
+            var boards = await _boardRepository.GetBoardsByGameAndPlayerIdAsync(gameId, playerId);
+            return boards.Select(BoardResponseDto.FromEntity).ToList();
+        }
+
+        public async Task<List<PlayerBoardsSummaryDto>> GetPlayersSummaryForGameAsync(Guid gameId)
+        {
+            var boards = await _boardRepository.GetBoardsByGameIdAsync(gameId);
+
+            var playersSummary = boards
+                .GroupBy(b => b.PlayerId)
+                .Select(group => new PlayerBoardsSummaryDto
+                {
+                    PlayerId = group.Key,
+                    PlayerName = group.First().Player.FullName,
+                    TotalBoards = group.Count()
+                })
+                .ToList();
+
+            return playersSummary;
+        }
 
 }

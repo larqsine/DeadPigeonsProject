@@ -68,8 +68,22 @@ namespace DataAccess.Repositories
                 .Where(b => b.Autoplay && b.RemainingAutoplayWeeks > 0)
                 .ToListAsync();
         }
+        
+        public async Task<List<Board>> GetBoardsByGameAndPlayerIdAsync(Guid gameId, Guid playerId)
+        {
+            return await _context.Boards
+                .Where(board => board.GameId == gameId && board.PlayerId == playerId)
+                .ToListAsync();
+        }
+        
+        public async Task<List<Board>> GetBoardsByGameIdAsync(Guid gameId)
+        {
+            return await _context.Boards
+                .Where(b => b.GameId == gameId)
+                .Include(b => b.Player)
+                .ToListAsync();
+        }
 
-
-
+        
     }
 }

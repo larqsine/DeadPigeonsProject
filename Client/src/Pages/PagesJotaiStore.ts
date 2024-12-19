@@ -16,16 +16,30 @@ export interface Transaction {
     amount: number;
     status: number;
     transactionType: string;
-    createdAt?: string; 
+    createdAt?: string;
 }
 
 interface Board {
     id: string;
     numbers: string;
-    fieldsCount: number;
-    cost: number;
+    fieldsCount?: number;
+    cost?: number;
     createdAt: string;
-    isWinning: boolean;
+    isWinning?: boolean;
+}
+
+interface Game {
+    id: string;
+    startDate: string;
+    endDate: string | null;
+    isClosed: boolean;
+    winningNumbers?: number[] | null;
+}
+
+interface PlayerBoardsSummaryDto {
+    playerId: string;
+    playerName: string;
+    totalBoards: number;
 }
 
 // Atoms for AdminPage
@@ -53,14 +67,29 @@ export const playerIdAtom = atom<string>('');
 export const gameIdAtom = atom<string>('');
 export const messageAtom = atom<string>('');
 export const errorAtom = atom<string>('');
+export const autoPlayAtom = atom(false);
 
 // Atoms for LoginPage
 export const loginFormAtom = atom({ email: '', password: '' });
 export const userAtom = atom<{ userName: string; roles: string[]; token: string[]; passwordChangeRequired: boolean } | null>(null);
 export const isLoggedInAtom = atom<boolean>(false);
+export const showPasswordAtom = atom(false);
 
 // Atoms for transactions page
 export const transactionsAtom = atom<Transaction[]>([]);
 export const loadingAtom = atom(true);
 
 export const boardHistoryAtom = atom<Board[]>([]);
+
+// Atoms for AllUserBoardsPage
+export const selectedGameAtom = atom<Game | null>(null);
+export const playersSummaryAtom = atom<PlayerBoardsSummaryDto[]>([]);
+export const selectedPlayerAtom = atom<PlayerBoardsSummaryDto | null>(null);
+export const gameHistoryAtom = atom<Game[]>([]);
+
+export const balanceAtom = atom<number>(0);
+
+// Password visibility states for ChangePasswordPage
+export const showCurrentPasswordAtom = atom(false);
+export const showNewPasswordAtom = atom(false);
+export const showVerifyNewPasswordAtom = atom(false);
