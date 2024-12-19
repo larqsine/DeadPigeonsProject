@@ -25,7 +25,7 @@ const App: React.FC = () => {
     const [showBoxGrid, setShowBoxGrid] = useAtom(showBoxGridAtom);
     const [transitioning, setTransitioning] = useAtom(transitioningAtom);
     const [username, setUsername] = useAtom(usernameAtom);
-    const [balance, setBalance] = useAtom(balanceAtom);
+    const [, setBalance] = useAtom(balanceAtom);
     const navigate = useNavigate();
     const [, setSelectedBoxes] = useAtom(selectedBoxesAtom);
 
@@ -48,7 +48,7 @@ const App: React.FC = () => {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Token is missing. Please log in again.");
 
-            const playerIdResponse = await fetch(`http://localhost:6329/api/player/current`, {
+            const playerIdResponse = await fetch(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player/current`, {
                 method: "GET",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -84,7 +84,6 @@ const App: React.FC = () => {
                 <Navbar
                     onPlayClick={handlePlayClick}
                     username={username || "Guest"}
-                    balance={balance !== null ? balance : 0}
                     onSignOut={handleSignOut}
                     isAdmin={isAdmin}
                     onGoToAdminPage={handleGoToAdminPage}

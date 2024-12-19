@@ -179,7 +179,7 @@ const AdminPage: React.FC = () => {
         }
 
         try {
-            const response = await axios.put(`http://localhost:6329/api/player/${editUser.id}`, editUser, {
+            const response = await axios.put(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player/${editUser.id}`, editUser, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
@@ -189,7 +189,7 @@ const AdminPage: React.FC = () => {
                 alert('User updated successfully');
 
                 // Refresh the user list
-                const usersResponse = await axios.get('http://localhost:6329/api/player', {
+                const usersResponse = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
@@ -213,7 +213,7 @@ const AdminPage: React.FC = () => {
 
         const token = auth;
         try {
-            const response = await axios.post('http://localhost:6329/api/Account/register', {
+            const response = await axios.post('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Account/register', {
                 userName: newUser.userName,
                 fullName: newUser.fullName,
                 email: newUser.email,
@@ -237,7 +237,7 @@ const AdminPage: React.FC = () => {
                     password: '',
                     role: '',
                 });
-                const usersResponse = await axios.get('http://localhost:6329/api/player', {
+                const usersResponse = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
@@ -266,7 +266,7 @@ const AdminPage: React.FC = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:6329/api/player/${userId}`, {
+            const response = await fetch(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player/${userId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,

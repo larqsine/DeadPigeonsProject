@@ -55,7 +55,7 @@ const BoardsHistoryPage: React.FC = () => {
                 }
 
                 const response = await axios.get<Board[]>(
-                    `http://localhost:6329/api/Board/${activeGameId}/BoardsByGameId`,
+                    `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${activeGameId}/BoardsByGameId`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -79,7 +79,7 @@ const BoardsHistoryPage: React.FC = () => {
                 }
 
                 const response = await axios.get<ApiResponse<Game[]>>(
-                    `http://localhost:6329/api/Games/closed`,
+                    `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/closed`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -116,7 +116,7 @@ const BoardsHistoryPage: React.FC = () => {
 
             // Fetch boards for the selected previous game and logged-in player
             const response = await axios.get<Board[]>(
-                `http://localhost:6329/api/Board/${game.id}/BoardsByGameId`,
+                `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${game.id}/BoardsByGameId`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

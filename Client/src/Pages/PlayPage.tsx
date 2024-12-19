@@ -25,7 +25,7 @@ const PlayPage: React.FC = () => {
         const fetchUserData = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:6329/api/Player/current`,
+                    `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Player/current`,
                     {
                         headers: {
                             Authorization: 'Bearer ' + user?.token,
@@ -41,7 +41,7 @@ const PlayPage: React.FC = () => {
         const fetchGameData = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:6329/api/Games/active`
+                    `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/active`
                 );
                 setGameId(response.data.gameId);
             } catch (err) {
@@ -78,7 +78,7 @@ const PlayPage: React.FC = () => {
         
         try {
             const response = await axios.post(
-                `http://localhost:6329/api/Board/${playerId}/buy`,
+                `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${playerId}/buy`,
                 payload
             );
             setMessage(response.data.message || 'Board purchased successfully!');

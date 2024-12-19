@@ -28,13 +28,7 @@ const AllUserBoardsPage: React.FC = () => {
         isClosed: boolean;
         winningNumbers?: number[] | null;
     }
-
-   /* interface PlayerBoardsSummaryDto {
-        playerId: string;
-        playerName: string;
-        totalBoards: number;
-    }*/
-
+    
     // Fetch all games on mount
     useEffect(() => {
         const fetchGames = async () => {
@@ -45,7 +39,7 @@ const AllUserBoardsPage: React.FC = () => {
                     return;
                 }
 
-                const response = await axios.get('http://localhost:6329/api/Games', {
+                const response = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -79,7 +73,7 @@ const AllUserBoardsPage: React.FC = () => {
             }
 
             const response = await axios.get(
-                `http://localhost:6329/api/Board/${game.id}/players-summary`,
+                `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${game.id}/players-summary`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -112,7 +106,7 @@ const AllUserBoardsPage: React.FC = () => {
             }
 
             const response = await axios.get(
-                `http://localhost:6329/api/Board/${playerId}/BoardsByPlayerId`,
+                `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${playerId}/BoardsByPlayerId`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

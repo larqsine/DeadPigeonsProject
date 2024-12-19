@@ -8,6 +8,7 @@ import {
     isLoggedInAtom,
     playerIdAtom,
     authAtom,
+    showPasswordAtom,
 } from './PagesJotaiStore.ts';
 
 interface LoginPageProps {
@@ -20,16 +21,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [, setIsLoggedIn] = useAtom(isLoggedInAtom);
     const [, setPlayerId] = useAtom(playerIdAtom);
     const [, setAuth] = useAtom(authAtom);
+    const [showPassword, setShowPassword] = useAtom(showPasswordAtom);
 
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setLoginForm((prev) => ({ ...prev, [name]: value }));
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword((prev) => !prev); // Toggle the password visibility atom
+    };
+
     const handleLoginSubmit = async () => {
         if (loginForm.email && loginForm.password) {
             try {
-                const response = await axios.post('http://localhost:6329/api/account/login', {
+                const response = await axios.post('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/account/login', {
                     email: loginForm.email,
                     password: loginForm.password,
                 });
@@ -70,13 +76,22 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                         value={loginForm.email}
                         onChange={handleLoginChange}
                     />
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Password"
-                        value={loginForm.password}
-                        onChange={handleLoginChange}
-                    />
+                    <div className={styles.passwordContainer}>
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            placeholder="Password"
+                            value={loginForm.password}
+                            onChange={handleLoginChange}
+                        />
+                        <button
+                            type="button"
+                            className={styles.togglePasswordButton}
+                            onClick={togglePasswordVisibility}
+                        >
+                            {showPassword ? "Hide" : "Show"}
+                        </button>
+                    </div>
                     <button className={styles.logInButton} onClick={handleLoginSubmit}>
                         Login
                     </button>

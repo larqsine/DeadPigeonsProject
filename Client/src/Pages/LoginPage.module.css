@@ -56,3 +56,29 @@ input {
 .logInButton:hover {
     background-color: rgb(112, 1, 1);
 }
+
+.passwordContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.passwordContainer input {
+    flex: 1;
+    padding-right: 50px; /* Space for the toggle button */
+}
+
+.togglePasswordButton {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: rgb(164, 1, 1);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 5px;
+}
+
+.togglePasswordButton:hover {
+    text-decoration: underline;
+}
