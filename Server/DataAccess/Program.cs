@@ -1,4 +1,4 @@
-﻿
+﻿/*
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,4 +10,4 @@ public class Program
         
 
     }
-}
+}*/
