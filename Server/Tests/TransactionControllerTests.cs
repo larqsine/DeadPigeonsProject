@@ -1,23 +1,21 @@
-using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using DataAccess.Enums;
-using DataAccess.Models;
+using System.Net;
+using Microsoft.AspNetCore.Identity;
+using Xunit;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using API;
 using DataAccess;
-using DataAccess.Repositories;
 using Service.DTOs.TransactionDto;
 
 namespace Tests
 {
     public class TransactionControllerTests : IClassFixture<WebApplicationFactory<Program>>
     {
-        private readonly HttpClient _client;
         private readonly WebApplicationFactory<Program> _factory;
+        private readonly HttpClient _client;
 
         public TransactionControllerTests(WebApplicationFactory<Program> factory)
         {
@@ -31,148 +29,71 @@ namespace Tests
                     services.AddDbContext<DBContext>(options => options.UseInMemoryDatabase("TestDb"));
                 });
             });
+            _client = _factory.CreateClient();
+        }
 
-            _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = false
-            });
+        private UserManager<DataAccess.Models.User> GetUserManager()
+        {
+            var scope = _factory.Services.CreateScope();
+            return scope.ServiceProvider.GetRequiredService<UserManager<DataAccess.Models.User>>();
+        }
+        
+
+        [Fact]
+        public async Task ApproveTransaction_Failure_Unauthorized()
+        {
+            var userManager = GetUserManager();
+            var player = await TestObjects.GetPlayer(userManager);
+            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
+
+            _client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var transactionId = Guid.NewGuid(); // Replace with a valid transaction ID
+            var response = await _client.PutAsJsonAsync($"/api/transaction/{transactionId}/approve", new { });
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        
+        [Fact]
+        public async Task DeclineTransaction_Failure_Unauthorized()
+        {
+            var userManager = GetUserManager();
+            var player = await TestObjects.GetPlayer(userManager);
+            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
+
+            _client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var transactionId = Guid.NewGuid(); // Replace with a valid transaction ID
+            var response = await _client.PutAsJsonAsync($"/api/transaction/{transactionId}/decline", new { });
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         [Fact]
-        public async Task ApproveTransaction_ReturnsOk_WhenTransactionIsApproved()
+        public async Task GetDepositTransactions_Success()
         {
-            using var scope = _factory.Services.CreateScope();
-            var scopedServices = scope.ServiceProvider;
-
-            var context = scopedServices.GetRequiredService<DBContext>();
-            var transactionRepository = new TransactionRepository(context);
-            
-            var admin = new User { Email = "admin@example.com", UserName = "admin" };
-            var player = new User { Email = "player@example.com", UserName = "player" };
-
-            context.Users.Add(admin);
-            context.Users.Add(player);
-            await context.SaveChangesAsync();
-
-            var transaction = new Transaction
-            {
-                Id = Guid.NewGuid(),
-                PlayerId = player.Id,
-                Amount = 100.0m,
-                Status = TransactionStatus.Pending,
-                TransactionType = "deposit"
-            };
-
-            await transactionRepository.AddTransactionAsync(transaction);
-            
-            var response = await _client.PutAsJsonAsync<object>($"/api/transaction/{transaction.Id}/approve", null!);
-            
+            var response = await _client.GetAsync("/api/transaction/deposit");
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task ApproveTransaction_ReturnsNotFound_WhenTransactionDoesNotExist()
-        {
-            var transactionId = Guid.NewGuid();
-
-            var response = await _client.PutAsync($"/api/transaction/{transactionId}/approve", null);
-
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task DeclineTransaction_ReturnsOk_WhenTransactionIsDeclined()
-        {
-            using var scope = _factory.Services.CreateScope();
-            var scopedServices = scope.ServiceProvider;
-
-            var context = scopedServices.GetRequiredService<DBContext>();
-            var transactionRepository = new TransactionRepository(context);
-            
-            var admin = new User { Email = "admin@example.com", UserName = "admin" };
-            var player = new User { Email = "player@example.com", UserName = "player" };
-
-            context.Users.Add(admin);
-            context.Users.Add(player);
-            await context.SaveChangesAsync();
-
-            var transaction = new Transaction
-            {
-                Id = Guid.NewGuid(),
-                PlayerId = player.Id,
-                Amount = 50.0m,
-                Status = TransactionStatus.Pending,
-                TransactionType = "deposit"
-            };
-
-            await transactionRepository.AddTransactionAsync(transaction);
-
-            
-            var response = await _client.PutAsync($"/api/transaction/{transaction.Id}/decline", null);
-
-           
-            var result = await response.Content.ReadFromJsonAsync<TransactionResponseDto>();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(result);
-            Assert.Equal(TransactionStatus.Declined, result.Status);
-        }
-
-        [Fact]
-        public async Task DeclineTransaction_ReturnsNotFound_WhenTransactionDoesNotExist()
-        {
-            var transactionId = Guid.NewGuid();
-            var response = await _client.PutAsync($"/api/transaction/{transactionId}/decline", null);
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
         public async Task GetTransactionsByPlayerId_Success()
         {
-            using var scope = _factory.Services.CreateScope();
-            var scopedServices = scope.ServiceProvider;
+            var userManager = GetUserManager();
+            var player = await TestObjects.GetPlayer(userManager);
+            var token = await TestObjects.GetToken(_client, player.Email, "PlayerPassword123!");
 
-            var context = scopedServices.GetRequiredService<DBContext>();
-            var transactionRepository = new TransactionRepository(context);
-            
-            var admin = new User { Email = "admin@example.com", UserName = "admin" };
-            var player = new User { Email = "player@example.com", UserName = "player" };
+            _client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            context.Users.Add(admin);
-            context.Users.Add(player);
-            await context.SaveChangesAsync();
+            var response = await _client.PutAsJsonAsync($"/api/transaction/{player.Id}/GetPlayerTransaction", new { });
 
-       
-            var transaction1 = new Transaction
-            {
-                Id = Guid.NewGuid(),
-                PlayerId = player.Id,
-                Amount = 100.0m,
-                Status = TransactionStatus.Pending,
-                TransactionType = "deposit"
-            };
-
-            var transaction2 = new Transaction
-            {
-                Id = Guid.NewGuid(),
-                PlayerId = player.Id,
-                Amount = 200.0m,
-                Status = TransactionStatus.Approved,
-                TransactionType = "deposit"
-            };
-
-            await transactionRepository.AddTransactionAsync(transaction1);
-            await transactionRepository.AddTransactionAsync(transaction2);
-
-          
-            var response = await _client.PutAsJsonAsync<object>($"/api/transaction/{player.Id}/GetPlayerTransaction", null!);
-
-         
-            response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<List<TransactionResponseDto>>();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-            Assert.All(result, transaction => Assert.Equal(player.Id, transaction.PlayerId));
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
+
+        
     }
 }

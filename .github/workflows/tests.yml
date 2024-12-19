@@ -14,4 +14,6 @@ jobs:
         with:
           dotnet-version: '8'
       - uses: docker/setup-buildx-action@v3
+      - name: Change directory to Server
+        run: cd Server
       - run: dotnet test
