@@ -101,7 +101,9 @@ namespace API.Controllers
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
+            {
                 return Unauthorized(new { message = "Invalid email or password." });
+            }
 
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
             if (!result.Succeeded)

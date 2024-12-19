@@ -15,7 +15,7 @@ public class WinnerController : ControllerBase
         _winnerService = winnerService;
     }
 
-    [HttpGet("games/{gameId:guid}/GetAllWinners")]
+    [HttpGet("{gameId:guid}/GetAllWinners")]
     public async Task<IActionResult> GetWinnersByGameId(Guid gameId)
     {
         try

@@ -13,5 +13,6 @@ namespace Service.Interfaces
         Task<List<BoardResponseDto>> GetBoardsByPlayerIdAsync(Guid playerId);
         Task<List<BoardResponseDto>> GetAllBoardsAsync();
         Task<List<BoardResponseDto>> GetBoardsByGameIdAsync(Guid gameId);
+        Task<IEnumerable<BoardResponseDto>> GetRecentBoardsAsync(Guid playerId);
     }
 }

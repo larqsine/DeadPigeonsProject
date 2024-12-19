@@ -28,6 +28,14 @@ namespace DataAccess.Repositories
         {
             await _context.SaveChangesAsync();
         }
+        
+        public async Task<List<Transaction>> GetTransactionsByTypeAsync(string type)
+        {
+            return await _context.Set<Transaction>()
+                .Where(t => t.TransactionType.ToLower() == type.ToLower()) // Convert to lowercase
+                .ToListAsync();
+        }
+
         public async Task<List<Transaction>> GetTransactionsByPlayerIdAsync(Guid playerId)
         {
             return await _context.Transactions

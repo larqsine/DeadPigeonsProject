@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Service.DTOs.BoardDto;
 using Service.DTOs.TransactionDto;
 using Service.Interfaces;
+using System.Globalization;
 
 namespace Service.Services;
 
@@ -31,20 +32,45 @@ public class BoardService : IBoardService
         
     public async Task<BoardResponseDto> BuyBoardAsync(Guid playerId, BuyBoardRequestDto buyBoardRequestDto)
     {
-        var player = await GetPlayerAsync(playerId);
-        var game = await GetGameAsync(buyBoardRequestDto.GameId);
+        try
+        {
+            _logger.LogInformation("BuyBoardAsync called for Player ID: {PlayerId} and Game ID: {GameId}", playerId, buyBoardRequestDto.GameId);
 
-        CheckParticipationDeadline();
+            // Validate the player
+            var player = await GetPlayerAsync(playerId);
+            _logger.LogInformation("Player validated: {PlayerId}", playerId);
 
-        ValidatePlayerBalance(player, buyBoardRequestDto.FieldsCount);
+            // Validate the game
+            var game = await GetGameAsync(buyBoardRequestDto.GameId);
+            _logger.LogInformation("Game validated: {GameId}", buyBoardRequestDto.GameId);
 
-        var transaction = await ProcessPurchaseTransaction(player, buyBoardRequestDto.FieldsCount);
-        var board = CreateBoard(buyBoardRequestDto, playerId, transaction.Amount);
+            // Check participation deadline
+            CheckParticipationDeadline();
+            _logger.LogInformation("Participation deadline check passed.");
 
-        var createdBoard = await _boardRepository.CreateBoardAsync(board);
+            // Validate player balance
+            ValidatePlayerBalance(player, buyBoardRequestDto.FieldsCount);
+            _logger.LogInformation("Player balance validated for cost of fields count: {FieldsCount}", buyBoardRequestDto.FieldsCount);
 
-        return MapToBoardResponseDto(createdBoard);
+            // Process purchase transaction
+            var transaction = await ProcessPurchaseTransaction(player, buyBoardRequestDto.FieldsCount);
+            _logger.LogInformation("Purchase transaction processed for amount: {Amount}", transaction.Amount);
+
+            // Create the board
+            var board = CreateBoard(buyBoardRequestDto, playerId, transaction.Amount);
+            var createdBoard = await _boardRepository.CreateBoardAsync(board);
+            _logger.LogInformation("Board created successfully: {BoardId}", createdBoard.Id);
+
+            // Map and return the board response
+            return MapToBoardResponseDto(createdBoard);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred in BuyBoardAsync for Player ID: {PlayerId}", playerId);
+            throw;
+        }
     }
+
 
     private async Task<Player> GetPlayerAsync(Guid playerId)
     {
@@ -113,7 +139,7 @@ public class BoardService : IBoardService
         await _playerRepository.UpdatePlayerAsync(player); // Update the player's balance in the database
 
         // Create a transaction record
-        var purchaseTransactionDto = new TransactionCreateDto { Amount = -cost }; // Negative to indicate deduction
+        var purchaseTransactionDto = new TransactionCreateDto { Amount = cost }; // Negative to indicate deduction
         var transactionId = Guid.NewGuid();
         var purchaseTransaction = purchaseTransactionDto.ToPurchaseTransaction(player.Id, transactionId);
 
@@ -236,4 +262,18 @@ public class BoardService : IBoardService
             var boards = await _boardRepository.GetAllBoardsAsync();
             return boards.Select(BoardResponseDto.FromEntity).ToList();
         }
+        public async Task<IEnumerable<BoardResponseDto>> GetRecentBoardsAsync(Guid playerId)
+        {
+            var currentWeekStart = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek);
+            var previousWeekStart = currentWeekStart.AddDays(-7);
+            var previousWeekEnd = currentWeekStart.AddSeconds(-1);
+
+            var boards = await _boardRepository.GetBoardsByPlayerIdAsync(playerId);
+
+            return boards.Where(board => 
+                    board.CreatedAt >= previousWeekStart && 
+                    board.CreatedAt <= currentWeekStart.AddDays(6))
+                .Select(BoardResponseDto.FromEntity);
+        }
+
 }

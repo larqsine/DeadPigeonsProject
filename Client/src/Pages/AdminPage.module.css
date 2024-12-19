@@ -1,11 +1,11 @@
-﻿/* Ensure body and HTML can fully expand with content */
-html, body {
+﻿html, body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    height: 100%; /* Stretches to fit content height */
+    height: 100%; 
     box-sizing: border-box;
 }
+
 body.modalOpen {
     overflow: hidden;
 }
@@ -14,17 +14,18 @@ body.modalOpen {
 .container {
     text-align: center;
     padding: 20px;
-    min-height: 100vh; /* Ensures it stretches the viewport */
     display: flex;
-    flex-direction: column; /* Stack sections vertically */
-    gap: 20px; /* Adds spacing between sections */
-    height: 100vh; /* Full viewport height */
+    flex-direction: column;
+    gap: 20px;
+    min-height: 100vh; /* Ensures it stretches the viewport */
+    box-sizing: border-box;
 }
 
 /* Header styling */
 .header {
     font-size: 2rem;
     color: #333;
+    margin-bottom: 20px;
 }
 
 /* Subheader styling */
@@ -37,19 +38,19 @@ body.modalOpen {
 /* Responsive grid container for items */
 .gridContainer, .userList {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 20px;
     justify-content: center;
     align-items: center;
-    width: 300px; /* Ensure responsive width */
-    max-width: 1200px;
-    margin: 20px auto;
-    
+    width: 100%; 
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* Styling for each grid box */
 .box, .userItem {
-    width: 160px;
+    width: 100%;
+    max-width: 160px;
     height: 80px;
     display: flex;
     justify-content: center;
@@ -127,6 +128,7 @@ body.modalOpen {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
+
 .modalContent label {
     display: flex;
     align-items: center;
@@ -139,11 +141,11 @@ body.modalOpen {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 10px; /* Adds space between Edit and Delete buttons */
-    margin-bottom: 20px; /* Adds space between buttons and other content */
+    gap: 10px;
+    margin-bottom: 20px; 
 }
 
-/* Close button inside modal */
+
 .closeButton {
     position: absolute;
     top: 10px;
@@ -176,11 +178,15 @@ body.modalOpen {
 /* User details styling */
 .userItem {
     display: flex;
-    justify-content: space-between;
-    padding: 10px 15px;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background-color: #fafafa;
     border: 1px solid #ddd;
     border-radius: 5px;
-    background-color: #fafafa;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .userItem:hover {
@@ -216,8 +222,8 @@ body.modalOpen {
 .WiningSection,
 .UserSection {
     width: 100%;
-    max-width: 1200px; /* Limits section width for better readability */
-    margin: 0 auto; /* Centers the sections horizontally */
+    max-width: 1200px; 
+    margin: 0 auto; 
     padding: 20px;
     background: #f9f9f9;
     border-radius: 10px;
@@ -225,3 +231,66 @@ body.modalOpen {
     flex-shrink: 0; /* Prevent sections from shrinking */
 }
 
+.userList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    padding: 0;
+    list-style: none;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .gridContainer, .userList {
+        grid-template-columns: repeat(4, 1fr);
+        width: 90%;
+        max-width: 360px;
+    }
+
+    .box, .userItem {
+        font-size: 12px;
+        height: 60px;
+        width: auto; 
+        padding: 4px;
+    }
+
+    .actionButton {
+        font-size: 12px; 
+        padding: 6px 12px;
+    }
+
+    .modalContent {
+        max-width: 90%; 
+    }
+    .userItem {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 480px) {
+    .gridContainer, .userList {
+        grid-template-columns: repeat(4, 1fr); 
+    }
+
+    .box, .userItem {
+        width: 70px;
+        height: 50px;
+        font-size: 10px;
+    }
+
+    .actionButton {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .modalContent {
+        max-width: 100%; /* Use full width on small screens */
+    }
+
+    .userItem {
+        font-size: 12px;
+        padding: 6px;
+    }
+}

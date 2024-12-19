@@ -12,10 +12,8 @@ dist
 dist-ssr
 obj
 bin
-Migrations
 *.local
 DeadPigeons.sln.DotSettings.user
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,4 +23,3 @@ DeadPigeons.sln.DotSettings.user
 *.ntvs*
 *.njsproj
 *.sw?
-.env

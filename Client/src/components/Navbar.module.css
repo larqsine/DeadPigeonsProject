@@ -1,11 +1,13 @@
 ﻿.nav {
     display: flex;
-    justify-content: space-between; /* Logo on the left, Profile on the right */
+    justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
     background-color: rgb(164, 1, 1);
     height: 90px;
     border-bottom: 1px solid #ddd;
+    position: relative;
+    z-index: 100;
 }
 
 /* Logo Styles */
@@ -18,11 +20,11 @@
 .navButtons {
     list-style: none;
     display: flex;
-    gap: 20px; /* Space between buttons */
+    gap: 20px; 
     margin: 0;
     padding: 0;
-    flex-grow: 1; /* Ensures buttons take up remaining space */
-    justify-content: center; /* Centers the buttons */
+    flex-grow: 1;
+    margin-left: 30px;
 }
 
 .navItem {
@@ -43,7 +45,7 @@
 
 /* Profile Button (Right) */
 .profileButton {
-    position: relative;
+    display: flex;
     font-size: 18px;
     color: white;
     cursor: pointer;
@@ -61,7 +63,7 @@
 
 /* Dropdown Menu */
 .dropdownMenu {
-    position: absolute;
+    position: static;
     right: 0;
     top: 40px;
     background-color: rgb(164, 1, 1);
@@ -70,8 +72,28 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 10;
     display: flex;
-    flex-direction: column; /* Stack items vertically */
-    width: 160px; /* Adjust width as needed */
+    flex-direction: column;
+    width: 160px; /* Stretch dropdown to match button width */
+    margin-top: 5px; /* Add slight spacing */
+}
+
+.dropdownMenu button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dropdownMenu button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dropdownMenu.show {
+    display: flex;
 }
 
 /* Dropdown Item */
@@ -96,18 +118,28 @@
     position: absolute;
     right: 10px;
     top: 70px;
-    background-color: white;
+    background-color: rgb(164, 1, 1);
     border: 1px solid #ddd;
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
 }
 
 .addBalance input {
+    background-color: #ffffff;
     margin-right: 10px;
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 3px;
+    margin-right: 10px;
+}
+.addBalance button {
+    background-color: rgb(164, 1, 1);
+}
+
+.addBalance button:hover {
+        background-color: rgb(112, 1, 1);
 }
 
 .Balance {
@@ -115,3 +147,106 @@
     font-weight: bold;
     margin-right: 10px;
 }
+
+.amountInputContainer{
+    margin-bottom: 10px;
+}
+
+.mobilePayInputContainer{
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .nav {
+        flex-wrap: wrap;
+    }
+
+    .navButtons {
+        display: none; /* Hide navigation buttons initially */
+        flex-direction: column; /* Stack items vertically */
+        width: 100%;
+        background-color: rgb(164, 1, 1);
+        position: absolute;
+        top: 90px;
+        left: 0;
+        z-index: 100;
+    }
+
+    .navButtons.show {
+        display: flex; /* Show navigation buttons when toggled */
+    }
+
+    .navItem {
+        text-align: center;
+        padding: 10px;
+        width: 100%; /* Make each item full width */
+    }
+
+    .hamburger {
+        display: flex; /* Show hamburger menu on smaller screens */
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+    }
+
+    .hamburger div {
+        width: 25px;
+        height: 3px;
+        background-color: white;
+        transition: 0.3s ease;
+    }
+
+    .profileButton {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 450px) {
+    .profileButton {
+        display: none; /* Hide the profile button from the main navbar */
+    }
+
+    /* Show Profile Button in Hamburger Menu */
+    .navButtons.show .profileButton {
+        display: block;
+        text-align: center;
+        background-color: rgb(164, 1, 1); /* Same as other menu items */
+        color: white;
+        font-size: 16px;
+        font-weight: bold; /* Ensure it's bold like the other buttons */
+        padding: 10px;
+        margin: 5px 0; /* Add spacing between items */
+        border-radius: 5px;
+        position: relative; /* Add relative positioning */
+    }
+
+    /* Dropdown Menu Inside Hamburger */
+    .navButtons.show .profileButton .dropdownMenu {
+        position: absolute; /* Position dropdown under profile button */
+        top: 100%; /* Place directly below the profile button */
+        left: 0;
+        width: 100%; /* Match the button's width */
+        background-color: rgb(164, 1, 1); /* Dropdown background */
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+    }
+
+    .dropdownMenu button {
+        background: none;
+        border: none;
+        color: white;
+        padding: 10px;
+        font-size: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%; /* Make buttons full width */
+    }
+
+    .dropdownMenu button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+}
+

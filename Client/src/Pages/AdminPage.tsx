@@ -9,7 +9,7 @@ import {
     isCreateUserModalOpenAtom,
     isEditUserModalOpenAtom,
     editUserAtom,
-    newUserAtom, User, gameIdAtom, errorAtom, messageAtom,
+    newUserAtom, User, gameIdAtom, errorAtom, messageAtom, authAtom,
 } from './PagesJotaiStore.ts';
 import axios from "axios";
 
@@ -26,7 +26,8 @@ const AdminPage: React.FC = () => {
     const [ gameId,setGameId] = useAtom(gameIdAtom);
     const [, setError] = useAtom(errorAtom);
     const [, setMessage] = useAtom(messageAtom);
-    
+    const [auth] = useAtom(authAtom);
+
 
     // Lock body scroll when any modal is open
     useEffect(() => {
@@ -37,14 +38,12 @@ const AdminPage: React.FC = () => {
         }
     }, [isModalOpen, isEditUserModalOpen, isCreateUserModalOpen]);
 
-    // Fetch all users
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:6329/api/player');
-                if (!response.ok) throw new Error('Failed to fetch users');
-                const data = await response.json();
-                setUsers(data);
+                const response = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player');
+                setUsers(response.data);
             } catch (error) {
                 console.error('Failed to fetch users:', error);
             }
@@ -52,13 +51,13 @@ const AdminPage: React.FC = () => {
 
         const fetchGameData = async () => {
             try {
-                const response = await axios.get(`http://localhost:6329/api/Games/active`);
+                const response = await axios.get(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/active`);
                 setGameId(response.data.gameId);
             } catch (err) {
                 setError('Failed to fetch game data');
             }
         };
-        
+
         fetchGameData();
         fetchUsers();
     }, [setUsers, setGameId, setError]);
@@ -84,9 +83,9 @@ const AdminPage: React.FC = () => {
         console.log('Payload:', payload); // Logs the payload sent to the backend
 
         try {
-            const response = await axios.post(`http://localhost:6329/api/Games/${gameId}/close`, payload);
+            const response = await axios.post(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/${gameId}/close`, payload);
             setMessage(response.data.message || 'Game closed successfully!');
-            setSelectedWinningNumbers([]); // Clear selected numbers after purchase
+            setSelectedWinningNumbers([]); 
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Error Status:', err.response?.status);
@@ -99,23 +98,53 @@ const AdminPage: React.FC = () => {
         }
         alert(`Winning numbers are: ${selectedWinningNumbers.join(', ')}`);
     };
-    
+
     const handeNewGame = async () => {
         try {
-            const response = await axios.post(`http://localhost:6329/api/Games/new`);
-            setMessage(response.data.message || 'Game created successfully!');
-        }
-        catch (err){
+            // Retrieve the token from authAtom or localStorage
+            const token = auth || localStorage.getItem('token');
+
+            if (!token) {
+                alert('Unauthorized: No token found. Please log in again.');
+                return;
+            }
+
+            // Prepare the GameCreateDto payload
+            const gameCreateDto = {
+                startDate: new Date().toISOString().split('T')[0], // ISO string in "YYYY-MM-DD" format
+            };
+
+            // Make the request
+            const response = await axios.post(
+                `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/start`,
+                gameCreateDto,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                }
+            );
+
+            // Show alert with the success message
+            alert(response.data.message || 'Game created successfully!');
+        } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Error Status:', err.response?.status);
                 console.error('Error Response:', err.response?.data);
-                setError(err.response?.data?.message || 'An error occurred during creating the game.');
+                setError(err.response?.data?.message || 'An error occurred while creating the game.');
+
+                // Show alert with the error message
+                alert(err.response?.data?.message || 'Failed to start the game.');
             } else {
                 console.error('Unexpected Error:', err);
                 setError('An unexpected error occurred.');
+
+                // Show alert for unexpected errors
+                alert('An unexpected error occurred.');
             }
         }
     };
+
 
     const handleUserClick = (user: User) => {
         setSelectedUser(user);
@@ -153,30 +182,45 @@ const AdminPage: React.FC = () => {
         }));
     };
 
-    const handleEditUserSubmit = async () => {
-        if (editUser) {
-            try {
-                const response = await fetch(`http://localhost:6329/api/player/${editUser.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(editUser),
-                });
 
-                if (response.ok) {
-                    alert('User updated successfully');
-                    const usersResponse = await fetch('http://localhost:6329/api/player');
-                    const data = await usersResponse.json();
-                    setUsers(data);
-                    handleCloseModal();
-                } else {
-                    alert('Failed to update user');
-                }
-            } catch (error) {
-                console.error('Error updating user:', error);
-                alert('Error updating user');
+
+    const handleEditUserSubmit = async () => {
+        if (!editUser) {
+            alert('No user selected for editing.');
+            return;
+        }
+
+        const token = auth || localStorage.getItem('token');
+
+        if (!token) {
+            alert('Unauthorized: No token found. Please log in again.');
+            return;
+        }
+
+        try {
+            const response = await axios.put(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player/${editUser.id}`, editUser, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (response.status === 200) {
+                alert('User updated successfully');
+
+                // Refresh the user list
+                const usersResponse = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setUsers(usersResponse.data);
+                handleCloseModal();
+            } else {
+                alert(response.data?.message || 'Failed to update user');
             }
+        } catch (error) {
+            console.error('Error updating user:', error);
+            alert('An error occurred while updating the user.');
         }
     };
 
@@ -186,40 +230,40 @@ const AdminPage: React.FC = () => {
             return;
         }
 
+        const token = auth;
         try {
-            const response = await fetch('http://localhost:6329/api/Account/register', {
-                method: 'POST',
+            const response = await axios.post('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Account/register', {
+                userName: newUser.userName,
+                fullName: newUser.fullName,
+                email: newUser.email,
+                phone: newUser.phone,
+                password: newUser.password,
+                role: newUser.role,
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    userName: newUser.userName,
-                    fullName: newUser.fullName,
-                    email: newUser.email,
-                    phone: newUser.phoneNumber,
-                    password: newUser.password,
-                    role: newUser.role,
-                }),
             });
 
-            const result = await response.json();
-
-            if (response.ok) {
+            if (response.status === 200) {
                 alert('User created successfully');
                 setIsCreateUserModalOpen(false);
                 setNewUser({
                     userName: '',
                     fullName: '',
                     email: '',
-                    phoneNumber: '',
+                    phone: '',
                     password: '',
                     role: '',
                 });
-                const usersResponse = await fetch('http://localhost:6329/api/player');
-                const data = await usersResponse.json();
-                setUsers(data);
+                const usersResponse = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setUsers(usersResponse.data);
             } else {
-                alert(result.message || 'Failed to create user');
+                alert(response.data?.message || 'Failed to create user');
             }
         } catch (error) {
             console.error('Error creating user:', error);
@@ -227,27 +271,42 @@ const AdminPage: React.FC = () => {
         }
     };
 
+
     const handleDeleteUser = async (userId: string) => {
         const confirmed = window.confirm('Are you sure you want to delete this user?');
         if (!confirmed) return;
 
+        // Retrieve the token from authAtom or fallback to localStorage
+        const token = auth || localStorage.getItem('token');
+
+        if (!token) {
+            alert('Unauthorized: No token found. Please log in again.');
+            return;
+        }
+
         try {
-            const response = await fetch(`http://localhost:6329/api/player/${userId}`, {
+            const response = await fetch(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player/${userId}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
             });
 
             if (response.ok) {
                 alert('User deleted successfully');
+                // Update the UI by filtering out the deleted user
                 setUsers(users.filter((user) => user.id !== userId));
                 handleCloseModal();
             } else {
-                alert('Failed to delete user');
+                const result = await response.json();
+                alert(result.message || 'Failed to delete user');
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert('Error deleting user');
+            alert('An error occurred while deleting the user.');
         }
     };
+
 
     return (
         <div className={styles.container}>
@@ -309,10 +368,10 @@ const AdminPage: React.FC = () => {
                             &times;
                         </button>
                         <h3>User Details</h3>
-                        <p>UserName: {selectedUser.userName}</p>
+                        <p>Username: {selectedUser.userName}</p>
                         <p>Full Name: {selectedUser.fullName}</p>
-                        <p>Email: {selectedUser.email}</p>
-                        <p>Phone Number: {selectedUser.phoneNumber}</p>
+                        <p>E-mail: {selectedUser.email}</p>
+                        <p>Phone Number:{selectedUser.phone || "Not provided"}</p>
                         <p>Balance: {selectedUser.balance}</p>
                         <p>Annual Fee Paid: {selectedUser.annualFeePaid ? 'Yes' : 'No'}</p>
                         <p>Created At: {selectedUser.createdAt}</p>
@@ -369,7 +428,7 @@ const AdminPage: React.FC = () => {
                                 <input
                                     type="text"
                                     name="phoneNumber"
-                                    value={editUser.phoneNumber}
+                                    value={editUser.phone}
                                     onChange={handleEditInputChange}
                                 />
                             </label>
@@ -435,7 +494,7 @@ const AdminPage: React.FC = () => {
                                 <input
                                     type="text"
                                     name="phoneNumber"
-                                    value={newUser.phoneNumber}
+                                    value={newUser.phone}
                                     onChange={handleCreateInputChange}
                                 />
                             </label>
@@ -455,9 +514,9 @@ const AdminPage: React.FC = () => {
                                     value={newUser.role}
                                     onChange={handleCreateInputChange}
                                 >
+                                    <option>Select Role</option>
                                     <option value="admin">Admin</option>
                                     <option value="player">Player</option>
-                                    {/* Updated option */}
                                 </select>
                             </label>
                             <button type="submit">Create User</button>
