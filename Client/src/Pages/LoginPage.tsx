@@ -6,10 +6,10 @@ import {
     loginFormAtom,
     userAtom,
     isLoggedInAtom,
-    playerIdAtom,
     authAtom,
     showPasswordAtom,
 } from './PagesJotaiStore.ts';
+import {isAdminAtom} from "../AppJotaiStore.ts";
 
 interface LoginPageProps {
     onLogin: (email: string, roles: string[], passwordChangeRequired: boolean) => void;
@@ -19,7 +19,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [loginForm, setLoginForm] = useAtom(loginFormAtom);
     const [, setUser] = useAtom(userAtom);
     const [, setIsLoggedIn] = useAtom(isLoggedInAtom);
-    const [, setPlayerId] = useAtom(playerIdAtom);
+    const [, setIsAdmin] = useAtom(isAdminAtom);
     const [, setAuth] = useAtom(authAtom);
     const [showPassword, setShowPassword] = useAtom(showPasswordAtom);
 
@@ -29,7 +29,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     };
 
     const togglePasswordVisibility = () => {
-        setShowPassword((prev) => !prev); // Toggle the password visibility atom
+        setShowPassword((prev) => !prev);
     };
 
     const handleLoginSubmit = async () => {
@@ -39,24 +39,34 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     email: loginForm.email,
                     password: loginForm.password,
                 });
-                
-                const { userName, roles, token, playerId,  passwordChangeRequired } = response.data;
+
+                const { userName, roles, token, passwordChangeRequired } = response.data;
 
                 // Store the token in localStorage
-                localStorage.setItem('token', token);
-                setAuth({ token });
-
-                // Update atoms
+                localStorage.setItem("token", token);
+                setAuth(token);
+                console.log("in loginPage  " + token)
+                // Update user and roles in state
                 setUser({ userName, roles, token, passwordChangeRequired });
-                setPlayerId(playerId); // Set playerId here
-                
-                setIsLoggedIn(true);
 
-                // Notify the parent component
+                // Check if the user has an admin role
+                const isAdmin = roles.includes("admin");
+                setIsLoggedIn(true);
+                setIsAdmin(isAdmin);
+
+                // Redirect or update the UI accordingly
                 onLogin(userName, roles, passwordChangeRequired);
-            } catch (error) {
-                console.error('Login Error:', error);
-                alert('Login failed. Please check your credentials.');
+            }
+            catch (error) {
+                if (axios.isAxiosError(error)) {
+                    // Handle Axios errors
+                    console.error("Login Error:", error.response?.data || error.message);
+                    alert(error.response?.data?.message || "Login failed. Please check your credentials.");
+                } else {
+                    // Handle non-Axios errors
+                    console.error("Unexpected Error:", error);
+                    alert("An unexpected error occurred.");
+                }
             }
         } else {
             alert('Please enter email and password.');

@@ -49,10 +49,7 @@ const BoardsHistoryPage: React.FC = () => {
         const fetchActiveGameBoards = async () => {
             try {
                 const token = user?.token;
-                if (!token) {
-                    setError('Token is not available.');
-                    return;
-                }
+              
 
                 const response = await axios.get<Board[]>(
                     `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${activeGameId}/BoardsByGameId`,
@@ -73,10 +70,7 @@ const BoardsHistoryPage: React.FC = () => {
         const fetchPreviousGames = async () => {
             try {
                 const token = user?.token;
-                if (!token) {
-                    setError('Token is not available.');
-                    return;
-                }
+               
 
                 const response = await axios.get<ApiResponse<Game[]>>(
                     `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/closed`,
@@ -109,10 +103,7 @@ const BoardsHistoryPage: React.FC = () => {
     const handlePreviousGameClick = async (game: Game) => {
         try {
             const token = user?.token;
-            if (!token) {
-                setError('Token is not available.');
-                return;
-            }
+         
 
             // Fetch boards for the selected previous game and logged-in player
             const response = await axios.get<Board[]>(

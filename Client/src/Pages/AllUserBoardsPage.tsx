@@ -34,10 +34,7 @@ const AllUserBoardsPage: React.FC = () => {
         const fetchGames = async () => {
             try {
                 const token = auth?.token;
-                if (!token) {
-                    setError('Token is not available.');
-                    return;
-                }
+               
 
                 const response = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games', {
                     headers: {
@@ -67,10 +64,7 @@ const AllUserBoardsPage: React.FC = () => {
 
         try {
             const token = auth?.token;
-            if (!token) {
-                setError('Token is not available.');
-                return;
-            }
+            
 
             const response = await axios.get(
                 `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${game.id}/players-summary`,
@@ -100,10 +94,7 @@ const AllUserBoardsPage: React.FC = () => {
 
         try {
             const token = auth?.token;
-            if (!token) {
-                setError('Token is not available.');
-                return;
-            }
+           
 
             const response = await axios.get(
                 `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${playerId}/BoardsByPlayerId`,
