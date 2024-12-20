@@ -48,7 +48,7 @@ const AdminPage: React.FC = () => {
 
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app');
+                const response = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player');
                 setUsers(response.data);
             } catch (error) {
                 console.error('Failed to fetch users:', error);
