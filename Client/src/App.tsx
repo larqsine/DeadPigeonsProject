@@ -31,20 +31,18 @@ const App: React.FC = () => {
 
     const handleLogin = async (username: string, roles: string[], passwordChangeRequired: boolean) => {
         setTransitioning(true);
-
         try {
             setIsLoggedIn(true);
             setUsername(username);
-
+            
             const isAdminRole = roles.includes("admin");
             setIsAdmin(isAdminRole);
             setShowBoxGrid(!isAdminRole);
-
             if (passwordChangeRequired) {
                 navigate("/change-password");
                 return;
             }
-
+            
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Token is missing. Please log in again.");
 

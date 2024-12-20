@@ -98,23 +98,22 @@ p {
     font-size: 18px;
 }
 
-/* Modal styling */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw; /* Ensure it covers the full viewport width */
-    height: 100vh; /* Ensure it covers the full viewport height */
-    background: rgba(0, 0, 0, 0.6); /* Slightly darker background for better contrast */
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden;
 }
 
 .modalContent {
-    position: relative; /* Position relative for proper close button placement */
+    position: relative;
     background: #fff;
     padding: 30px;
     border-radius: 10px;
@@ -134,18 +133,17 @@ p {
     line-height: 1.6;
 }
 
-/* Close button styling */
 .closeButton {
-    position: absolute; /* Position absolute within the modalContent */
-    top: 10px; /* Align at the top */
-    right: 10px; /* Align at the right */
+    position: absolute;
+    top: 10px;
+    right: 10px;
     background: none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
     background: #a60505;
-    color: #fff; /* Ensure visibility on dark backgrounds */
-    border-radius: 50%; /* Make it circular */
+    color: #fff;
+    border-radius: 50%;
     height: 40px;
     width: 40px;
     display: flex;

@@ -36,20 +36,18 @@ interface Board {
 }
 
 const BoardsHistoryPage: React.FC = () => {
-    const [user] = useAtom(userAtom); // Get the current user
-    const [boards, setBoards] = useAtom(boardHistoryAtom); // Boards for the current game
-    const [activeGameId] = useAtom(gameIdAtom); // Active game ID
-    const [previousGames, setPreviousGames] = useState<Game[]>([]); // Previous games
-    const [selectedGameBoards, setSelectedGameBoards] = useState<Board[]>([]); // Boards for the selected previous game
-    const [selectedGame, setSelectedGame] = useState<Game | null>(null); // Selected previous game
-    const [error, setError] = useAtom(errorAtom); // Error state
+    const [user] = useAtom(userAtom);
+    const [boards, setBoards] = useAtom(boardHistoryAtom);
+    const [activeGameId] = useAtom(gameIdAtom);
+    const [previousGames, setPreviousGames] = useState<Game[]>([]);
+    const [selectedGameBoards, setSelectedGameBoards] = useState<Board[]>([]);
+    const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+    const [error, setError] = useAtom(errorAtom);
 
     useEffect(() => {
-        // Fetch boards for the current game
         const fetchActiveGameBoards = async () => {
             try {
                 const token = user?.token;
-              
 
                 const response = await axios.get<Board[]>(
                     `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${activeGameId}/BoardsByGameId`,
@@ -70,7 +68,6 @@ const BoardsHistoryPage: React.FC = () => {
         const fetchPreviousGames = async () => {
             try {
                 const token = user?.token;
-               
 
                 const response = await axios.get<ApiResponse<Game[]>>(
                     `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/closed`,
@@ -80,21 +77,16 @@ const BoardsHistoryPage: React.FC = () => {
                         },
                     }
                 );
-
-                // Sort games by startDate in descending order
+                
                 const sortedGames = response.data.data.sort(
                     (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
                 );
-
                 setPreviousGames(sortedGames);
             } catch (err) {
                 console.error(err);
                 setError('Failed to fetch closed games.');
             }
         };
-
-
-
 
         fetchActiveGameBoards();
         fetchPreviousGames();
@@ -103,9 +95,7 @@ const BoardsHistoryPage: React.FC = () => {
     const handlePreviousGameClick = async (game: Game) => {
         try {
             const token = user?.token;
-         
-
-            // Fetch boards for the selected previous game and logged-in player
+            
             const response = await axios.get<Board[]>(
                 `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${game.id}/BoardsByGameId`,
                 {
@@ -115,7 +105,6 @@ const BoardsHistoryPage: React.FC = () => {
                 }
             );
 
-            // Set boards for the selected previous game
             setSelectedGameBoards(response.data);
             setSelectedGame(game);
         } catch (err) {

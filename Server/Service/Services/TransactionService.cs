@@ -60,8 +60,6 @@ namespace Service.Services
 
             return transactions.Select(TransactionResponseDto.FromEntity).ToList();
         }
-
-
         
         public async Task<List<TransactionResponseDto>> GetTransactionsByPlayerIdAsync(Guid playerId)
         {

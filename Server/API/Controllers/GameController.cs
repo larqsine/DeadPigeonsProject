@@ -11,6 +11,7 @@ namespace API.Controllers
     public class GamesController : ControllerBase
     {
         private readonly IGameService _gameService;
+
         public GamesController(IGameService gameService)
         {
             _gameService = gameService;
@@ -59,16 +60,18 @@ namespace API.Controllers
             try
             {
                 var activeGame = await _gameService.GetActiveGameAsync();
-                
+
                 if (activeGame == null)
                 {
                     return NotFound(new { message = "No active game found." });
                 }
+
                 return Ok(new { gameId = activeGame.Id });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching the active game ID.", error = ex.Message });
+                return StatusCode(500,
+                    new { message = "An error occurred while fetching the active game ID.", error = ex.Message });
             }
         }
 
@@ -85,7 +88,7 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while fetching games.");
             }
         }
-        
+
         [HttpGet("closed")]
         public async Task<IActionResult> GetClosedGames()
         {
@@ -96,11 +99,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching closed games.", error = ex.Message });
+                return StatusCode(500,
+                    new { message = "An error occurred while fetching closed games.", error = ex.Message });
             }
         }
-
-
     }
-
 }

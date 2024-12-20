@@ -61,13 +61,13 @@ const NavBar: React.FC<NavbarProps> = ({
     };
     
     useEffect(() => {
-        if (playerId) fetchBalance(); // Fetch balance when playerId changes
+        if (playerId) fetchBalance();
 
         const intervalId = setInterval(() => {
             if (playerId) fetchBalance();
         }, 5000); // Poll every 5 seconds
 
-        return () => clearInterval(intervalId); // Cleanup interval on unmount
+        return () => clearInterval(intervalId);
     }, [playerId]);
 
     const handleSubmitTransaction = async () => {
@@ -103,8 +103,7 @@ const NavBar: React.FC<NavbarProps> = ({
             alert("An error occurred while adding balance.");
         }
     };
-
-    // Close the dropdown menus if clicked outside
+    
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -137,10 +136,8 @@ const NavBar: React.FC<NavbarProps> = ({
         const handleResize = () => {
             setIsMobileScreen(window.innerWidth < 450);
         };
-
         handleResize();
         window.addEventListener("resize", handleResize);
-
         return () => {
             window.removeEventListener("resize", handleResize);
         };
@@ -187,7 +184,6 @@ const NavBar: React.FC<NavbarProps> = ({
         setIsNavOpen(!isNavOpen);
     };
     
-    
     return (
         <div className={styles.nav}>
             {/* Logo */}
@@ -231,24 +227,15 @@ const NavBar: React.FC<NavbarProps> = ({
                             }`}
                         >
                             {isAdmin ? (
-                                <button
-                                    className={styles.dropdownMenuButton}
-                                    onClick={onGoToAdminPage}
-                                >
+                                <button className={styles.dropdownMenuButton} onClick={onGoToAdminPage}>
                                     Admin Page
                                 </button>
                             ) : (
-                                <button
-                                    className={styles.dropdownMenuButton}
-                                    onClick={handleAddBalanceClick}
-                                >
+                                <button className={styles.dropdownMenuButton} onClick={handleAddBalanceClick}>
                                     Add Balance
                                 </button>
                             )}
-                            <button
-                                className={styles.dropdownMenuButton}
-                                onClick={onSignOut}
-                            >
+                            <button className={styles.dropdownMenuButton} onClick={onSignOut}>
                                 Sign Out
                             </button>
                         </div>
@@ -261,7 +248,7 @@ const NavBar: React.FC<NavbarProps> = ({
             <div className={styles.Balance}>Balance: {balance ? `${balance.toFixed(2)} DKK` : "Loading..."} </div>
             )}
 
-            {/* Username/Profile Dropdown */}
+            {/* Profile Dropdown */}
             <div className={styles.profileButton} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                 {username || "Guest"}
             </div>

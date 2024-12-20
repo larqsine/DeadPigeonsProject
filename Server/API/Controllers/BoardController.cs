@@ -30,7 +30,6 @@ namespace API.Controllers
 
             try
             {
-                // Call the service method passing the DTO directly
                 var boardResponse = await _boardService.BuyBoardAsync(playerId, buyBoardRequestDto);
 
                 return Ok(new { message = "Board purchased successfully.", data = boardResponse });
@@ -60,8 +59,7 @@ namespace API.Controllers
                 {
                     return Unauthorized("User is not logged in.");
                 }
-
-                // Fetch boards for the logged-in player and game
+                
                 var boards = await _boardService.GetBoardsByGameAndPlayerIdAsync(gameId, Guid.Parse(playerId));
                 return Ok(boards);
             }
@@ -98,8 +96,6 @@ namespace API.Controllers
                 {
                     return Unauthorized("User is not logged in.");
                 }
-
-                // Fetch boards for the logged-in player
                 var boards = await _boardService.GetBoardsByPlayerIdAsync(Guid.Parse(playerId));
 
                 return Ok(boards);
@@ -124,8 +120,5 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while fetching the players summary.");
             }
         }
-
-        
-
     }
 }

@@ -13,7 +13,6 @@ namespace DataAccess.Repositories
             _context = context;
         }
 
-        
 
         public async Task<Board> CreateBoardAsync(Board board)
         {
@@ -52,30 +51,31 @@ namespace DataAccess.Repositories
 
             return await query.ToListAsync();
         }
-        
+
         public async Task UpdateBoardsAsync(IEnumerable<Board> boards)
         {
             foreach (var board in boards)
             {
                 _context.Entry(board).State = EntityState.Modified;
             }
+
             await _context.SaveChangesAsync();
         }
-        
+
         public async Task<List<Board>> GetBoardsForAutoplayAsync()
         {
             return await _context.Boards
                 .Where(b => b.Autoplay && b.RemainingAutoplayWeeks > 0)
                 .ToListAsync();
         }
-        
+
         public async Task<List<Board>> GetBoardsByGameAndPlayerIdAsync(Guid gameId, Guid playerId)
         {
             return await _context.Boards
                 .Where(board => board.GameId == gameId && board.PlayerId == playerId)
                 .ToListAsync();
         }
-        
+
         public async Task<List<Board>> GetBoardsByGameIdAsync(Guid gameId)
         {
             return await _context.Boards
@@ -83,7 +83,5 @@ namespace DataAccess.Repositories
                 .Include(b => b.Player)
                 .ToListAsync();
         }
-
-        
     }
 }

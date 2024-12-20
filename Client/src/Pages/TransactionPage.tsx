@@ -23,21 +23,14 @@ const TransactionPage: React.FC = () => {
             setLoading(true);
             setError("");
             try {
-                const response = await fetch("https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Transaction/deposit", {
-
-                });
-
+                const response = await fetch("https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Transaction/deposit", {});
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error("Error response:", errorText);
                     throw new Error(`Failed to fetch transactions: ${response.statusText}`);
                 }
-
                 const data: Transaction[] = await response.json();
-
-                // Filter the transactions to only show those with status 0
                 const filteredTransactions = data.filter(transaction => transaction.status === 0);
-
                 setTransactions(filteredTransactions);
             } catch (err: unknown) {
                 if (err instanceof Error) {
@@ -55,8 +48,6 @@ const TransactionPage: React.FC = () => {
 
     const handleApprove = async (transactionId: string) => {
         try {
-
-            // Retrieve the token from authAtom or fallback to localStorage
             const token = auth || localStorage.getItem('token');
 
             const response = await fetch(
@@ -81,10 +72,8 @@ const TransactionPage: React.FC = () => {
         }
     };
 
-
     const handleDecline = async (transactionId: string) => {
         try {
-
             const token = auth || localStorage.getItem('token');
 
             const response = await fetch(
@@ -107,12 +96,9 @@ const TransactionPage: React.FC = () => {
             }
         }
     };
-
-
     if (loading) {
         return <div className={styles.container}>Loading transactions...</div>;
     }
-
     if (error) {
         return <div className={styles.container} style={{ color: "red" }}>{error}</div>;
     }
@@ -132,16 +118,10 @@ const TransactionPage: React.FC = () => {
                                 <p><strong>Status:</strong> {transaction.status}</p>
                             </div>
                             <div className={styles.transactionActions}>
-                                <button
-                                    className={styles.approve}
-                                    onClick={() => handleApprove(transaction.id)}
-                                >
+                                <button className={styles.approve} onClick={() => handleApprove(transaction.id)}>
                                     Approve
                                 </button>
-                                <button
-                                    className={styles.decline}
-                                    onClick={() => handleDecline(transaction.id)}
-                                >
+                                <button className={styles.decline} onClick={() => handleDecline(transaction.id)}>
                                     Decline
                                 </button>
                             </div>

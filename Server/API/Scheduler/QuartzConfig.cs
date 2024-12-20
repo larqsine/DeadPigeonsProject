@@ -17,10 +17,8 @@ public static class QuartzConfig
                 .WithSchedule(CronScheduleBuilder
                     .CronSchedule("0 0 0 ? * MON *") 
                     .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"))));
-
-
+            
         });
-
         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         return services;
     }

@@ -37,7 +37,4 @@ public class DBContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
             .HasValue<Player>("Player");
 
     }
-
-    
-    
 }

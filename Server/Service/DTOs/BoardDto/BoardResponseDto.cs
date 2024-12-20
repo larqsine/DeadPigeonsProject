@@ -22,7 +22,7 @@ namespace Service.DTOs.BoardDto
                 PlayerId = board.PlayerId,
                 GameId = board.GameId,
                 Numbers = board.Numbers,
-                Autoplay = board.Autoplay, //can decide later how to implement
+                Autoplay = board.Autoplay,
                 FieldsCount = board.FieldsCount,
                 Cost = board.Cost,
                 CreatedAt = board.CreatedAt,

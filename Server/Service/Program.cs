@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 
 using System.Collections.Generic;
 using DataAccess;
@@ -13,6 +14,6 @@ namespace Service
         {
             Console.WriteLine("Hello World!");
         }
-        
     }
 }
+*/

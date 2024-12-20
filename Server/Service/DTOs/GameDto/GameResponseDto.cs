@@ -29,6 +29,5 @@ namespace Service.DTOs.GameDto
                 WinningNumbers = game.WinningNumbers!
             };
         }
-}
-    
+    }
 }

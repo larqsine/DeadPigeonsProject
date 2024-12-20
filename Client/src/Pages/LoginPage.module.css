@@ -65,7 +65,7 @@ input {
 
 .passwordContainer input {
     flex: 1;
-    padding-right: 50px; /* Space for the toggle button */
+    padding-right: 50px;
 }
 
 .togglePasswordButton {

@@ -7,7 +7,7 @@
 
 .gridContainer {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columns for larger screens */
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     justify-content: center;
     margin: 20px auto;
@@ -78,12 +78,12 @@
 
 .autoPlayLabel {
     display: flex;
-    align-items: center; /* Aligns the checkbox and label text vertically */
+    align-items: center;
     font-size: 1rem;
     color: #333;
     cursor: pointer;
-    margin: 0; /* Ensures it stays aligned with the button */
-    padding: 0; /* Removes extra padding for alignment */
+    margin: 0;
+    padding: 0;
 }
 .autoPlayLabel input {
     margin-right: 10px;
@@ -91,15 +91,7 @@
     cursor: pointer;
 }
 
-
-/* Media Queries */
-
-/* For tablets and smaller devices */
 @media (max-width: 768px) {
-    .gridContainer {
-        grid-template-columns: repeat(4, 1fr); /* 3 columns */
-    }
-
     .box {
         width: 90px;
         height: 80px;
@@ -116,12 +108,7 @@
     }
 }
 
-/* For mobile devices */
 @media (max-width: 480px) {
-    .gridContainer {
-        grid-template-columns: repeat(4, 1fr); /* 2 columns */
-    }
-
     .box {
         width: 70px;
         height: 70px;

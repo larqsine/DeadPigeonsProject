@@ -14,8 +14,6 @@ const ChangePasswordPage: React.FC = () => {
     const [verifyNewPassword, setVerifyNewPassword] = React.useState("");
     const [error, setError] = React.useState("");
     const [success, setSuccess] = React.useState("");
-
-    // Jotai atoms for toggling password visibility
     const [showCurrentPassword, setShowCurrentPassword] = useAtom(showCurrentPasswordAtom);
     const [showNewPassword, setShowNewPassword] = useAtom(showNewPasswordAtom);
     const [showVerifyNewPassword, setShowVerifyNewPassword] = useAtom(showVerifyNewPasswordAtom);
@@ -39,8 +37,7 @@ const ChangePasswordPage: React.FC = () => {
 
             setSuccess(response.data.message);
             setError("");
-
-            // Redirect to the Play Page after a successful password change
+            
             setTimeout(() => {
                 window.location.href = "/";
             }, 2000);
@@ -63,11 +60,7 @@ const ChangePasswordPage: React.FC = () => {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                     />
-                    <button
-                        type="button"
-                        className={styles.toggleButton}
-                        onClick={() => setShowCurrentPassword((prev) => !prev)}
-                    >
+                    <button type="button" className={styles.toggleButton} onClick={() => setShowCurrentPassword((prev) => !prev)}>
                         {showCurrentPassword ? "Hide" : "Show"}
                     </button>
                 </div>
@@ -78,11 +71,7 @@ const ChangePasswordPage: React.FC = () => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                     />
-                    <button
-                        type="button"
-                        className={styles.toggleButton}
-                        onClick={() => setShowNewPassword((prev) => !prev)}
-                    >
+                    <button type="button" className={styles.toggleButton} onClick={() => setShowNewPassword((prev) => !prev)}>
                         {showNewPassword ? "Hide" : "Show"}
                     </button>
                 </div>
@@ -93,11 +82,7 @@ const ChangePasswordPage: React.FC = () => {
                         value={verifyNewPassword}
                         onChange={(e) => setVerifyNewPassword(e.target.value)}
                     />
-                    <button
-                        type="button"
-                        className={styles.toggleButton}
-                        onClick={() => setShowVerifyNewPassword((prev) => !prev)}
-                    >
+                    <button type="button" className={styles.toggleButton} onClick={() => setShowVerifyNewPassword((prev) => !prev)}>
                         {showVerifyNewPassword ? "Hide" : "Show"}
                     </button>
                 </div>

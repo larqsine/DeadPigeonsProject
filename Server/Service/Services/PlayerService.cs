@@ -4,8 +4,6 @@ using DataAccess.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Service.DTOs.PlayerDto;
 using Service.DTOs.TransactionDto;
-using Service.DTOs.UserDto;
-using Service.DTOs.WinnerDto;
 using Service.Interfaces;
 
 namespace Service.Services
@@ -66,24 +64,20 @@ namespace Service.Services
         {
             try
             {
-                // Retrieve the player by ID
                 var player = await _repository.GetPlayerByIdAsync(playerId);
                 if (player == null)
                 {
                     throw new KeyNotFoundException("Player not found.");
                 }
-
-                // If email is being updated, validate it
+                
                 if (!string.IsNullOrWhiteSpace(updateDto.Email) && updateDto.Email != player.Email)
                 {
-                    // Validate email with UserManager
                     var user = await _userManager.FindByEmailAsync(updateDto.Email);
                     if (user != null)
                     {
                         throw new ApplicationException("Email is already in use.");
                     }
-
-                    // If the email is valid, update it
+                    
                     var result = await _userManager.SetEmailAsync(player, updateDto.Email);
                     if (!result.Succeeded)
                     {
@@ -91,8 +85,7 @@ namespace Service.Services
                         throw new ApplicationException($"Email update failed: {errors}");
                     }
                 }
-
-                // Update other fields using the DTO
+                
                 updateDto.UpdatePlayer(player);
 
                 // Save changes to the player
@@ -143,15 +136,13 @@ namespace Service.Services
                 {
                     throw new ArgumentException("The amount to add must be greater than zero.");
                 }
-
-                // Ensure the player exists
+                
                 var player = await _repository.GetPlayerByIdAsync(playerId);
                 if (player == null)
                 {
                     throw new KeyNotFoundException("Player not found.");
                 }
-
-                // Generate Transaction ID
+                
                 var transactionId = Guid.NewGuid();
 
                 // Create and save the transaction with default status as Pending
@@ -186,7 +177,6 @@ namespace Service.Services
         {
             try
             {
-                // Update the player's annual fee paid status based on active/inactive toggle
                 await _repository.UpdatePlayerAnnualFeeStatusAsync(playerId, isActive);
 
                 // Retrieve the updated player and return the PlayerResponseDto

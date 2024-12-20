@@ -9,7 +9,7 @@ import {
     messageAtom,
     errorAtom,
     userAtom,
-    autoPlayAtom, // Add this to manage AutoPlay state
+    autoPlayAtom,
 } from './PagesJotaiStore.ts';
 
 const PlayPage: React.FC = () => {
@@ -104,7 +104,7 @@ const PlayPage: React.FC = () => {
         };
         return prices[selectedBoxes.length] || '';
     };
-    // Automatically clear the success message after 3 seconds
+    
     useEffect(() => {
         if (message) {
             const timer = setTimeout(() => {

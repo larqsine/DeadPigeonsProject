@@ -41,8 +41,4 @@ public class WinnerRepository
         _context.Winners.Update(winner);
         await _context.SaveChangesAsync();
     }
-    
-   
-    
-  
 }

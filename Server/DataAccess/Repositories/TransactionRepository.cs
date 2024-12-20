@@ -32,7 +32,7 @@ namespace DataAccess.Repositories
         public async Task<List<Transaction>> GetTransactionsByTypeAsync(string type)
         {
             return await _context.Set<Transaction>()
-                .Where(t => t.TransactionType.ToLower() == type.ToLower()) // Convert to lowercase
+                .Where(t => t.TransactionType.ToLower() == type.ToLower())
                 .ToListAsync();
         }
 

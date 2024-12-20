@@ -35,28 +35,22 @@ public class BoardService : IBoardService
         try
         {
             _logger.LogInformation("BuyBoardAsync called for Player ID: {PlayerId} and Game ID: {GameId}", playerId, buyBoardRequestDto.GameId);
-
-            // Validate the player
+            
             var player = await GetPlayerAsync(playerId);
             _logger.LogInformation("Player validated: {PlayerId}", playerId);
-
-            // Validate the game
+            
             var game = await GetGameAsync(buyBoardRequestDto.GameId);
             _logger.LogInformation("Game validated: {GameId}", buyBoardRequestDto.GameId);
-
-            // Check participation deadline
+            
             CheckParticipationDeadline();
             _logger.LogInformation("Participation deadline check passed.");
-
-            // Validate player balance
+            
             ValidatePlayerBalance(player, buyBoardRequestDto.FieldsCount);
             _logger.LogInformation("Player balance validated for cost of fields count: {FieldsCount}", buyBoardRequestDto.FieldsCount);
-
-            // Process purchase transaction
+            
             var transaction = await ProcessPurchaseTransaction(player, buyBoardRequestDto.FieldsCount);
             _logger.LogInformation("Purchase transaction processed for amount: {Amount}", transaction.Amount);
-
-            // Create the board
+            
             var board = CreateBoard(buyBoardRequestDto, playerId, transaction.Amount);
             var createdBoard = await _boardRepository.CreateBoardAsync(board);
             _logger.LogInformation("Board created successfully: {BoardId}", createdBoard.Id);

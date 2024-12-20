@@ -40,8 +40,7 @@ namespace API.Controllers
             }
 
             User user;
-
-            // Determine whether to create an Admin or Player
+            
             if (model.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
                 user = new Admin
@@ -72,8 +71,7 @@ namespace API.Controllers
             {
                 return BadRequest(new { message = "Invalid role. Must be 'Admin' or 'Player'." });
             }
-
-            // Create the user
+            
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -84,8 +82,7 @@ namespace API.Controllers
                     errors = result.Errors.Select(e => e.Description)
                 });
             }
-
-            // Assign role to user
+            
             if (!await _roleManager.RoleExistsAsync(model.Role))
             {
                 await _roleManager.CreateAsync(new IdentityRole<Guid>(model.Role));
@@ -110,8 +107,7 @@ namespace API.Controllers
                 return Unauthorized(new { message = "Invalid email or password." });
 
             var roles = await _userManager.GetRolesAsync(user);
-
-            // Generate JWT token using the JwtService
+            
             var token = _jwtService.GenerateJwtToken(user.Id.ToString(), user.UserName, roles.ToList());
 
             return Ok(new LoginResultDto()
@@ -134,13 +130,11 @@ namespace API.Controllers
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
         {
-            // Check if the user is authenticated
             if (!User.Identity.IsAuthenticated)
             {
                 return Unauthorized(new { message = "User is not authenticated. Please log in." });
             }
-
-            // Get the user ID from the token
+            
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 
                          ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub); 
 
@@ -148,35 +142,28 @@ namespace API.Controllers
             {
                 return Unauthorized(new { message = "Invalid token. User ID not found." });
             }
-
-            // Find the user by their ID
+            
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return Unauthorized(new { message = "User not found." });
             }
-
-            // Check if the current password provided matches the user's actual current password
+            
             var result = await _signInManager.PasswordSignInAsync(user, model.CurrentPassword, false, false);
             if (!result.Succeeded)
             {
                 return BadRequest(new { message = "Current password is incorrect." });
             }
 
-            // Change the password
             var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (!changePasswordResult.Succeeded)
             {
                 return BadRequest(new { message = "Password change failed.", errors = changePasswordResult.Errors.Select(e => e.Description) });
             }
-
-            // Update the user's PasswordChangeRequired flag
+            
             user.PasswordChangeRequired = false;
             await _userManager.UpdateAsync(user);
-
             return Ok(new { message = "Password changed successfully!", user.UserName });
         }
-
-
     }
 }

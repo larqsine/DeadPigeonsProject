@@ -78,7 +78,6 @@ export const showPasswordAtom = atom(false);
 // Atoms for transactions page
 export const transactionsAtom = atom<Transaction[]>([]);
 export const loadingAtom = atom(true);
-
 export const boardHistoryAtom = atom<Board[]>([]);
 
 // Atoms for AllUserBoardsPage

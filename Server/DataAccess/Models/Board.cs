@@ -15,7 +15,7 @@ namespace DataAccess.Models
         public DateTime? CreatedAt { get; set; }  
         public bool IsWinning { get; set; }
         
-        public int RemainingAutoplayWeeks { get; set; } // The number of weeks the player wants to repeat the board
+        public int RemainingAutoplayWeeks { get; set; }
         public bool Autoplay { get; set; }
 
         public virtual Game Game { get; set; } = null!;

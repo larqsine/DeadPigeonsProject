@@ -10,7 +10,6 @@ body.modalOpen {
     overflow: hidden;
 }
 
-/* Main container styling */
 .container {
     text-align: center;
     padding: 20px;
@@ -23,7 +22,6 @@ body.modalOpen {
     justify-content: center;
 }
 
-/* Header styling */
 .header {
     font-size: 2rem;
     color: #333;
@@ -31,14 +29,12 @@ body.modalOpen {
     text-align: center;
 }
 
-/* Subheader styling */
 .subheader {
     margin-bottom: 20px;
     font-size: 1.2rem;
     color: #555;
 }
 
-/* Responsive grid container for items */
 .gridContainer, .userList {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -50,7 +46,6 @@ body.modalOpen {
     margin: 0 auto;
 }
 
-/* Styling for each grid box */
 .box, .userItem {
     width: 100%;
     max-width: 160px;
@@ -67,12 +62,10 @@ body.modalOpen {
     transition: background-color 0.3s, transform 0.2s;
 }
 
-/* Hover effects for grid items */
 .box:hover, .userItem:hover {
     background-color: #ddd;
 }
 
-/* Selected box styling */
 .box.selected {
     background-color: #f15c5c;
     color: white;
@@ -80,7 +73,6 @@ body.modalOpen {
     transform: scale(1.1);
 }
 
-/* Button styling */
 .actionButton {
     margin-top: 20px;
     margin-bottom: 30px;
@@ -95,18 +87,15 @@ body.modalOpen {
     align-self: center; 
 }
 
-/* Disabled button styling */
 .actionButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
 
-/* Hover effects for active buttons */
 .actionButton:hover:not(:disabled) {
     background-color: #045b12;
 }
 
-/* Modal styling */
 .modal {
     position: fixed;
     height: 100vh;
@@ -120,7 +109,6 @@ body.modalOpen {
     z-index: 9999;
 }
 
-/* Modal content box */
 .modalContent {
     background: white;
     display: block;
@@ -190,7 +178,6 @@ body.modalOpen {
     width: 40px;
 }
 
-/* Modal Input fields */
 .modalContent input, .modalContent select {
     width: 100%;
     padding: 10px;
@@ -201,14 +188,12 @@ body.modalOpen {
     box-sizing: border-box;
 }
 
-
 .modalContent .actionButton {
     margin-top: 20px;
     background-color: #045b12;
     font-size: 1.2rem;
 }
 
-/* User details styling */
 .userItem {
     display: flex;
     justify-content: center;
@@ -226,7 +211,6 @@ body.modalOpen {
     background-color: #f0f0f0;
 }
 
-/* User Edit form styles */
 .userDetailsForm {
     width: 100%;
     display: flex;
@@ -234,7 +218,6 @@ body.modalOpen {
     gap: 10px;
 }
 
-/* Additional input field styles */
 .userDetailsForm input, .userDetailsForm select {
     padding: 10px;
     border-radius: 5px;
@@ -261,7 +244,7 @@ body.modalOpen {
     background: #f9f9f9;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0; /* Prevent sections from shrinking */
+    flex-shrink: 0;
     justify-content: center;
     align-items: center;
 }
@@ -274,7 +257,6 @@ body.modalOpen {
     list-style: none;
 }
 
-/* Mobile Responsive Styles */
 @media (max-width: 768px) {
     .gridContainer, .userList {
         grid-template-columns: repeat(4, 1fr);
@@ -302,12 +284,11 @@ body.modalOpen {
         padding: 10px;
     }
     .WiningSection, .UserSection {
-        width: 100%; /* Allow full width */
+        width: 100%;
         padding: 15px;
     }
 }
 
-/* Small Mobile Styles */
 @media (max-width: 480px) {
     .gridContainer, .userList {
         grid-template-columns: repeat(4, 1fr);

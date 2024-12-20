@@ -37,7 +37,7 @@
 .transactionActions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px; /* Default gap for larger screens */
+    gap: 10px;
 }
 
 .transactionActions button {
@@ -68,24 +68,22 @@
 .transactionActions .decline:hover {
     background-color: #c82333;
 }
-
-
-/* Tablets (768px and below) */
+    
 @media (max-width: 768px) {
     .transactionActions {
-        gap: 15px; /* Increase gap between buttons for tablets */
+        gap: 15px;
     }
 }
 
 /* Mobile Devices (480px and below) */
 @media (max-width: 480px) {
     .transactionActions {
-        gap: 20px; /* Increase gap between buttons for mobile */
-        flex-wrap: wrap; /* Allow buttons to stack if needed */
+        gap: 20px;
+        flex-wrap: wrap;
     }
 
     .transactionActions button {
-        flex: 1 1 calc(50% - 20px); /* Buttons take 50% width minus the gap */
-        max-width: none; /* Allow buttons to stretch */
+        flex: 1 1 calc(50% - 20px);
+        max-width: none;
     }
 }

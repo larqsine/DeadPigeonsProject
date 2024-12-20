@@ -29,13 +29,11 @@ const AllUserBoardsPage: React.FC = () => {
         winningNumbers?: number[] | null;
     }
     
-    // Fetch all games on mount
     useEffect(() => {
         const fetchGames = async () => {
             try {
                 const token = auth?.token;
-               
-
+                
                 const response = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games', {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -53,19 +51,16 @@ const AllUserBoardsPage: React.FC = () => {
                 setError('Failed to fetch games.');
             }
         };
-        
 
         fetchGames();
     }, [auth, setGameHistory, setError]);
-
-    // Handle game selection
+    
     const handleGameClick = async (game: Game) => {
         setSelectedGame(game);
 
         try {
             const token = auth?.token;
             
-
             const response = await axios.get(
                 `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${game.id}/players-summary`,
                 {
@@ -81,21 +76,17 @@ const AllUserBoardsPage: React.FC = () => {
             setError('Failed to fetch players for the selected game.');
         }
     };
-
-    // Handle player selection
+    
     const handlePlayerClick = async (playerId: string) => {
         const selected = playersSummary.find((player) => player.playerId === playerId);
         if (!selected) {
             setError('Player not found.');
             return;
         }
-
         setSelectedPlayer(selected);
-
         try {
             const token = auth?.token;
-           
-
+            
             const response = await axios.get(
                 `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Board/${playerId}/BoardsByPlayerId`,
                 {

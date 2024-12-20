@@ -41,29 +41,23 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 });
 
                 const { userName, roles, token, passwordChangeRequired } = response.data;
-
-                // Store the token in localStorage
+                
                 localStorage.setItem("token", token);
                 setAuth(token);
                 console.log("in loginPage  " + token)
-                // Update user and roles in state
                 setUser({ userName, roles, token, passwordChangeRequired });
-
-                // Check if the user has an admin role
+                
                 const isAdmin = roles.includes("admin");
                 setIsLoggedIn(true);
                 setIsAdmin(isAdmin);
-
-                // Redirect or update the UI accordingly
+                
                 onLogin(userName, roles, passwordChangeRequired);
             }
             catch (error) {
                 if (axios.isAxiosError(error)) {
-                    // Handle Axios errors
                     console.error("Login Error:", error.response?.data || error.message);
                     alert(error.response?.data?.message || "Login failed. Please check your credentials.");
                 } else {
-                    // Handle non-Axios errors
                     console.error("Unexpected Error:", error);
                     alert("An unexpected error occurred.");
                 }
@@ -94,11 +88,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                             value={loginForm.password}
                             onChange={handleLoginChange}
                         />
-                        <button
-                            type="button"
-                            className={styles.togglePasswordButton}
-                            onClick={togglePasswordVisibility}
-                        >
+                        <button type="button" className={styles.togglePasswordButton} onClick={togglePasswordVisibility}>
                             {showPassword ? "Hide" : "Show"}
                         </button>
                     </div>

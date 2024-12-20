@@ -78,10 +78,6 @@ const AdminPage: React.FC = () => {
             gameId: gameId,
         };
 
-        console.log('GameId:', gameId); // Logs the active game ID
-        console.log('Number', selectedWinningNumbers); //Logs the selected wining numbers
-        console.log('Payload:', payload); // Logs the payload sent to the backend
-
         try {
             const response = await axios.post(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/${gameId}/close`, payload);
             setMessage(response.data.message || 'Game closed successfully!');
@@ -101,20 +97,16 @@ const AdminPage: React.FC = () => {
 
     const handeNewGame = async () => {
         try {
-            // Retrieve the token from authAtom or localStorage
             const token = auth || localStorage.getItem('token');
-
             if (!token) {
                 alert('Unauthorized: No token found. Please log in again.');
                 return;
             }
 
-            // Prepare the GameCreateDto payload
             const gameCreateDto = {
                 startDate: new Date().toISOString().split('T')[0], // ISO string in "YYYY-MM-DD" format
             };
-
-            // Make the request
+            
             const response = await axios.post(
                 `https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/start`,
                 gameCreateDto,
@@ -124,27 +116,23 @@ const AdminPage: React.FC = () => {
                     },
                 }
             );
-
-            // Show alert with the success message
+            
             alert(response.data.message || 'Game created successfully!');
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Error Status:', err.response?.status);
                 console.error('Error Response:', err.response?.data);
                 setError(err.response?.data?.message || 'An error occurred while creating the game.');
-
-                // Show alert with the error message
+                
                 alert(err.response?.data?.message || 'Failed to start the game.');
             } else {
                 console.error('Unexpected Error:', err);
                 setError('An unexpected error occurred.');
-
-                // Show alert for unexpected errors
+                
                 alert('An unexpected error occurred.');
             }
         }
     };
-
 
     const handleUserClick = (user: User) => {
         setSelectedUser(user);
@@ -182,8 +170,6 @@ const AdminPage: React.FC = () => {
         }));
     };
 
-
-
     const handleEditUserSubmit = async () => {
         if (!editUser) {
             alert('No user selected for editing.');
@@ -206,8 +192,7 @@ const AdminPage: React.FC = () => {
 
             if (response.status === 200) {
                 alert('User updated successfully');
-
-                // Refresh the user list
+                
                 const usersResponse = await axios.get('https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -270,13 +255,11 @@ const AdminPage: React.FC = () => {
             alert('An error occurred while creating the user.');
         }
     };
-
-
+    
     const handleDeleteUser = async (userId: string) => {
         const confirmed = window.confirm('Are you sure you want to delete this user?');
         if (!confirmed) return;
-
-        // Retrieve the token from authAtom or fallback to localStorage
+        
         const token = auth || localStorage.getItem('token');
 
         if (!token) {
@@ -294,7 +277,6 @@ const AdminPage: React.FC = () => {
 
             if (response.ok) {
                 alert('User deleted successfully');
-                // Update the UI by filtering out the deleted user
                 setUsers(users.filter((user) => user.id !== userId));
                 handleCloseModal();
             } else {
@@ -314,10 +296,7 @@ const AdminPage: React.FC = () => {
 
             {/* Winning Numbers Section */}
             <section className={styles.WiningSection}>
-                <button
-                    className={styles.actionButton}
-                    onClick={handeNewGame}
-                >
+                <button className={styles.actionButton} onClick={handeNewGame}>
                     Start New Game
                 </button>
                 <p className={styles.subheader}>Select up to 3 winning numbers:</p>
@@ -332,14 +311,9 @@ const AdminPage: React.FC = () => {
                         </div>
                     ))}
                 </div>
-                <button
-                    className={styles.actionButton}
-                    onClick={handleSubmit}
-                    disabled={selectedWinningNumbers.length !== 3}
-                >
+                <button className={styles.actionButton} onClick={handleSubmit} disabled={selectedWinningNumbers.length !== 3}>
                     Confirm Winning Numbers
                 </button>
-
             </section>
 
             {/* Users Section */}
