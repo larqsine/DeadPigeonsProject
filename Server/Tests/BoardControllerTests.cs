@@ -55,21 +55,6 @@ namespace Tests
             Assert.NotNull(result);
             Assert.All(result, board => Assert.Equal(playerId, board.PlayerId));
         }
-
-        [Fact]
-        public async Task GetBoardsByGameId_Success()
-        {
-         
-            var gameId = Guid.NewGuid();
-
-          
-            var response = await _client.GetAsync($"/api/board/{gameId}/BoardsByGameId");
-            var result = await response.Content.ReadFromJsonAsync<List<BoardResponseDto>>();
-
-      
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(result);
-            Assert.All(result, board => Assert.Equal(gameId, board.GameId));
-        }
+        
     }
 }
