@@ -1,4 +1,3 @@
-import React from "react";
 import {Routes, Route, Navigate, useNavigate} from "react-router-dom";
 import { useAtom } from "jotai";
 import {
@@ -15,6 +14,7 @@ import LoginPage from "./Pages/LoginPage";
 import PlayPage from "./Pages/PlayPage";
 import TransactionPage from "./Pages/TransactionPage.tsx";
 import BoardHistoryPage from "./Pages/BoardsHistoryPage.tsx";
+import AllUserBoardsPage from "./Pages/AllUserBoardsPage.tsx";
 import styles from "./App.module.css";
 import ChangePasswordPage from "./Pages/ChangePasswordPage.tsx";
 import {selectedBoxesAtom} from "./Pages/PagesJotaiStore.ts"
@@ -25,7 +25,7 @@ const App: React.FC = () => {
     const [showBoxGrid, setShowBoxGrid] = useAtom(showBoxGridAtom);
     const [transitioning, setTransitioning] = useAtom(transitioningAtom);
     const [username, setUsername] = useAtom(usernameAtom);
-    const [balance, setBalance] = useAtom(balanceAtom);
+    const [, setBalance] = useAtom(balanceAtom);
     const navigate = useNavigate();
     const [, setSelectedBoxes] = useAtom(selectedBoxesAtom);
 
@@ -54,19 +54,6 @@ const App: React.FC = () => {
             });
 
             if (!playerIdResponse.ok) throw new Error(`Failed to fetch player ID. Status: ${playerIdResponse.status}`);
-            const { id: playerId } = await playerIdResponse.json();
-
-            const balanceResponse = await fetch(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/player/${playerId}/balance`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!balanceResponse.ok) throw new Error(`Failed to fetch player balance. Status: ${balanceResponse.status}`);
-            const balanceData = await balanceResponse.json();
-            setBalance(balanceData);
         } catch (error) {
             console.error("Error during login process:", error);
             setBalance(null);
@@ -97,7 +84,6 @@ const App: React.FC = () => {
                 <Navbar
                     onPlayClick={handlePlayClick}
                     username={username || "Guest"}
-                    balance={balance !== null ? balance : 0}
                     onSignOut={handleSignOut}
                     isAdmin={isAdmin}
                     onGoToAdminPage={handleGoToAdminPage}
@@ -150,6 +136,10 @@ const App: React.FC = () => {
                         <Route
                             path="/transactions"
                             element={isLoggedIn && isAdmin ? <TransactionPage /> : <Navigate to="/" />}
+                        />
+                        <Route
+                            path="/all-user-boards"
+                            element={isLoggedIn && isAdmin ? <AllUserBoardsPage /> : <Navigate to="/" />}
                         />
                         <Route
                             path="/change-password"

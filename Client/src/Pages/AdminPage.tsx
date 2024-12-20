@@ -74,10 +74,10 @@ const AdminPage: React.FC = () => {
 
     const handleSubmit = async () => {
         const payload = {
-            winningNumbers: selectedWinningNumbers, 
+            winningNumbers: selectedWinningNumbers,
             gameId: gameId,
         };
-        
+
         console.log('GameId:', gameId); // Logs the active game ID
         console.log('Number', selectedWinningNumbers); //Logs the selected wining numbers
         console.log('Payload:', payload); // Logs the payload sent to the backend
@@ -85,7 +85,7 @@ const AdminPage: React.FC = () => {
         try {
             const response = await axios.post(`https://dead-pigeons-backend-587187818392.europe-west1.run.app/api/Games/${gameId}/close`, payload);
             setMessage(response.data.message || 'Game closed successfully!');
-            setSelectedWinningNumbers([]); 
+            setSelectedWinningNumbers([]);
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Error Status:', err.response?.status);
@@ -346,7 +346,7 @@ const AdminPage: React.FC = () => {
             <section className={styles.UserSection}>
                 <h2 className={styles.subheader}>Users</h2>
                 <button className={styles.actionButton} onClick={() => setIsCreateUserModalOpen(true)}>
-                New User
+                    New User
                 </button>
                 <ul className={styles.userList}>
                     {users.map((user) => (
@@ -376,8 +376,8 @@ const AdminPage: React.FC = () => {
                         <p>Annual Fee Paid: {selectedUser.annualFeePaid ? 'Yes' : 'No'}</p>
                         <p>Created At: {selectedUser.createdAt}</p>
                         <div className={styles.modalButtons}>
-                            <button onClick={() => handleEditUserClick(selectedUser)}>Edit User</button>
-                            <button onClick={() => handleDeleteUser(selectedUser.id)}>Delete User</button>
+                            <button className={styles.editUserButton} onClick={() => handleEditUserClick(selectedUser)}>Edit User</button>
+                            <button className={styles.deleteUserButton} onClick={() => handleDeleteUser(selectedUser.id)}>Delete User</button>
                         </div>
                     </div>
                 </div>
@@ -427,7 +427,7 @@ const AdminPage: React.FC = () => {
                                 Phone Number:
                                 <input
                                     type="text"
-                                    name="phoneNumber"
+                                    name="phone"
                                     value={editUser.phone}
                                     onChange={handleEditInputChange}
                                 />
@@ -444,7 +444,7 @@ const AdminPage: React.FC = () => {
                                     })}
                                 />
                             </label>
-                            <button type="submit">Save Changes</button>
+                            <button className={styles.CreateUserModalButton} type="submit">Save Changes</button>
                         </form>
                     </div>
                 </div>
@@ -493,7 +493,7 @@ const AdminPage: React.FC = () => {
                                 Phone Number:
                                 <input
                                     type="text"
-                                    name="phoneNumber"
+                                    name="phone"
                                     value={newUser.phone}
                                     onChange={handleCreateInputChange}
                                 />
@@ -519,7 +519,7 @@ const AdminPage: React.FC = () => {
                                     <option value="player">Player</option>
                                 </select>
                             </label>
-                            <button type="submit">Create User</button>
+                            <button className={styles.createUserModalButton} type="submit">Create User</button>
                         </form>
                     </div>
                 </div>

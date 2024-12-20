@@ -2,7 +2,15 @@
 import { useAtom } from 'jotai';
 import axios from 'axios';
 import styles from './LoginPage.module.css';
-import {loginFormAtom, userAtom, isLoggedInAtom, playerIdAtom, authAtom} from './PagesJotaiStore.ts';
+import {
+    loginFormAtom,
+    userAtom,
+    isLoggedInAtom,
+    playerIdAtom,
+    authAtom,
+    showPasswordAtom,
+} from './PagesJotaiStore.ts';
+import {isAdminAtom} from "../AppJotaiStore.ts";
 
 interface LoginPageProps {
     onLogin: (email: string, roles: string[], passwordChangeRequired: boolean) => void;
@@ -12,12 +20,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [loginForm, setLoginForm] = useAtom(loginFormAtom);
     const [, setUser] = useAtom(userAtom);
     const [, setIsLoggedIn] = useAtom(isLoggedInAtom);
-    const [, setIsAdmin] = useAtom(playerIdAtom);
+    const [, setIsAdmin] = useAtom(isAdminAtom);
     const [, setAuth] = useAtom(authAtom);
-    
+    const [showPassword, setShowPassword] = useAtom(showPasswordAtom);
+
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setLoginForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword((prev) => !prev);
     };
 
     const handleLoginSubmit = async () => {
@@ -61,8 +74,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         }
     };
 
-
-
     return (
         <div className={styles.container}>
             <img src="/logo.png" alt="App Logo" className={styles.logo} />
@@ -76,14 +87,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                         value={loginForm.email}
                         onChange={handleLoginChange}
                     />
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Password"
-                        value={loginForm.password}
-                        onChange={handleLoginChange}
-                    />
-                    <button onClick={handleLoginSubmit}>Login</button>
+                    <div className={styles.passwordContainer}>
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            placeholder="Password"
+                            value={loginForm.password}
+                            onChange={handleLoginChange}
+                        />
+                        <button
+                            type="button"
+                            className={styles.togglePasswordButton}
+                            onClick={togglePasswordVisibility}
+                        >
+                            {showPassword ? "Hide" : "Show"}
+                        </button>
+                    </div>
+                    <button className={styles.logInButton} onClick={handleLoginSubmit}>
+                        Login
+                    </button>
                 </div>
             </div>
         </div>

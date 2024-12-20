@@ -1,14 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
+import { useAtom } from "jotai";
 import axios from "axios";
 import styles from "./ChangePasswordPage.module.css";
+import {
+    showCurrentPasswordAtom,
+    showNewPasswordAtom,
+    showVerifyNewPasswordAtom,
+} from "./PagesJotaiStore.ts";
 
 const ChangePasswordPage: React.FC = () => {
-    const [currentPassword, setCurrentPassword] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [verifyNewPassword, setVerifyNewPassword] = useState("");
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-
+    const [currentPassword, setCurrentPassword] = React.useState("");
+    const [newPassword, setNewPassword] = React.useState("");
+    const [verifyNewPassword, setVerifyNewPassword] = React.useState("");
+    const [error, setError] = React.useState("");
+    const [success, setSuccess] = React.useState("");
+    const [showCurrentPassword, setShowCurrentPassword] = useAtom(showCurrentPasswordAtom);
+    const [showNewPassword, setShowNewPassword] = useAtom(showNewPasswordAtom);
+    const [showVerifyNewPassword, setShowVerifyNewPassword] = useAtom(showVerifyNewPasswordAtom);
 
     const handleSubmit = async () => {
         if (newPassword !== verifyNewPassword) {
@@ -46,24 +54,51 @@ const ChangePasswordPage: React.FC = () => {
             {error && <p className={styles.error}>{error}</p>}
             {success && <p className={styles.success}>{success}</p>}
             <div className={styles.form}>
-                <input
-                    type="password"
-                    placeholder="Current Password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="New Password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Verify New Password"
-                    value={verifyNewPassword}
-                    onChange={(e) => setVerifyNewPassword(e.target.value)}
-                />
+                <div className={styles.passwordInput}>
+                    <input
+                        type={showCurrentPassword ? "text" : "password"}
+                        placeholder="Current Password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        className={styles.toggleButton}
+                        onClick={() => setShowCurrentPassword((prev) => !prev)}
+                    >
+                        {showCurrentPassword ? "Hide" : "Show"}
+                    </button>
+                </div>
+                <div className={styles.passwordInput}>
+                    <input
+                        type={showNewPassword ? "text" : "password"}
+                        placeholder="New Password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        className={styles.toggleButton}
+                        onClick={() => setShowNewPassword((prev) => !prev)}
+                    >
+                        {showNewPassword ? "Hide" : "Show"}
+                    </button>
+                </div>
+                <div className={styles.passwordInput}>
+                    <input
+                        type={showVerifyNewPassword ? "text" : "password"}
+                        placeholder="Verify New Password"
+                        value={verifyNewPassword}
+                        onChange={(e) => setVerifyNewPassword(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        className={styles.toggleButton}
+                        onClick={() => setShowVerifyNewPassword((prev) => !prev)}
+                    >
+                        {showVerifyNewPassword ? "Hide" : "Show"}
+                    </button>
+                </div>
                 <button onClick={handleSubmit}>Save</button>
             </div>
         </div>
