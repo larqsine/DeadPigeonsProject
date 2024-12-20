@@ -183,16 +183,6 @@
         display: flex;
     }
 
-    .navItem {
-        padding: 15px 20px;
-        color: white;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        text-align: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
     .hamburger {
         display: flex;
         flex-direction: column;
@@ -207,6 +197,16 @@
         transition: 0.3s ease;
     }
 
+    .navItem {
+        padding: 15px 20px;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
     .profileButton {
         font-size: 16px;
     }

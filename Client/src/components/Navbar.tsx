@@ -118,12 +118,6 @@ const NavBar: React.FC<NavbarProps> = ({
             ) {
                 setIsAddBalanceOpen(false);
             }
-            if (
-                hamburgerRef.current &&
-                !hamburgerRef.current.contains(event.target as Node)
-            ) {
-                setIsNavOpen(false);
-            }
         };
 
         document.addEventListener("mousedown", handleClickOutside);
